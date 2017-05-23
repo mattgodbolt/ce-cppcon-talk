@@ -137,3 +137,65 @@ Or even:
 You can see how those combine e.g. Where we were/Initial situation, or How/Why, or Solution/Call-to-action.
 
 
+### More notes
+
+Infinite loop detection. Linked list walk clang vs GCC
+
+Fold operator repl style thing
+
+Move construction vs copy
+
+Shout to Chandler and Michael Spencer talks on UB
+
+Shout to John Regehr 
+
+Follow-alomg mode (URL to keep updating the layout, websockets?)
+
+Pre vs post increment
+Algorithm for each vs non
+
+Trivia:
+-- people running a "most output from a tweet" competition
+
+Simon Brand [7:22 AM] 
+@mattgodbolt I'd be interested in the roadmap, understanding how to get the most useful output (making things volatile and such), how the different compiler versions are maintained, and how I could leverage it for other cool projects (maybe a collaborative compiler for interviews or something).
+
+what do you use it for?
+Simon Brand [7:19 AM] 
+@mattgodbolt I use it for demonstrating compiler optimisations.
+
+Arne Mertz [7:22 AM] 
+@mattgodbolt what I use it for:
+1) to play around with C++17 features out of curiosity (I don't have a bleeding edge compiler locally)
+2) to show colleagues that the tips I give them compile and don't create worse assembly
+3) to discuss stuff here on Slack
+tbh, my point 1) has become less valid in the past weeks since someone pointed me to Wandbox, because I can execute code there.
+@mattgodbolt I forgot one point: since this week, I use CE to produce minimal examples for compiler bugs/ICEs and narrow down which version they were introduced. The turnaround times are just great for things like that.
+
+Miro Knejp [7:22 AM] 
+is "to prove people wrong" a valid reason? :smile:
+I also use it to check on new features or edge cases of the language that I'm less familiar with, and to see how different compilers handle the same code, e.g. that clang discovered my loop was a summation and replaced it with the closed form was quite entertaining to me. these are things you usually don't discover at work
+
+Björn Fahller [7:37 AM] 
+I use it mostly to show my colleagues how different code constructs works - most specifically to show that abstractions typically are very cheap.
+I also use it for experimental TMP stuff, where it's easier to check with a static_assert in CE with different compilers than to do the same with many compilers installed locally. (edited)
+
+Peter Bindels [7:38 AM] 
+I use it to show colleagues what's new in C++11/14/17 and why it's awesome
+I also use it to see what things work on MSVC, without needing a Windows box. (+2 thumbs ups)
+
+Nir Friedman [12:36 PM] 
+Sorry if this is cheesy, but wanted to thank you personally for Compiler Explorer
+It's an awesome tool that has definitely improved my QoL as a C++ dev, and I've undoubtedly learned things because it was so easy to use
+
+that otherwise I would have just shrugged off and never investigated
+
+so, thanks! And the big update to it some number of months ago with the tabs for the compiler output, also very useful.
+
+
+Links to cool code optimisation 
+https://godbolt.org/g/tuO5Ij - devirtualisation
+
+------
+
+symbol interposition
