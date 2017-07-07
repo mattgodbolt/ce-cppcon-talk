@@ -8,13 +8,32 @@ Titles:
 * Don't be afraid of assembly
 * Compiler Explorer - assembly for the masses
 jj
-* Charting your code/ompiler with Compiler Explorer
-* Code prospecting?
+* Charting your code/compiler with Compiler Explorer
+* Code prospecting? (with Compiler Explorer?)
+* Demystifying your [compiler/code] with Compiler Explorer
+* A Boltf from beyond; Compiler Explorer
+* Holy Lightning strikes (batman), it's CE
+* Don't fear the compiler. Explore it
+* Assembly spelunking your C++ with CE
+* Compiler Explorer, or how I learned to stop worrying and love assembly
+* Unbolting the lid of your compiler with CE
 * "What has my compiler done for me lately?"
 * Compilational sympathy?
-* 
+
 via medium of Bowie songs?
 "Keynotes should be inspiring and memorable" <- @lefticus
+
+[12:07 PM, 7/7/2017] Kimberly Godbolt: Everyone loves a 'how to'                        
+[12:07 PM, 7/7/2017] Kimberly Godbolt: Discover? Uncover your code?                        
+[12:08 PM, 7/7/2017] Kimberly Godbolt: Making your code work harder                        
+[12:08 PM, 7/7/2017] Kimberly Godbolt: Or something?                        
+[12:08 PM, 7/7/2017] Kimberly Godbolt: Secrets of your code with Compiler Explorer                        
+[12:08 PM, 7/7/2017] Kimberly Godbolt: Oooh I'm intrigued                        
+[12:09 PM, 7/7/2017] Kimberly Godbolt: Can you tell I'm in telly?                        
+[12:09 PM, 7/7/2017] Kimberly Godbolt: Unlocking the secrets                        
+[12:09 PM, 7/7/2017] Kimberly Godbolt: Haha totally wrong                        
+[12:09 PM, 7/7/2017] Kimberly Godbolt: Understanding but that's how brainstorm work right?
+
 
 ---------------
 in this talk Matt will not only show you how easy (and fun!) it is to understand the assembly code
@@ -198,7 +217,7 @@ closed form was quite entertaining to me. these are things you usually don't dis
 Björn Fahller [7:37 AM] 
 I use it mostly to show my colleagues how different code constructs works - most specifically to show that abstractions 
 typically are very cheap.
-I also use it for experimental TMP stuff, where it's easier to check with a static_assert in CE with different compilers 
+I also use it for experimental TMP stuff, where it's easier to check with a `static_assert` in CE with different compilers 
 than to do the same with many compilers installed locally. (edited)
 
 Peter Bindels [7:38 AM] 
@@ -238,6 +257,7 @@ Code examples (watch https://www.youtube.com/watch?v=-o-Wjy_ISvs&t=5s&index=20&l
 * Move construction vs copy
 * Pre vs post increment
 * Algorithm for each vs non? https://godbolt.org/g/gS9NOV makes nice s-x-s example? (also NB code gen wildly diff at O3 between the two compared to O2)
+* adc? https://godbolt.org/g/6WBYZP where intel is smart? https://godbolt.org/g/7yrhn5 is nearest GCC will do
 
 -----
 for below?
@@ -270,25 +290,28 @@ to assembly.
 What I'm hoping from this talk is to convince you of a few things:
 
 * Assembly isn't scary
-* Compilers are smart
+* Compilers are smart^
+
+^ most of the time.
 
 Along the way I'll explain why the site was set up, how I use it and how some others are
 using it and why I think you should be using it. I'll talk a little bit about how it
-has evolved over the years, how it's written, maintained and deployed. Maybe also some
+has evolved over the years, how it's written, maintained and deployed. some
 cool features about the site that even regular users might not know about.
 
 who has ever looked at x86 asm? Regularly looks at it? Writes in it? Writes often in it? Wow, unlucky...
+What about non-x86? I'm assuming most of you program to Intel machines, and 64-bit ones at that. The things
+that go on here mostly apply to any architecture, but I'm going to be concentrating on x86_64.
 For the rest of you let's show what CE looks like and show you how un-scary the ASM is.
 
-[[simple code here]]
-* show asm output
+[[simple code here]] maybe even something with several dumb statements. -O0 will show all
+* show asm output with -O0, talk about each step. Explain what it's doing, step through it
 * show -O1 output
-* roughly explain
 
 So let's cover a bit more about x86 in general
 [some slides on assembly]
 * registers
-* addressing modes. Also tal kabout CISC versus RISC
+* addressing modes. Also talk about CISC versus RISC
 [jokes about intel vs at&t. also tabs and spaces, vi / emacs]
 
 Ok, that's cool. So what can we observe now we've learned a little about this?
@@ -308,7 +331,7 @@ Shortly after that Compiler Explorer was born. Or GCC Explorer as it was called 
 me on to our first major topic: Compilers are SUPER CLEVER!
 * range-for example
   * maybe we external function call?
-  * make vector<T> and show "oh noes where's my code"
+  * make acuumulate<T> and show "oh noes where's my code" or a class?
   * show std::accumulate?
 * some examples here
 
@@ -334,3 +357,12 @@ So, how does this stuff all work behind the scenes?
   * node, javascript...
     * maybe gag about if you think C++ is crazy, try JS
 
+* All the compilers
+ * help from Intel and MS
+ * loads still "coming soon"
+
+Road map - the future?
+* more compilers
+* execution
+
+Shout out to those that helped along the way
