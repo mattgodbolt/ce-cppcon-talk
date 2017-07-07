@@ -7,6 +7,20 @@ Titles:
 * Democratising asm
 * Don't be afraid of assembly
 * Compiler Explorer - assembly for the masses
+jj
+* Charting your code/ompiler with Compiler Explorer
+* Code prospecting?
+* "What has my compiler done for me lately?"
+* Compilational sympathy?
+* 
+via medium of Bowie songs?
+"Keynotes should be inspiring and memorable" <- @lefticus
+
+---------------
+in this talk Matt will not only show you how easy (and fun!) it is to understand the assembly code
+geenrated by your compiler, but also how important it can be. 
+
+0000000000000
 
 In 2012, Matt was arguing with a colleague about whether it was more efficient to
 pre-increment or post-increment iterators. Comparing the machine code of both approaches
@@ -47,7 +61,7 @@ scenes and tell some stories of how others use it and how it has scaled beyond a
 hack to an ecostystem of thingies....
 
 -- why = reason!
--- even i fyou don't know asm or odnt care about perf
+-- even if you don't know asm or don't care about perf
 
 Compiler Explorer
 -----------------
@@ -87,13 +101,13 @@ Deploying and compiling all the compilers
 
 War stories
 - S3 downtime
+- EFS fun
 - hacking attempts
 
 NB NEEDS A STORY and teaching point(s). 
 Need passion...hopefully groovy on that front
 
 we are hiring!
-
 ~~
 
 Notes!
@@ -158,7 +172,9 @@ Trivia:
 -- people running a "most output from a tweet" competition
 
 Simon Brand [7:22 AM] 
-@mattgodbolt I'd be interested in the roadmap, understanding how to get the most useful output (making things volatile and such), how the different compiler versions are maintained, and how I could leverage it for other cool projects (maybe a collaborative compiler for interviews or something).
+@mattgodbolt I'd be interested in the roadmap, understanding how to get the most useful output (making things volatile 
+and such), how the different compiler versions are maintained, and how I could leverage it for other cool projects (maybe 
+a collaborative compiler for interviews or something).
 
 what do you use it for?
 Simon Brand [7:19 AM] 
@@ -170,15 +186,20 @@ Arne Mertz [7:22 AM]
 2) to show colleagues that the tips I give them compile and don't create worse assembly
 3) to discuss stuff here on Slack
 tbh, my point 1) has become less valid in the past weeks since someone pointed me to Wandbox, because I can execute code there.
-@mattgodbolt I forgot one point: since this week, I use CE to produce minimal examples for compiler bugs/ICEs and narrow down which version they were introduced. The turnaround times are just great for things like that.
+@mattgodbolt I forgot one point: since this week, I use CE to produce minimal examples for compiler bugs/ICEs and narrow
+down which version they were introduced. The turnaround times are just great for things like that.
 
 Miro Knejp [7:22 AM] 
 is "to prove people wrong" a valid reason? :smile:
-I also use it to check on new features or edge cases of the language that I'm less familiar with, and to see how different compilers handle the same code, e.g. that clang discovered my loop was a summation and replaced it with the closed form was quite entertaining to me. these are things you usually don't discover at work
+I also use it to check on new features or edge cases of the language that I'm less familiar with, and to see how 
+different compilers handle the same code, e.g. that clang discovered my loop was a summation and replaced it with the 
+closed form was quite entertaining to me. these are things you usually don't discover at work
 
 Björn Fahller [7:37 AM] 
-I use it mostly to show my colleagues how different code constructs works - most specifically to show that abstractions typically are very cheap.
-I also use it for experimental TMP stuff, where it's easier to check with a static_assert in CE with different compilers than to do the same with many compilers installed locally. (edited)
+I use it mostly to show my colleagues how different code constructs works - most specifically to show that abstractions 
+typically are very cheap.
+I also use it for experimental TMP stuff, where it's easier to check with a static_assert in CE with different compilers 
+than to do the same with many compilers installed locally. (edited)
 
 Peter Bindels [7:38 AM] 
 I use it to show colleagues what's new in C++11/14/17 and why it's awesome
@@ -199,3 +220,117 @@ https://godbolt.org/g/tuO5Ij - devirtualisation
 ------
 
 symbol interposition
+
+tips for defeating the optimizer in the right way
+
+
+---------------
+
+Code examples (watch https://www.youtube.com/watch?v=-o-Wjy_ISvs&t=5s&index=20&list=WL)
+
+* range-for vs old-for
+* boost::multi_index thing
+* auto foo = bar(); // unintentional copy
+* Find a RVO thing?
+* Over-optimized thing (compiles to nothing?)
+* Infinite loop detection. Linked list walk clang vs GCC
+* Fold operator repl style thing
+* Move construction vs copy
+* Pre vs post increment
+* Algorithm for each vs non? https://godbolt.org/g/gS9NOV makes nice s-x-s example? (also NB code gen wildly diff at O3 between the two compared to O2)
+
+-----
+for below?
+    Intro - 
+
+
+-----------------------
+
+Hi everyone,
+
+I'm going to be talking today about a C++ website I set up in 2012 to scratch my
+own itch.  Since then it's gone from tens of hits a day to many thousands, and
+has ballooned into something which takes up most of my spare time.  It's also
+rather unexpectedly turned my family name into a noun and a verb.
+
+My name's Matt Godbolt and I'm a programmer at DRW, a trading firm based out of Chicago.
+My career path has taken me through games programming, setting up my own C++ toolchain
+company, mobile phone development and a couple years at Google before ending up at DRW.
+We're hiring: If you like what I'm saying here, you should come speak to me after this talk about coming
+to work with me. 
+
+The site is - well, what I call it is - Compiler Explorer. Most people refer to it
+as godbolt -- how many here have heard of it? Used it? Use it regularly?
+
+CE is a site that lets you type in your C++ code and interactively see how it's compiled
+to assembly.
+
+[[insert appropriate response here]]
+
+What I'm hoping from this talk is to convince you of a few things:
+
+* Assembly isn't scary
+* Compilers are smart
+
+Along the way I'll explain why the site was set up, how I use it and how some others are
+using it and why I think you should be using it. I'll talk a little bit about how it
+has evolved over the years, how it's written, maintained and deployed. Maybe also some
+cool features about the site that even regular users might not know about.
+
+who has ever looked at x86 asm? Regularly looks at it? Writes in it? Writes often in it? Wow, unlucky...
+For the rest of you let's show what CE looks like and show you how un-scary the ASM is.
+
+[[simple code here]]
+* show asm output
+* show -O1 output
+* roughly explain
+
+So let's cover a bit more about x86 in general
+[some slides on assembly]
+* registers
+* addressing modes. Also tal kabout CISC versus RISC
+[jokes about intel vs at&t. also tabs and spaces, vi / emacs]
+
+Ok, that's cool. So what can we observe now we've learned a little about this?
+
+First - a story. In 2012 a colleague and I were just starting to dip our toe into the
+new C++0x stuff coming along. One thing we had started looking at was the use of range-based
+for versus old-fashioned iteration or counter-based fors. We'd argued a bunch. I should explain,
+for some of the work we do, performance is really important and we spend a lot of time thinking about
+good practises and guidelines that have not performance drawbacks. And in some other languages, using
+range-based iterators has been expensive (cough, java, cough).
+
+So to answer the question I hacked a UNIX command line to output the compiled code. As we experimented
+I used `watch` in conjucntion with the command and we could edit the code in vi and see the asm output.
+[maybe demo]?
+
+Shortly after that Compiler Explorer was born. Or GCC Explorer as it was called back then. So, that brings
+me on to our first major topic: Compilers are SUPER CLEVER!
+* range-for example
+  * maybe we external function call?
+  * make vector<T> and show "oh noes where's my code"
+  * show std::accumulate?
+* some examples here
+
+But sometimes they're TOO CLEVER for what you want.
+* Examples of optimizer throwing away work
+  * defeating optimizer tricks
+* Examples of template code "going away"
+
+More curated examples here...
+
+Compilers CAN be dumb too! Well, as dumb as the person writing the code.
+
+* Examples...
+ * `auto` copy when you didn't mean it
+ * calling out of line function pessimisation
+ * restrict keyword?
+
+So, how does this stuff all work behind the scenes?
+
+* Simple example
+* Magic javascript libraries
+  * shout out to CodeMirror and Monaco. And then MS for OSSing it!
+  * node, javascript...
+    * maybe gag about if you think C++ is crazy, try JS
+
