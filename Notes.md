@@ -19,6 +19,11 @@ jj
 * Unbolting the lid of your compiler with CE
 * "What has my compiler done for me lately?"
 * Compilational sympathy?
+* Assembly! Wait, come back!
+* Compiler Explorer: The Right To Assembly
+* CE - Assembly is a right not a privilege
+
+Foemmel likes 16, 18 (cliched), 8. His ideas 22-24
 
 via medium of Bowie songs?
 "Keynotes should be inspiring and memorable" <- @lefticus
