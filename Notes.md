@@ -11,7 +11,7 @@ jj
 * Charting your code/compiler with Compiler Explorer
 * Code prospecting? (with Compiler Explorer?)
 * Demystifying your [compiler/code] with Compiler Explorer
-* A Boltf from beyond; Compiler Explorer
+* A Bolt from beyond; Compiler Explorer
 * Holy Lightning strikes (batman), it's CE
 * Don't fear the compiler. Explore it
 * Assembly spelunking your C++ with CE
@@ -264,6 +264,103 @@ Code examples (watch https://www.youtube.com/watch?v=-o-Wjy_ISvs&t=5s&index=20&l
 * Algorithm for each vs non? https://godbolt.org/g/gS9NOV makes nice s-x-s example? (also NB code gen wildly diff at O3 between the two compared to O2)
 * adc? https://godbolt.org/g/6WBYZP where intel is smart? https://godbolt.org/g/7yrhn5 is nearest GCC will do
 
+
+#Compiler Explorer
+infinite loop detection. Linked list walk clang vs GCC
+
+Fold operator repl style thing
+
+Move construction vs copy
+
+Shout to Chamdler and Michael Spencer talks on UB
+
+Shout to John Regehr 
+
+Vinnie Falco: https://godbolt.org/g/YyRg4z beast
+
+used it the other day to "explore" c++17 string_view (specifrically to_string)
+
+JT's twitter puzzle (https://twitter.com/lefticus/status/870731364160512000); used attribute noinline https://godbolt.org/g/lvo9wz to find [ https://godbolt.org/g/2wP50w actual answer 6 it seems? ] https://godbolt.org/g/pGviKZ too
+
+Gcc flag Fipa-pta maybe? If can find a case where it works. https://kristerw.blogspot.com/2017/05/interprocedural-optimization-in-gcc.html?m=1
+
+-fsanitize=address
+
+entire smallpt
+
+auto lambda demo: https://godbolt.org/g/5fOC4q
+
+Kent's email about "works on my machine" / Godbolt
+
+variant stuff, clang opts out
+
+Non virtual thunks
+
+cute opt: https://godbolt.org/g/Tk8Af4 and https://godbolt.org/g/Zdvzke (ordering? interesting)
+
+DRW repo: "First working version
+ master
+ 1 parent 0ee0c10 commit de67452fc937d31ecc48991d1449051f362087f4 @mgodbolt mgodbolt committed on May 9, 2012"
+
+ pass by value / pass by reference https://godbolt.org/g/XWFR7s
+
+ aliasing: https://godbolt.org/g/wczpd3
+
+ https://bugs.llvm.org/show_bug.cgi?id=28343 - type based aliasing
+
+ HACKING ATTEMPTS
+
+ New int; leak memory thing? (memory alloc elision)
+
+ https://bugs.llvm.org/show_bug.cgi?id=28343
+
+#GCC Explorer
+Follow-alomg mode (URL to keep updating the layout, websockets?)
+
+Pre vs post increment
+Algorithm for each vs non
+
+Trivia:
+-- people running a "most output from a tweet" competition
+
+Simon Brand [7:22 AM] 
+@mattgodbolt I'd be interested in the roadmap, understanding how to get the most useful output (making things volatile and such), how the different compiler versions are maintained, and how I could leverage it for other cool projects (maybe a collaborative compiler for interviews or something).
+
+what do you use it for?
+Simon Brand [7:19 AM] 
+@mattgodbolt I use it for demonstrating compiler optimisations.
+
+Arne Mertz [7:22 AM] 
+@mattgodbolt what I use it for:
+1) to play around with C++17 features out of curiosity (I don't have a bleeding edge compiler locally)
+2) to show colleagues that the tips I give them compile and don't create worse assembly
+3) to discuss stuff here on Slack
+tbh, my point 1) has become less valid in the past weeks since someone pointed me to Wandbox, because I can execute code there.
+@mattgodbolt I forgot one point: since this week, I use CE to produce minimal examples for compiler bugs/ICEs and narrow down which version they were introduced. The turnaround times are just great for things like that.
+
+Miro Knejp [7:22 AM] 
+is "to prove people wrong" a valid reason? :smile:
+I also use it to check on new features or edge cases of the language that I'm less familiar with, and to see how different compilers handle the same code, e.g. that clang discovered my loop was a summation and replaced it with the closed form was quite entertaining to me. these are things you usually don't discover at work
+
+Björn Fahller [7:37 AM] 
+I use it mostly to show my colleagues how different code constructs works - most specifically to show that abstractions typically are very cheap.
+I also use it for experimental TMP stuff, where it's easier to check with a static_assert in CE with different compilers than to do the same with many compilers installed locally. (edited)
+
+Peter Bindels [7:38 AM] 
+I use it to show colleagues what's new in C++11/14/17 and why it's awesome
+I also use it to see what things work on MSVC, without needing a Windows box. (+2 thumbs ups)
+
+Nir Friedman [12:36 PM] 
+Sorry if this is cheesy, but wanted to thank you personally for Compiler Explorer
+It's an awesome tool that has definitely improved my QoL as a C++ dev, and I've undoubtedly learned things because it was so easy to use
+
+that otherwise I would have just shrugged off and never investigated
+
+so, thanks! And the big update to it some number of months ago with the tabs for the compiler output, also very useful.
+
+Links to cool code optimisation 
+`https://gcc.godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(j:1,source:'namespace+%7B%0A++struct+Iface+%7B%0A++++virtual+~Iface()+%7B%7D%0A++++virtual+int+doThing()+const+%3D+0%3B%0A++%7D%3B%0A%0A++struct+Bob+:+Iface+%7B+%0A++++int+doThing()+const+override+%7B+return+1%3B+%7D%0A++%7D%3B%0A%0A++struct+Ian+:+Iface+%7B+%0A++++int+doThing()+const+override+%7B+return+2%3B+%7D%0A++%7D%3B%0A%0A++int+test(const+Iface+%26obj)+%7B%0A++++int+a+%3D+0%3B%0A++++for+(int+i+%3D+0%3B+i+%3C+10000%3B+%2B%2Bi)%0A++++++a+%2B%3D+obj.doThing()%3B%0A++++return+a%3B%0A++%7D%0A%7D%0A%0Aint+main(int+argc,+const+char+*argv%5B%5D)+%7B%0A++Ian+ian%3B%0A++Bob+bob%3B%0A++if+(argc+%3D%3D+2)+%0A++++return+test(ian)%3B%0A++else%0A++++return+test(bob)%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',m:100,n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:g7snapshot,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),options:'-O3',source:1),l:'5',n:'0',o:'x86-64+gcc+7+(snapshot)+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',m:50.05471818428769,n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:clang_trunk,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),options:'-O3',source:1),l:'5',n:'0',o:'x86-64+clang+(trunk)+(Editor+%231,+Compiler+%232)',t:'0')),l:'4',m:49.94528181571231,n:'0',o:'',s:0,t:'0')),k:50,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4`
+
 -----
 for below?
     Intro - 
@@ -353,6 +450,10 @@ Compilers CAN be dumb too! Well, as dumb as the person writing the code.
  * `auto` copy when you didn't mean it
  * calling out of line function pessimisation
  * restrict keyword?
+
+IN CONTEXT? 
+* map lookups? - trading stuff? unordered_map vs hand-written or boost multimap, the modulus thing.
+* formatting a number?
 
 So, how does this stuff all work behind the scenes?
 
