@@ -9,6 +9,13 @@
     <link rel="stylesheet" href="reveal.js/css/reveal.css">
     <link rel="stylesheet" href="drw.css">
 
+    <style>
+        td.reg {
+            background-color: #333;
+            text-align: center !important
+        }
+    </style>
+
     <!-- Theme used for syntax highlighting of code -->
     <link rel="stylesheet" href="reveal.js/lib/css/zenburn.css">
 
@@ -36,8 +43,103 @@
             <br>
             <em><a href="https://drw.com/">drw.com</a></em>
         </section>
-        <section>Slide 1</section>
-        <section>Slide 2</section>
+        <section>
+            <h3>Backstory</h3>
+            <pre><code data-trim class="cpp">
+                void foreach(const vector&lt;int> &v) {
+                  for (size_t i = 0; i < v.size(); ++i)
+                    doSomething(v[i]);
+                }</code></pre>
+            <pre><code data-trim class="cpp">
+                void foreach(const vector&lt;int> &v) {
+                  for (int x : v)
+                    doSomething(x);
+                }</code></pre>
+        </section>
+        <section>
+            <h3>Compiler Explorer v1</h3>
+            <pre><code class="bash">$ watch 'g++ -O2 -S /tmp/test.cc -o - | c++filt'</code></pre>
+            <a href="http://localhost:10240/#z:OYLghAFBqd5TKALEBjA9gEwKYFFMCWALugE4A0BIEAZugHZEDKqAhgDbYgCMAdABwBWAOyCATAAYAnGIBsw7lKVTh5AFY9yAZ3QBXUqi4ByAKRiAzAXqp2unAGoT5gMKotRTOwIAjJ7hMSAIJmlta2Dk7OAG7YqCSkfgHBQdgAHkTYpPT2UegEmPaY6EzoALbYREhWwBBWRACUTgBCSUm5%2BfZ0pNisqEgQGPTu9u6YICAxcWSRdX6OclH1jsItQfadZPYQWgQAXtgA%2BkT2BI7mACL2Es0nZ845vDv7EI3mTfMtYk0EjWvrhcUyhUqvQalETIJvhDzq9VsFhOcjPVyOwQEZBEZyPQ0RJMeg0c4zJ93jp9IZ5uZuJiiDikciANYgQQSFFogAsmNKTJZ2KMuPI%2BKMmK0IBZNL5SPIcFgKAwpQADgROBQqAMyorlSAAPS6LSkLXeKxa4BEonkGhKjKkEUQby08hy8qMADy9HYAE97YRunECDERRLKIxsKiJci6IwWBwuHwhKJJDJ5IplKp0PKiAQGAGALTOsTCvQGGPI0MYrH2wU6vUGo0mr5Erb4YibELccj2ZzqpWZCncerU2n1ZFIHo4UjUBnc1lGDnlwOC4Wi8ji3FD6f58hc5lz/kL5eDqWIaXINBYPCEeKUagR5hsTg8AQicTSOQKZQqdQgMTaQuGNEhKwbDsbA7jcDwvF8cx/CCACwmAu5JniRIYJSdJMmydoCiKEpykqapakYWFWiCTCNm6Xp%2BkGYZRnGRDphcWYoPmWRFmWOF1i6LY6nsVJ7BAHJfkCf4ARw4F8NSIiYIRSVS0xXldwJU0vhGX8QJCDcVzpcgR1YMcJ3IRlt1DWctx5Cs0UXMUD2PCBZS7ZUrzVBVu3HKt9UNehjSUppzUtTIbTtQNHWwF03U9QNvViDN/XtOoQwPG8o3vWMnwTV9kyUVN00zIY0VzDdSSLL8SzRMt5LxNE3JrTy62JRsLxbCxvw7eye3U/t9zDYdR0yfTDJZYy5PMoVtCXTS11DDdTJ3CqRvGyduAkAa0XMIb5wszrV2RGJrRykA2SAA%3D%3D">Or
+                here</a>
+        </section>
+        <section>
+            <h3>Some assembly</h3>
+            <iframe width="1000px" height="300px"
+                    src="http://localhost:10240/e#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.5479341055999998,j:1,source:'int+square(int+num)+%7B%0A++++return+num+*+num%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:/usr/bin/g%2B%2B,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),fontScale:1.5479341055999998,options:'',source:1),l:'5',n:'0',o:'/usr/bin/g%2B%2B+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"></iframe>
+        </section>
+        <section>
+            <h3>Intel asm 101</h3>
+            <pre><code data-trim class="asm">
+                mov dest, src
+                add dest, arg
+                cmp reg, arg
+                jmp dest
+            </code></pre>
+        </section>
+        <section>
+            <h3>Intel registers</h3>
+            <ul>
+                <li>rax</li>
+                <li>rcx</li>
+                <li>rdx</li>
+                <li>rbx</li>
+                <li>rsp</li>
+                <li>rbp</li>
+                <li>rsi</li>
+                <li>rdi</li>
+                <li>r8-r15</li>
+            </ul>
+        </section>
+        <section>
+            <h3>Intel registers</h3>
+            <table class="reg">
+                <tr>
+                    <td colspan="8" class="reg">rax</td>
+                </tr>
+                <tr>
+                    <td colspan="4"></td>
+                    <td colspan="4" class="reg">eax</td>
+                </tr>
+                <tr>
+                    <td colspan="6"></td>
+                    <td colspan="2" class="reg">ax</td>
+                </tr>
+                <tr>
+                    <td colspan="6"></td>
+                    <td colspan="1" class="reg">ah</td>
+                    <td colspan="1" class="reg">al</td>
+                </tr>
+                <tr>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                </tr>
+            </table>
+        </section>
+        <section>
+            <h3>Intel registers</h3>
+            <pre><code data-trim class="cpp">
+                union {
+                  struct {
+                    uint8_t al;
+                    uint8_t ah;
+                  };
+                  uint16_t ax;
+                  uint32_t eax;
+                  uint64_t rax;
+                };
+            </code></pre>
+        </section>
+        <section>
+            <h3>Cleverness</h3>
+            <iframe width="1000px" height="300px"
+                    src="http://localhost:10240/e#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.2899450879999999,j:1,source:'int+times9(int+num)+%7B%0A++++return+num+*+9%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:/usr/bin/g%2B%2B,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),fontScale:1.2899450879999999,options:'-O1',source:1),l:'5',n:'0',o:'/usr/bin/g%2B%2B+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"></iframe>
+        </section>
         <div class="footer">
             <hr>
             <img src="DRWSmallLogo.png" width="50" height="16">
@@ -51,6 +153,7 @@
 <script>
     Reveal.initialize({
         transition: 'none',
+        history: true,
         dependencies: [
             {src: 'reveal.js/plugin/markdown/marked.js'},
             {src: 'reveal.js/plugin/markdown/markdown.js'},
