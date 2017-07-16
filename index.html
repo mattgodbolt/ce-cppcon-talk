@@ -56,90 +56,144 @@
                     doSomething(x);
                 }</code></pre>
         </section>
-        <section>
-            <h3>Compiler Explorer v1</h3>
-            <pre><code class="bash">$ watch 'g++ -O2 -S /tmp/test.cc -o - | c++filt'</code></pre>
-            <a href="http://localhost:10240/#z:OYLghAFBqd5TKALEBjA9gEwKYFFMCWALugE4A0BIEAZugHZEDKqAhgDbYgCMAdABwBWAOyCATAAYAnGIBsw7lKVTh5AFY9yAZ3QBXUqi4ByAKRiAzAXqp2unAGoT5gMKotRTOwIAjJ7hMSAIJmlta2Dk7OAG7YqCSkfgHBQdgAHkTYpPT2UegEmPaY6EzoALbYREhWwBBWRACUTgBCSUm5%2BfZ0pNisqEgQGPTu9u6YICAxcWSRdX6OclH1jsItQfadZPYQWgQAXtgA%2BkT2BI7mACL2Es0nZ845vDv7EI3mTfMtYk0EjWvrhcUyhUqvQalETIJvhDzq9VsFhOcjPVyOwQEZBEZyPQ0RJMeg0c4zJ93jp9IZ5uZuJiiDikciANYgQQSFFogAsmNKTJZ2KMuPI%2BKMmK0IBZNL5SPIcFgKAwpQADgROBQqAMyorlSAAPS6LSkLXeKxa4BEonkGhKjKkEUQby08hy8qMADy9HYAE97YRunECDERRLKIxsKiJci6IwWBwuHwhKJJDJ5IplKp0PKiAQGAGALTOsTCvQGGPI0MYrH2wU6vUGo0mr5Erb4YibELccj2ZzqpWZCncerU2n1ZFIHo4UjUBnc1lGDnlwOC4Wi8ji3FD6f58hc5lz/kL5eDqWIaXINBYPCEeKUagR5hsTg8AQicTSOQKZQqdQgMTaQuGNEhKwbDsbA7jcDwvF8cx/CCACwmAu5JniRIYJSdJMmydoCiKEpykqapakYWFWiCTCNm6Xp%2BkGYZRnGRDphcWYoPmWRFmWOF1i6LY6nsVJ7BAHJfkCf4ARw4F8NSIiYIRSVS0xXldwJU0vhGX8QJCDcVzpcgR1YMcJ3IRlt1DWctx5Cs0UXMUD2PCBZS7ZUrzVBVu3HKt9UNehjSUppzUtTIbTtQNHWwF03U9QNvViDN/XtOoQwPG8o3vWMnwTV9kyUVN00zIY0VzDdSSLL8SzRMt5LxNE3JrTy62JRsLxbCxvw7eye3U/t9zDYdR0yfTDJZYy5PMoVtCXTS11DDdTJ3CqRvGyduAkAa0XMIb5wszrV2RGJrRykA2SAA%3D%3D">Or
-                here</a>
+        <section><h3>Why we care</h3></section>
+        <section><h3>Demo</h3></section>
+        <section><h3>How it works</h3></section>
+        <section><h3>New compilers</h3></section>
+        <section><h3>Running Locally</h3></section>
+        <section><h3>Hacking attempts</h3></section>
+        <section><h3>Measure everything</h3></section>
+        <section><h3>ASM 101</h3></section>
+        <section><h3>Defeating the optimizer</h3></section>
+        <section><h3>Case Study: range for and pre-post increment, vs std::algorithm</h3>
+            https://godbolt.org/g/gS9NOV
+        </section>
+        <section><h3>Case Study: hash maps</h3>
+            boost multi_index
+        </section>
+        <section><h3>Case Study: order formatting</h3></section>
+        <section><h3>Power Features</h3></section>
+        <section><h3>Case Study: auto copy / move / etc (Chrome xopied all its images moved instead of moved..)</h3>
+        </section>
+        <section><h3>Case Study: clever compiler optimizations</h3></section>
+        <section><h3>Case Study: clang vs GCC inf loop detect</h3></section>
+        <section><h3>Case Study: closed form summation</h3></section>
+        <section><h3>Case Study: devirtulaise</h3>
+            https://godbolt.org/g/tuO5Ij - devirtualisation
         </section>
         <section>
-            <h3>Some assembly</h3>
-            <iframe width="1000px" height="300px"
-                    src="http://localhost:10240/e#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.5479341055999998,j:1,source:'int+square(int+num)+%7B%0A++++return+num+*+num%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:/usr/bin/g%2B%2B,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),fontScale:1.5479341055999998,options:'',source:1),l:'5',n:'0',o:'/usr/bin/g%2B%2B+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"></iframe>
+            pass by value / pass by reference https://godbolt.org/g/XWFR7s
+            aliasing: https://godbolt.org/g/wczpd3
+            https://bugs.llvm.org/show_bug.cgi?id=28343 - type based aliasing
+            New int; leak memory thing? (memory alloc elision)
+            https://bugs.llvm.org/show_bug.cgi?id=28343
+            memory allocation elision
+            -fsanitize=address
+            entire smallpt
+            auto lambda demo: https://godbolt.org/g/5fOC4q
+            variant stuff, clang opts out
+            Non virtual thunks
+            cute opt: https://godbolt.org/g/Tk8Af4 and https://godbolt.org/g/Zdvzke (ordering? interesting)
+            https://gcc.godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(j:1,source:'namespace+%7B%0A++struct+Iface+%7B%0A++++virtual+~Iface()+%7B%7D%0A++++virtual+int+doThing()+const+%3D+0%3B%0A++%7D%3B%0A%0A++struct+Bob+:+Iface+%7B+%0A++++int+doThing()+const+override+%7B+return+1%3B+%7D%0A++%7D%3B%0A%0A++struct+Ian+:+Iface+%7B+%0A++++int+doThing()+const+override+%7B+return+2%3B+%7D%0A++%7D%3B%0A%0A++int+test(const+Iface+%26obj)+%7B%0A++++int+a+%3D+0%3B%0A++++for+(int+i+%3D+0%3B+i+%3C+10000%3B+%2B%2Bi)%0A++++++a+%2B%3D+obj.doThing()%3B%0A++++return+a%3B%0A++%7D%0A%7D%0A%0Aint+main(int+argc,+const+char+*argv%5B%5D)+%7B%0A++Ian+ian%3B%0A++Bob+bob%3B%0A++if+(argc+%3D%3D+2)+%0A++++return+test(ian)%3B%0A++else%0A++++return+test(bob)%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',m:100,n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:g7snapshot,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),options:'-O3',source:1),l:'5',n:'0',o:'x86-64+gcc+7+(snapshot)+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',m:50.05471818428769,n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:clang_trunk,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),options:'-O3',source:1),l:'5',n:'0',o:'x86-64+clang+(trunk)+(Editor+%231,+Compiler+%232)',t:'0')),l:'4',m:49.94528181571231,n:'0',o:'',s:0,t:'0')),k:50,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4`
         </section>
-        <section>
-            <h3>Intel asm 101</h3>
-            <pre><code data-trim class="asm">
-                mov dest, src
-                add dest, arg
-                cmp reg, arg
-                jmp dest
-            </code></pre>
-        </section>
-        <section>
-            <h3>Intel registers</h3>
+        <section><h3>Case Study: other people's usage</h3>
             <ul>
-                <li>rax</li>
-                <li>rcx</li>
-                <li>rdx</li>
-                <li>rbx</li>
-                <li>rsp</li>
-                <li>rbp</li>
-                <li>rsi</li>
-                <li>rdi</li>
-                <li>r8-r15</li>
+                <li>Trying out new features</li>
+                <li>Demoing compiler optimizations</li>
+                <li>"most output from a tweet" competition</li>
+                <li>creating minimal bug reports for compilers</li>
+                <li>TMP repl using static_assert</li>
+                <li>ease of use means people try things out they would never have thought of</li>
+                <li>Compiler optimization team at Google</li>
+                <li>"Works on my machine" / Godbolt</li>
             </ul>
         </section>
-        <section>
-            <h3>Intel registers</h3>
-            <table class="reg">
-                <tr>
-                    <td colspan="8" class="reg">rax</td>
-                </tr>
-                <tr>
-                    <td colspan="4"></td>
-                    <td colspan="4" class="reg">eax</td>
-                </tr>
-                <tr>
-                    <td colspan="6"></td>
-                    <td colspan="2" class="reg">ax</td>
-                </tr>
-                <tr>
-                    <td colspan="6"></td>
-                    <td colspan="1" class="reg">ah</td>
-                    <td colspan="1" class="reg">al</td>
-                </tr>
-                <tr>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
-                </tr>
-            </table>
-        </section>
-        <section>
-            <h3>Intel registers</h3>
-            <pre><code data-trim class="cpp">
-                union {
-                  struct {
-                    uint8_t al;
-                    uint8_t ah;
-                  };
-                  uint16_t ax;
-                  uint32_t eax;
-                  uint64_t rax;
-                };
-            </code></pre>
-        </section>
-        <section>
-            <h3>Cleverness</h3>
-            <iframe width="1000px" height="300px"
-                    src="http://localhost:10240/e#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.2899450879999999,j:1,source:'int+times9(int+num)+%7B%0A++++return+num+*+9%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:/usr/bin/g%2B%2B,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),fontScale:1.2899450879999999,options:'-O1',source:1),l:'5',n:'0',o:'/usr/bin/g%2B%2B+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"></iframe>
-        </section>
+        <!--
+                <section>
+                    <h3>Compiler Explorer v1</h3>
+                    <pre><code class="bash">$ watch 'g++ -O2 -S /tmp/test.cc -o - | c++filt'</code></pre>
+                    <a href="http://localhost:10240/#z:OYLghAFBqd5TKALEBjA9gEwKYFFMCWALugE4A0BIEAZugHZEDKqAhgDbYgCMAdABwBWAOyCATAAYAnGIBsw7lKVTh5AFY9yAZ3QBXUqi4ByAKRiAzAXqp2unAGoT5gMKotRTOwIAjJ7hMSAIJmlta2Dk7OAG7YqCSkfgHBQdgAHkTYpPT2UegEmPaY6EzoALbYREhWwBBWRACUTgBCSUm5%2BfZ0pNisqEgQGPTu9u6YICAxcWSRdX6OclH1jsItQfadZPYQWgQAXtgA%2BkT2BI7mACL2Es0nZ845vDv7EI3mTfMtYk0EjWvrhcUyhUqvQalETIJvhDzq9VsFhOcjPVyOwQEZBEZyPQ0RJMeg0c4zJ93jp9IZ5uZuJiiDikciANYgQQSFFogAsmNKTJZ2KMuPI%2BKMmK0IBZNL5SPIcFgKAwpQADgROBQqAMyorlSAAPS6LSkLXeKxa4BEonkGhKjKkEUQby08hy8qMADy9HYAE97YRunECDERRLKIxsKiJci6IwWBwuHwhKJJDJ5IplKp0PKiAQGAGALTOsTCvQGGPI0MYrH2wU6vUGo0mr5Erb4YibELccj2ZzqpWZCncerU2n1ZFIHo4UjUBnc1lGDnlwOC4Wi8ji3FD6f58hc5lz/kL5eDqWIaXINBYPCEeKUagR5hsTg8AQicTSOQKZQqdQgMTaQuGNEhKwbDsbA7jcDwvF8cx/CCACwmAu5JniRIYJSdJMmydoCiKEpykqapakYWFWiCTCNm6Xp%2BkGYZRnGRDphcWYoPmWRFmWOF1i6LY6nsVJ7BAHJfkCf4ARw4F8NSIiYIRSVS0xXldwJU0vhGX8QJCDcVzpcgR1YMcJ3IRlt1DWctx5Cs0UXMUD2PCBZS7ZUrzVBVu3HKt9UNehjSUppzUtTIbTtQNHWwF03U9QNvViDN/XtOoQwPG8o3vWMnwTV9kyUVN00zIY0VzDdSSLL8SzRMt5LxNE3JrTy62JRsLxbCxvw7eye3U/t9zDYdR0yfTDJZYy5PMoVtCXTS11DDdTJ3CqRvGyduAkAa0XMIb5wszrV2RGJrRykA2SAA%3D%3D">Or
+                        here</a>
+                </section>
+                <section>
+                    <h3>Some assembly</h3>
+                    <iframe width="1000px" height="300px"
+                            src="http://localhost:10240/e#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.5479341055999998,j:1,source:'int+square(int+num)+%7B%0A++++return+num+*+num%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:/usr/bin/g%2B%2B,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),fontScale:1.5479341055999998,options:'',source:1),l:'5',n:'0',o:'/usr/bin/g%2B%2B+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"></iframe>
+                </section>
+                <section>
+                    <h3>Intel asm 101</h3>
+                    <pre><code data-trim class="asm">
+                        mov dest, src
+                        add dest, arg
+                        cmp reg, arg
+                        jmp dest
+                    </code></pre>
+                </section>
+                <section>
+                    <h3>Intel registers</h3>
+                    <ul>
+                        <li>rax</li>
+                        <li>rcx</li>
+                        <li>rdx</li>
+                        <li>rbx</li>
+                        <li>rsp</li>
+                        <li>rbp</li>
+                        <li>rsi</li>
+                        <li>rdi</li>
+                        <li>r8-r15</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Intel registers</h3>
+                    <table class="reg">
+                        <tr>
+                            <td colspan="8" class="reg">rax</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4"></td>
+                            <td colspan="4" class="reg">eax</td>
+                        </tr>
+                        <tr>
+                            <td colspan="6"></td>
+                            <td colspan="2" class="reg">ax</td>
+                        </tr>
+                        <tr>
+                            <td colspan="6"></td>
+                            <td colspan="1" class="reg">ah</td>
+                            <td colspan="1" class="reg">al</td>
+                        </tr>
+                        <tr>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                    </table>
+                </section>
+                <section>
+                    <h3>Intel registers</h3>
+                    <pre><code data-trim class="cpp">
+                        union {
+                          struct {
+                            uint8_t al;
+                            uint8_t ah;
+                          };
+                          uint16_t ax;
+                          uint32_t eax;
+                          uint64_t rax;
+                        };
+                    </code></pre>
+                </section>
+                <section>
+                    <h3>Cleverness</h3>
+                    <iframe width="1000px" height="300px"
+                            src="http://localhost:10240/e#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.2899450879999999,j:1,source:'int+times9(int+num)+%7B%0A++++return+num+*+9%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:/usr/bin/g%2B%2B,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),fontScale:1.2899450879999999,options:'-O1',source:1),l:'5',n:'0',o:'/usr/bin/g%2B%2B+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"></iframe>
+                </section>
+        -->
         <div class="footer">
             <hr>
             <img src="DRWSmallLogo.png" width="50" height="16">

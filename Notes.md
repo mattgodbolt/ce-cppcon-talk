@@ -22,6 +22,7 @@ jj
 * Assembly! Wait, come back!
 * Compiler Explorer: The Right To Assembly
 * CE - Assembly is a right not a privilege
+* Unbolting the secrets of the compiler
 
 Foemmel likes 16, 18 (cliched), 8. His ideas 22-24
 
