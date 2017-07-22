@@ -56,6 +56,53 @@
                     doSomething(x);
                 }</code></pre>
         </section>
+        <section>
+            <h3>Demo</h3>
+            <pre class="ce">
+/// g71:-O2
+// setup
+  #include &lt;vector>
+  using namespace std;
+  extern void doSomething(int);
+
+void foreach(const vector&lt;int> &v) {
+  for (size_t i = 0; i < v.size(); ++i)
+    doSomething(v[i]);
+}</pre>
+        </section>
+        <section><h3>Including assembly 101, or how to fake it at assembly</h3></section>
+        <section><h3>Compilers are super-smart!</h3></section>
+        <section><h3>Appropriately defeating the optimizer to see what you'd expect</h3></section>
+        <section><h3>Demo some "power features" that some people don't necessarily know about (diff view, multiple
+            editors) - depends on screen resolution of the project and visibility.</h3></section>
+        <section><h3>A warning: MEASURE EVERYTHING! Limitations of "just" looking at the assembly output (dovetails with
+            hash maps below)</h3></section>
+        <section><h3>Case Studies, including things like:</h3></section>
+        <section><h3>Loop iteration shoot-out, pre-increment vs post-increment vs range-for vs std::algorithms</h3>
+        </section>
+        <section><h3>Hash maps, GCC's STL unordered_map vs boost multi-index</h3></section>
+        <section><h3>Compiler Explorer in low-latency trading: formatting exchange orders (and/or processing market
+            data)</h3></section>
+        <section><h3>Undefined behaviour is your friend, or how clang beats gcc with linked list iteration</h3>
+        </section>
+        <section><h3>Unpicking your object model, or devirtualisation for dummies</h3></section>
+        <section><h3>Plus, many, many more (allocation elision in clang, non-virtual thunks, write combining, address
+            sanitisation)</h3></section>
+        <section><h3>How other people use it, including things like</h3></section>
+        <section><h3>Compiler teams (e.g. at Google)</h3></section>
+        <section><h3>Slack</h3></section>
+        <section><h3>Twitter competition to "generate most code from 140c of code"</h3></section>
+        <section><h3>Template metaprogramming REPL using constepr</h3></section>
+        <section><h3>Minimal bug reports for compilers / search for regressions</h3></section>
+        <section><h3>Peeking behind the curtain: how CE works</h3></section>
+        <section><h3>The code (and how to run it locally)</h3></section>
+        <section><h3>The compilers (and how to get most of them locally yourself)</h3></section>
+        <section><h3>The magic that runs on Amazon's infrastructure</h3></section>
+        <section><h3>Conclusions and call to action!</h3></section>
+        <section><h3>Everyone should be using this!</h3></section>
+        <section><h3>Thanks to my contributors and patreon supporters</h3></section>
+        <section><h3>Help wanted</h3></section>
+
         <section><h3>Why we care</h3></section>
         <section><h3>Demo</h3></section>
         <section><h3>How it works</h3></section>
@@ -78,6 +125,8 @@
         <section><h3>Case Study: clever compiler optimizations</h3></section>
         <section><h3>Case Study: clang vs GCC inf loop detect</h3></section>
         <section><h3>Case Study: closed form summation</h3></section>
+        <section><h3>Cute tricks</h3>
+        https://godbolt.org/g/YWXiqi </section>
         <section><h3>Case Study: devirtulaise</h3>
             https://godbolt.org/g/tuO5Ij - devirtualisation
         </section>
@@ -217,6 +266,10 @@
                 callback: function () {
                     hljs.initHighlightingOnLoad();
                 }
+            },
+            {
+                src: 'compiler-explorer.js',
+                async: true
             }
         ]
     });
