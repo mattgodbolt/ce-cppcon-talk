@@ -15,8 +15,9 @@
             if (match) {
                 compiler = match[1];
                 options = match[2];
-            } else
+            } else if (line.trim() !== "") {
                 source = source + line + "\n";
+            }
         }
         var parent = element.parentElement;
         element.remove();
@@ -49,7 +50,7 @@
             version: 4,
             content: [{type: 'row', content: content}]
         };
-        ceElement.setAttribute('src', "http://localhost:10240/e#" + JSON.stringify(obj));
+        ceElement.setAttribute('src', "http://localhost:10240/e#" + encodeURIComponent(JSON.stringify(obj)));
         parent.appendChild(ceElement);
     }
 

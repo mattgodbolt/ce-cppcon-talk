@@ -18,6 +18,10 @@ body {
     color: #7b8a9c;
 }
 
+.reveal .slide-number {
+    background-color: inherit;
+}
+
 ::selection {
     color: #fff;
     background: #98bdef;

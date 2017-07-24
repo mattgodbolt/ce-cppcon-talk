@@ -14,6 +14,15 @@
             background-color: #333;
             text-align: center !important
         }
+
+        .replaceable {
+            position: absolute !important;
+            width: 800px;
+        }
+
+        .replacecontainer {
+            position: relative;
+        }
     </style>
 
     <!-- Theme used for syntax highlighting of code -->
@@ -33,7 +42,9 @@
     <div class="slides">
         <section>
             <em>September 2017</em>
-            <h1>Compiler Explorer</h1>
+            <!-- TODO, better title format -->
+            <h3>Unbolting the Compiler's Lid:</h3>
+            <h5>What Has My Compiler Done for Me Lately</h5>
             <em>Matt Godbolt, DRW Trading</em>
             <br>
             <em>
@@ -41,37 +52,260 @@
                 <a href="mailto:matt@godbolt.org">matt@godbolt.org</a>
             </em>
             <br>
-            <em><a href="https://drw.com/">drw.com</a></em>
+            <em><a href="https://drw.com/careers">drw.com</a></em>
+        </section>
+        <section>
+            <h3>Why am I here?</h3>
+            <aside class="notes">
+                <p>I'm wondering that too. If I explain a bit about myself perhaps it'll help.</p>
+                <p>Passion for performance</p>
+                <h4>Potted history:</h4>
+                <ul>
+                    <li>Learned Z80, 6502 assembly in the 80s to write my own games</li>
+                    <li>Moved on to ARM assembly</li>
+                    <li>Dismissed C as just a macro assembler</li>
+                    <li>Learned C to write a MUD at Uni</li>
+                    <li>Eventually moved on to C++</li>
+                    <li>Got a job making games, high performance stuff</li>
+                    <li>Google; occasional performance stuff for cellphones</li>
+                    <li>Now 6 years at DRW doing performance stuff for trading systems</li>
+                    <li>Still an asm hacker at heart though don't touch it so more</li>
+                </ul>
+                <p>Amazing opportunity to talk to lots of C++ programmers at all levels. My passion.</p>
+            </aside>
+        </section>
+        <section>
+            <h3>My goals</h3>
+            <ul>
+                <li>Un-scary-fy assembler</li>
+                <li>Compilers are amazing</li>
+                <li>Trust but verify</li>
+            </ul>
+        </section>
+        <section>
+            <h3>Backstory</h3>
+            <aside class="notes">
+                <ul>
+                    <li>love performance</li>
+                    <li>work in trading where every microsecond can count</li>
+                    <li>2012, C++11isms, range-for</li>
+                </ul>
+            </aside>
         </section>
         <section>
             <h3>Backstory</h3>
             <pre><code data-trim class="cpp">
-                void foreach(const vector&lt;int> &v) {
+                int sum(const vector&lt;int> &v) {
+                  int result = 0;
                   for (size_t i = 0; i < v.size(); ++i)
-                    doSomething(v[i]);
+                    result += v[i];
+                  return result;
                 }</code></pre>
             <pre><code data-trim class="cpp">
-                void foreach(const vector&lt;int> &v) {
-                  for (int x : v)
-                    doSomething(x);
+                int sum(const vector&lt;int> &v) {
+                  int result = 0;
+                  for (int x : i) result += x;
+                  return result;
                 }</code></pre>
+        </section>
+        <section>
+            <h3>WARNING</h3>
+            <ul>
+                <li>Reading assembly alone is bad</li>
+                <li><em>Always</em> measure too</li>
+            </ul>
+            <aside class="notes">
+                Shout out to google benchmarking tool. Microbenchmarks, perils.
+
+                But always measure end-to-end perf if you can too.
+            </aside>
+        </section>
+        <section>
+            <h3>x86 Assembly 101</h3>
+            Registers <!-- TODO -->
+            <aside class="notes">
+                Faking it with x86 asm.
+            </aside>
+        </section>
+        <section>
+            <h3>x86 Assembly 101</h3>
+            Instructions
+            <pre><code data-trim class="x86asm">
+                mov eax, 1234       ; eax = 1234
+                mov ecx, 5678       ; ecx = 5678
+                add eax, ecx        ; eax += ecx
+                cmp eax, 6912       ; eax == 6912 ?
+                je all_ok           ;  then goto all_ok
+            </code></pre>
+        </section>
+        <section>
+            <h3>x86 Assembly 101</h3>
+            Instructions
+            <pre><code data-trim class="x86asm">
+                mov eax, DWORD PTR [r14] ; eax = *(int32_t *)rdi
+                mov edx, DWORD PTR [r14 + 4] ; eax = *(int32_t *)(rdi + 4)
+                mov edx, DWORD PTR [r14 + 4 * rbx]
+                        ; eax = *(int32_t *)(rdi + 4 * rbx)
+            </code></pre>
+        </section>
+        <section>
+            <h3>CE v1</h3>
+            <pre><code data-noescape data-trim class="bash">
+                 $ g++ /tmp/test.cc -O1 -c -S -o -masm=intel -
+                   <span class="fragment" data-fragment-index="3">| c++filt</span>
+                   <span class="fragment" data-fragment-index="4">| grep -vE '\s+\.'</span>
+            </code></pre>
+            <div class="replacecontainer">
+                <pre class="fragment current-visible replaceable" data-fragment-index="2"><code class="x86asm"
+                                                                                                data-trim>
+    .file	"test.cc"
+    .text
+    .globl	_Z3sumRKSt6vectorIiSaIiEE
+    .type	_Z3sumRKSt6vectorIiSaIiEE, @function
+_Z3sumRKSt6vectorIiSaIiEE:
+.LFB786:
+    .cfi_startproc
+    mov	rcx, QWORD PTR [rdi]
+    mov	rax, QWORD PTR 8[rdi]
+    sub	rax, rcx
+    ...</code></pre>
+                <pre class="fragment current-visible replaceable" data-fragment-index="3"><code class="x86asm"
+                                                                                                data-trim>
+    .file	"test.cc"
+    .text
+    .globl	sum(std::vector&lt;int, std::allocator&lt;int> > const&)
+    .type	sum(std::vector&lt;int, std::allocator&lt;int> > const&), @function
+sum(std::vector&lt;int, std::allocator&lt;int> > const&):
+.LFB786:
+    .cfi_startproc
+    mov	rcx, QWORD PTR [rdi]
+    mov	rax, QWORD PTR 8[rdi]
+    sub	rax, rcx
+    ...</code></pre>
+                <pre class="fragment current-visible replaceable" data-fragment-index="4"><code class="x86asm"
+                                                                                                data-trim>
+sum(std::vector&lt;int, std::allocator&lt;int> > const&):
+.LFB786:
+    mov	rcx, QWORD PTR [rdi]
+    mov	rax, QWORD PTR 8[rdi]
+    sub	rax, rcx
+    sar	rax, 2
+    mov	rsi, rax
+    test rax, rax
+    mov	edx, 0
+    mov eax, 0
+    ...</code></pre>
+            </div>
         </section>
         <section>
             <h3>Demo</h3>
             <pre class="ce">
 /// g71:-O2
 // setup
+  #include &lt;numeric>
   #include &lt;vector>
   using namespace std;
-  extern void doSomething(int);
 
-void foreach(const vector&lt;int> &v) {
+int sum(const vector&lt;int> &v) {
+  int result = 0;
   for (size_t i = 0; i < v.size(); ++i)
-    doSomething(v[i]);
+    result += v[i];
+  return result;
 }</pre>
+            <aside class="notes">
+                <ul>
+                    <li>Walk through code, note optimizer is on</li>
+                    <li>Use range-for, show it's the same</li>
+                    <li>Ditto std::accumulate</li>
+                </ul>
+                Show code, show same happens with auto & and std::accumulate
+            </aside>
         </section>
-        <section><h3>Including assembly 101, or how to fake it at assembly</h3></section>
-        <section><h3>Compilers are super-smart!</h3></section>
+        <section>
+            <section><h3>Compilers are super-smart!</h3></section>
+            <section>
+                <h3>Multiplication</h3>
+                <pre class="ce">
+/// g71:-O2
+int mulBy3(int x) { return x * 3; }
+int mulBy5(int x) { return x * 5; }
+int mulBy7(int x) { return x * 7; }
+int mulBy9(int x) { return x * 9; }
+                </pre>
+                <!-- TODO slide on a = &foo[3]? -->
+            </section>
+            <section>
+                <h3>Division</h3>
+                <pre class="ce">
+/// g71:-O2
+int divBy3(int x) { return x / 3; }
+                </pre>
+            </section>
+            <section>
+                <h3>Modulus</h3>
+                <pre class="ce">
+/// g71:-O2
+int modBy3(int x) { return x % 3; }
+                </pre>
+            </section>
+        </section>
+        <section>
+            <h3>Compilers are super-smart!</h3>
+            <h5 class="fragment">...but aren't clairvoyent</h5>
+        </section>
+        <!-- TODO slides here about -O3 and what on earth it does? -->
+        <section>
+            <pre class="ce">
+/// g71:-O2
+// setup
+  #include &lt;vector>
+  using namespace std;
+  extern int someFunc(int);
+
+int sum(const vector&lt;int> &v) {
+  int result = 0;
+  for (size_t i = 0; i < v.size(); ++i)
+    result += someFunc(v[i]);
+  return result;
+}</pre>
+            <aside class="notes">
+                Compiler can't make any assumptions about someFunc. So has to reload size.
+                Even though vector is const, compiler can't assume it's not going to change.
+                Using range-for fixes issue as rang-efor is defined to copy the extents of the iterand outsid of loop.
+            </aside>
+        </section>
+        <section>
+            <section>
+            <pre><code data-trim class="cpp">
+                struct Foo {
+                  Foo *next{nullptr};
+                  bool isOk() const;
+                };
+                void debugCheck(Foo *first) {
+                  for (auto p = first; p; p = p->next) {
+                    assert(p->isOk());
+                  }
+                }
+            </code></pre>
+            </section>
+            <section>
+                <!-- TODO install clang 4.0.0 -->
+                <!-- TODO use non-fig GCC 7.1 -->
+                <pre class="ce">
+/// g71:-O2 -DNDEBUG -std=c++14
+// setup
+  #include &lt;cassert>
+  struct Foo {
+    Foo *next{nullptr};
+    bool isOk() const;
+  };
+void debugCheck(Foo *first) {
+  for (auto p = first; p; p = p->next) {
+    assert(p->isOk());
+  }
+}</pre>
+            </section>
+        </section>
         <section><h3>Appropriately defeating the optimizer to see what you'd expect</h3></section>
         <section><h3>Demo some "power features" that some people don't necessarily know about (diff view, multiple
             editors) - depends on screen resolution of the project and visibility.</h3></section>
@@ -126,7 +360,8 @@ void foreach(const vector&lt;int> &v) {
         <section><h3>Case Study: clang vs GCC inf loop detect</h3></section>
         <section><h3>Case Study: closed form summation</h3></section>
         <section><h3>Cute tricks</h3>
-        https://godbolt.org/g/YWXiqi </section>
+            https://godbolt.org/g/YWXiqi
+        </section>
         <section><h3>Case Study: devirtulaise</h3>
             https://godbolt.org/g/tuO5Ij - devirtualisation
         </section>
@@ -257,6 +492,7 @@ void foreach(const vector&lt;int> &v) {
     Reveal.initialize({
         transition: 'none',
         history: true,
+        slideNumber: true,
         dependencies: [
             {src: 'reveal.js/plugin/markdown/marked.js'},
             {src: 'reveal.js/plugin/markdown/markdown.js'},
