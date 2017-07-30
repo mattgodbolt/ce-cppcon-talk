@@ -39,7 +39,8 @@
 </head>
 <body>
 <div class="reveal">
-    <div class="slides">
+    <!-- TODO compile all with -Wall -Wextra -->
+    <section class="slides">
         <section>
             <em>September 2017</em>
             <!-- TODO, better title format -->
@@ -123,6 +124,7 @@
         <section>
             <h3>x86 Assembly 101</h3>
             Registers <!-- TODO -->
+            Calling convention <!-- TODO -->
             <aside class="notes">
                 Faking it with x86 asm.
             </aside>
@@ -198,8 +200,9 @@ sum(std::vector&lt;int, std::allocator&lt;int> > const&):
             </div>
         </section>
         <section>
-            <h3>Demo</h3>
-            <pre class="ce">
+            <section>
+                <h3>Demo</h3>
+                <pre class="ce">
 /// g71:-O2
 // setup
   #include &lt;numeric>
@@ -212,17 +215,62 @@ int sum(const vector&lt;int> &v) {
     result += v[i];
   return result;
 }</pre>
-            <aside class="notes">
-                <ul>
-                    <li>Walk through code, note optimizer is on</li>
-                    <li>Use range-for, show it's the same</li>
-                    <li>Ditto std::accumulate</li>
-                </ul>
-                Show code, show same happens with auto & and std::accumulate
-            </aside>
+                <aside class="notes">
+                    <ul>
+                        <li>Pop out</li>
+                        <li>Walk through code (using following slides), note optimizer is on</li>
+                        <li>Show optimizer off</li>
+                        <li>Use range-for, show it's the same</li>
+                        <li>Ditto std::accumulate</li>
+                    </ul>
+                    Show code, show same happens with auto & and std::accumulate
+                </aside>
+            </section>
+            <section>
+            <pre><code data-trim class="x86asm">
+  ; rdi = const vector&lt;int> *
+  mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
+  mov rcx, QWORD PTR [rdi+8]  ; rcx = *(rdi + 8)  &equiv; rdi->end
+  sub rcx, rdx                ; rcx = rcx - rdx   &equiv; end - begin
+  mov rax, rcx                ; rax = rcx &equiv; end - begin
+  sar rax, 2                  ; rax = rax / 4
+                              ;     &equiv; (end - begin) / sizeof(int)
+  test rax, rax               ; is rax  == 0?
+  je .L4                      ;   if so, goto L4
+            </code></pre>
+            </section>
+            <section>
+            <pre><code data-trim class="x86asm">
+  add rcx, rdx                ; rcx += rdx
+                              ;     &equiv; begin + size
+                              ;     &equiv; end
+  xor eax, eax                ; eax = 0
+.L3:
+  add eax, DWORD PTR [rdx]    ; eax += *rdx
+  add rdx, 4                  ; rdx += sizeof(int)
+  cmp rdx, rcx                ; is rdx == (begin + size)
+  jne .L3                     ; if not, loop
+  rep ret                     ; we're done
+.L4:
+  xor eax, eax                ; return 0
+  ret
+            </code></pre>
+            </section>
+            <section><h3>Optimizer off</h3></section>
+            <section><h3>Other approaches</h3></section>
         </section>
         <section>
             <section><h3>Compilers are super-smart!</h3></section>
+            <!-- TODO show versions with non-constant; dovetails with hash map -->
+            <section>
+                <h3>Multiplication</h3>
+                <pre class="ce">
+/// g71:-O2
+int mulByY(int x, int y) {
+  return x * y;
+}
+                </pre>
+            </section>
             <section>
                 <h3>Multiplication</h3>
                 <pre class="ce">
@@ -233,6 +281,23 @@ int mulBy7(int x) { return x * 7; }
 int mulBy9(int x) { return x * 9; }
                 </pre>
                 <!-- TODO slide on a = &foo[3]? -->
+            </section>
+            <h3>Multiplication</h3>
+            <pre class="ce">
+/// g71:-O2
+int mulBy65599(int a) {
+  return (a << 6) + (a << 16) - a;
+}                </pre>
+            <!-- TODO slide on a = &foo[3]? -->
+        </section>
+            <section>
+                <h3>Division</h3>
+                <pre class="ce">
+/// g71:-O2
+int divByY(int x, int y) {
+  return x / y;
+}
+                </pre>
             </section>
             <section>
                 <h3>Division</h3>
@@ -289,8 +354,7 @@ int sum(const vector&lt;int> &v) {
             </code></pre>
             </section>
             <section>
-                <!-- TODO install clang 4.0.0 -->
-                <!-- TODO use non-fig GCC 7.1 -->
+                <!-- Can't get this one to work -->
                 <pre class="ce">
 /// g71:-O2 -DNDEBUG -std=c++14
 // setup
@@ -306,7 +370,72 @@ void debugCheck(Foo *first) {
 }</pre>
             </section>
         </section>
-        <section><h3>Appropriately defeating the optimizer to see what you'd expect</h3></section>
+        <section>
+            <section><h3>Unpicking your object hierarchy</h3></section>
+            <section>
+                <pre><code data-trim class="cpp">
+                struct Display {
+                    virtual ~Display() = default;
+                    virtual int width() const = 0;
+                    virtual int height() const = 0;
+                    virtual void putPixel(int x, int y, bool set) = 0;
+                };
+                </code></pre>
+            </section>
+            <section>struct Display {
+                virtual ~Display() = default;
+                virtual int width() const = 0;
+                virtual int height() const = 0;
+                virtual void putPixel(int x, int y, bool set) = 0;
+                };
+
+                struct Bitmap : Display {
+                bool screen[640 * 480];
+                virtual int width() const { return 640; }
+                virtual int height() const { return 480; }
+                virtual void putPixel(int x, int y, bool set) {
+                screen[x + y * 640] = set;
+                }
+                };
+
+                void clearScreen(Display &display) {
+                for (int y = 0; y < display.height(); ++y)
+                for (int x = 0; x < display.width(); ++x)
+                display.putPixel(x, y, false);
+                }
+            </section>
+        </section>
+        <section>
+            <section>
+                <h3>Appropriately defeating the optimizer to see what you'd expect</h3>
+            </section>
+            <section>
+                <pre class="ce">
+/// g71:-O2 -std=c++1z
+constexpr int sumTo(int x) {
+  int sum = 0;
+  for (int i = 0; i &lt;= x; ++i)
+    sum += i;
+  return sum;
+}
+
+int main() {
+  return sumTo(20);
+}
+                </pre>
+                <aside class="notes">
+                    <ul>
+                        <li>Show code</li>
+                        <li>Modify code to show how to make it depend on argc/argv</li>
+                        <li>Show clang's cleverness</li>
+                        <li>Show clang's weirdness if starting at 1 instead of 0</li>
+                    </ul>
+                </aside>
+            </section>
+            <section>
+                TODO: math bit? maybe show nice n x (n-1)
+            </section>
+        </section>
         <section><h3>Demo some "power features" that some people don't necessarily know about (diff view, multiple
             editors) - depends on screen resolution of the project and visibility.</h3></section>
         <section><h3>A warning: MEASURE EVERYTHING! Limitations of "just" looking at the assembly output (dovetails with
@@ -322,6 +451,25 @@ void debugCheck(Foo *first) {
         <section><h3>Unpicking your object model, or devirtualisation for dummies</h3></section>
         <section><h3>Plus, many, many more (allocation elision in clang, non-virtual thunks, write combining, address
             sanitisation)</h3></section>
+        <section>
+            <h3>Non-virtual thunks</h3>
+            <pre class="ce">
+/// clang400:-O1 -std=c++1z
+struct Foo { virtual void foo() = 0; };
+struct Bar { virtual void bar() = 0; };
+extern void logFoo(const Foo &);
+struct FooBar : Foo, Bar {
+  void bar() override;
+  void log();
+};
+
+void FooBar::bar() {
+  log();
+}            </pre>
+            <aside class="notes">
+                line 35 of output with label and directive filter off
+            </aside>
+        </section>
         <section><h3>How other people use it, including things like</h3></section>
         <section><h3>Compiler teams (e.g. at Google)</h3></section>
         <section><h3>Slack</h3></section>
@@ -349,36 +497,262 @@ void debugCheck(Foo *first) {
         <section><h3>Case Study: range for and pre-post increment, vs std::algorithm</h3>
             https://godbolt.org/g/gS9NOV
         </section>
-        <section><h3>Case Study: hash maps</h3>
-            boost multi_index
+        <section>
+            <section><h3>Case Study: hash maps</h3></section>
+            <section>
+                <!-- clang vs gcc - ispow2!  https://github.com/llvm-mirror/libcxx/blob/master/include/__hash_table#L130  -->
+                <pre class="ce">
+/// g71:-O2 -std=c++1z
+// setup
+  #include &lt;unordered_map>
+  using namespace std;
+
+int findOrZero(
+    const unordered_map&lt;int, int> &m,
+    int key) {
+  if (auto it = m.find(key);
+      it != m.end()) {
+    return it->second;
+  }
+  return 0;
+}
+              </pre>
+            </section>
         </section>
         <section><h3>Case Study: order formatting</h3></section>
         <section><h3>Power Features</h3></section>
-        <section><h3>Case Study: auto copy / move / etc (Chrome xopied all its images moved instead of moved..)</h3>
+        <section>
+            <section>
+                <h3>Case Study: auto copy / move / etc (Chrome xopied all its images moved instead of moved..)</h3>
+                <pre class="ce">
+ // setup
+  #include &lt;vector>
+  using namespace std;
+
+struct ImageHolder {
+  const vector&lt;int> &
+    intensities() const;
+};
+
+double average(const ImageHolder &ih) {
+  auto data = ih.intensities();
+  int sum = 0;
+  for (auto &&v : data) sum += v;
+  return sum / static_cast<double>(data.size());
+}
+                </pre>
+            </section>
         </section>
         <section><h3>Case Study: clever compiler optimizations</h3></section>
         <section><h3>Case Study: clang vs GCC inf loop detect</h3></section>
         <section><h3>Case Study: closed form summation</h3></section>
         <section><h3>Cute tricks</h3>
-            https://godbolt.org/g/YWXiqi
+            <pre class="ce">
+using func = int();
+
+int bar() { return 9527; }
+int foo() { return 102539; }
+
+int f(int i) {
+  if(i < 0)
+    return foo();
+  else
+    return bar();
+}
+
+int d(int i) {
+  static func *functions[] = {&bar, &foo};
+  const auto funcIndex = static_cast<int>(i < 0);
+  return functions[funcIndex]();
+}
+            </pre>
+            <!-- TODO flesh this ^^ one out -->
         </section>
-        <section><h3>Case Study: devirtulaise</h3>
-            https://godbolt.org/g/tuO5Ij - devirtualisation
+        <section><h3>Case Study: devirtualize</h3>
+            <pre class="ce">
+/// g71:-O2 -std=c++1z
+namespace {
+  struct Base {
+    virtual ~Base() = default;
+    virtual int val() const = 0;
+  };
+
+  struct One : Base {
+    int val() const override
+      { return 1; }
+  };
+
+  struct Two : Base {
+    int val() const override
+      { return 2; }
+  };
+
+  int cost(const Base &b, int num) {
+    int a = 0;
+    for (int i = 0; i < num; ++i)
+      a += b.val();
+    return a;
+  }
+}
+
+int main(int argc, const char *argv[]) {
+  One one;
+  Two two;
+  if (argc == 2)
+    return cost(two, 100);
+  else
+    return cost(one, 100);
+}            </pre>
+            <aside class="notes">
+                Show it as-is, show clang
+            </aside>
         </section>
         <section>
             pass by value / pass by reference https://godbolt.org/g/XWFR7s
-            aliasing: https://godbolt.org/g/wczpd3
-            https://bugs.llvm.org/show_bug.cgi?id=28343 - type based aliasing
-            New int; leak memory thing? (memory alloc elision)
-            https://bugs.llvm.org/show_bug.cgi?id=28343
-            memory allocation elision
-            -fsanitize=address
-            entire smallpt
-            auto lambda demo: https://godbolt.org/g/5fOC4q
-            variant stuff, clang opts out
-            Non virtual thunks
-            cute opt: https://godbolt.org/g/Tk8Af4 and https://godbolt.org/g/Zdvzke (ordering? interesting)
-            https://gcc.godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(j:1,source:'namespace+%7B%0A++struct+Iface+%7B%0A++++virtual+~Iface()+%7B%7D%0A++++virtual+int+doThing()+const+%3D+0%3B%0A++%7D%3B%0A%0A++struct+Bob+:+Iface+%7B+%0A++++int+doThing()+const+override+%7B+return+1%3B+%7D%0A++%7D%3B%0A%0A++struct+Ian+:+Iface+%7B+%0A++++int+doThing()+const+override+%7B+return+2%3B+%7D%0A++%7D%3B%0A%0A++int+test(const+Iface+%26obj)+%7B%0A++++int+a+%3D+0%3B%0A++++for+(int+i+%3D+0%3B+i+%3C+10000%3B+%2B%2Bi)%0A++++++a+%2B%3D+obj.doThing()%3B%0A++++return+a%3B%0A++%7D%0A%7D%0A%0Aint+main(int+argc,+const+char+*argv%5B%5D)+%7B%0A++Ian+ian%3B%0A++Bob+bob%3B%0A++if+(argc+%3D%3D+2)+%0A++++return+test(ian)%3B%0A++else%0A++++return+test(bob)%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',m:100,n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:g7snapshot,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),options:'-O3',source:1),l:'5',n:'0',o:'x86-64+gcc+7+(snapshot)+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',m:50.05471818428769,n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:clang_trunk,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),options:'-O3',source:1),l:'5',n:'0',o:'x86-64+clang+(trunk)+(Editor+%231,+Compiler+%232)',t:'0')),l:'4',m:49.94528181571231,n:'0',o:'',s:0,t:'0')),k:50,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4`
+            <pre class="ce">
+using T = int;
+
+struct p1d { T x; };
+struct p2d { T x; T y; };
+struct p3d { T x; T y; T z; };
+struct p4d { T x; T y; T z; T a; };
+struct p5d { T x; T y; T z; T a; T b; };
+
+T sum(p1d p) {
+  return p.x;
+}
+
+T sum(const p2d p) {
+  return p.x + p.y;
+}
+
+T sum(p3d p) {
+  return p.x + p.y + p.z;
+}
+
+T sum(p4d p) {
+  return p.x + p.y + p.z + p.a;
+}
+
+T sum(p5d p) {
+  return p.x + p.y + p.z + p.a + p.b;
+}
+
+extern T e_sum(p3d p);
+extern T e_sum(p4d p);
+extern T e_sum(const p5d &p);
+
+T f3() {
+  p3d p {1, 2, 3};
+  return e_sum(p);
+}
+
+T f4() {
+  p4d p {1, 2, 3, 4};
+  return e_sum(p);
+}
+
+T f5() {
+  p5d p {1, 2, 3, 4, 5};
+  return e_sum(p);
+}
+            </pre>
+        </section>
+        <section>
+            <h3>Restrict</h3>
+            <!-- TODO - some story about compilers pessimistic? -->
+            <pre class="ce">
+/// g71:-Ofast
+#include &lt;functional>
+
+void max(
+    int *__restrict begin,
+    int *__restrict end,
+    int *__restrict out) {
+  *out = *begin;
+  for (auto i = begin; i != end; ++i) {
+    *out = std::max(*i, *out);
+  }
+}            </pre>
+        </section>
+        <section>
+            <h3>Heap elision</h3>
+            <pre class="ce">
+// TODO: unqiue_ptr to int return it, clang vs non-clang
+            </pre>
+        </section>
+        <section>
+            <h3>The address sanitizer</h3>
+            <pre class="ce">
+/// g71:-O1
+// setup
+  #include &lt;cstdlib>
+int read(int *array, size_t index) {
+  return array[index];
+}
+            </pre>
+        </section>
+        <section><h3>auto lambdas</h3>
+            <!--TODO: lots here-->
+            <pre class="ce">
+void test() {
+    auto l = [](auto i) { return i > 10; };
+    l(10);
+    l(10.0);
+}
+        </pre>
+        </section>
+        <section>
+            <h3>Compiler differences?</h3>
+            <!--clang vs gcc difference here -->
+            <pre class="ce">
+/// g71:-O3 -march=haswell -std=c++1z
+// setup
+  extern void bar();
+void foo(int a, int b, int c) {
+  if (a == 0 && b == 0 && c == 0) return;
+  bar();
+}
+void foo(int a, int b, int c, int d, int e, int f, int g, int h) {
+  if (a == 0 && b == 0 && c == 0 && d == 0 && e == 0
+  && f == 0 && g == 0 && h == 0)
+    return;
+  bar();
+}
+            </pre>
+        </section>
+        <section>
+            <h3>Variant</h3>
+            <pre class="ce">
+/// clang_trunk:-O3 -march=haswell -std=c++1z -stdlib=libc++
+// setup
+  #include &lt;variant>
+  using namespace std;
+
+using IntOrFloat = variant&lt;int, float>;
+int test(IntOrFloat iof) {
+  return visit([](auto i) -> int{ return i; }, iof);
+}
+// TODO:
+int test2() {
+  IntOrFloat iof { 1.f };
+  return visit([](auto i) -> int{ return i; }, iof);
+}
+            </pre>
+        </section>
+        <section>
+            <!--    pass by value / pass by reference https://godbolt.org/g/XWFR7s-->
+            <!--aliasing: https://godbolt.org/g/wczpd3-->
+            <!--New int; leak memory thing? (memory alloc elision)-->
+            <!-- -fsanitize=address-->
+            entire smallpt?
+            challenges: Microsoft
+            <!--auto lambda demo: https://godbolt.org/g/5fOC4q-->
+            variant stuff, clang opts out ?
+            <!--Non virtual thunks-->
+            <!--cute opt: https://godbolt.org/g/Tk8Af4 and https://godbolt.org/g/Zdvzke (ordering? interesting)-->
+            <!--https://gcc.godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(j:1,source:'namespace+%7B%0A++struct+Iface+%7B%0A++++virtual+~Iface()+%7B%7D%0A++++virtual+int+doThing()+const+%3D+0%3B%0A++%7D%3B%0A%0A++struct+Bob+:+Iface+%7B+%0A++++int+doThing()+const+override+%7B+return+1%3B+%7D%0A++%7D%3B%0A%0A++struct+Ian+:+Iface+%7B+%0A++++int+doThing()+const+override+%7B+return+2%3B+%7D%0A++%7D%3B%0A%0A++int+test(const+Iface+%26obj)+%7B%0A++++int+a+%3D+0%3B%0A++++for+(int+i+%3D+0%3B+i+%3C+10000%3B+%2B%2Bi)%0A++++++a+%2B%3D+obj.doThing()%3B%0A++++return+a%3B%0A++%7D%0A%7D%0A%0Aint+main(int+argc,+const+char+*argv%5B%5D)+%7B%0A++Ian+ian%3B%0A++Bob+bob%3B%0A++if+(argc+%3D%3D+2)+%0A++++return+test(ian)%3B%0A++else%0A++++return+test(bob)%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',m:100,n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:g7snapshot,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),options:'-O3',source:1),l:'5',n:'0',o:'x86-64+gcc+7+(snapshot)+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',m:50.05471818428769,n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:clang_trunk,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),options:'-O3',source:1),l:'5',n:'0',o:'x86-64+clang+(trunk)+(Editor+%231,+Compiler+%232)',t:'0')),l:'4',m:49.94528181571231,n:'0',o:'',s:0,t:'0')),k:50,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4`-->
+            Link time code generation
         </section>
         <section><h3>Case Study: other people's usage</h3>
             <ul>
@@ -482,7 +856,7 @@ void debugCheck(Foo *first) {
             <hr>
             <img src="DRWSmallLogo.png" width="50" height="16">
         </div>
-    </div>
+</div>
 </div>
 
 <script src="reveal.js/lib/js/head.min.js"></script>
