@@ -282,14 +282,19 @@ int mulBy9(int x) { return x * 9; }
                 </pre>
                 <!-- TODO slide on a = &foo[3]? -->
             </section>
-            <h3>Multiplication</h3>
-            <pre class="ce">
+            <section>
+                <h3>Multiplication</h3>
+                <pre class="ce">
 /// g71:-O2
 int mulBy65599(int a) {
-  return (a << 6) + (a << 16) - a;
+  return (a << 16) + (a << 6) - a;
+  //         ^          ^
+  //     a * 65536      |
+  //                  a * 64
+  // 65536 + 64 - 1 = 65599
 }                </pre>
-            <!-- TODO slide on a = &foo[3]? -->
-        </section>
+                <!-- TODO slide on a = &foo[3]? -->
+            </section>
             <section>
                 <h3>Division</h3>
                 <pre class="ce">
@@ -316,7 +321,7 @@ int modBy3(int x) { return x % 3; }
         </section>
         <section>
             <h3>Compilers are super-smart!</h3>
-            <h5 class="fragment">...but aren't clairvoyent</h5>
+            <h5 class="fragment">...but aren't clairvoyant</h5>
         </section>
         <!-- TODO slides here about -O3 and what on earth it does? -->
         <section>
@@ -435,6 +440,23 @@ int main() {
             <section>
                 TODO: math bit? maybe show nice n x (n-1)
             </section>
+            <section>
+                <h3>Classes?</h3>
+                <pre class="ce">
+/// g71:-O0 -std=c++1z
+class Holder {
+  int value_{0};
+public:
+  int value() const {
+    return value_;
+  }
+};
+                </pre>
+            </section>
+            <section>
+                <h3>Templates</h3>
+                <!--tODO-->
+            </section>
         </section>
         <section><h3>Demo some "power features" that some people don't necessarily know about (diff view, multiple
             editors) - depends on screen resolution of the project and visibility.</h3></section>
@@ -523,7 +545,7 @@ int findOrZero(
         <section><h3>Power Features</h3></section>
         <section>
             <section>
-                <h3>Case Study: auto copy / move / etc (Chrome xopied all its images moved instead of moved..)</h3>
+                <h3>Case Study: auto copy / move / etc (Chrome copied all its images moved instead of moved..)</h3>
                 <pre class="ce">
  // setup
   #include &lt;vector>
