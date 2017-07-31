@@ -348,3 +348,7 @@ li:before {
     width: 100%;
     text-align: left;
 }
+
+.slides .footer img {
+    border: none;
+}
