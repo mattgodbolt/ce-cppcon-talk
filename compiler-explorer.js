@@ -8,7 +8,9 @@
         var source = unescape(element.textContent);
         var lines = source.split('\n');
         source = "";
+        var displaySource = "";
         var matcher = /^\/\/\/\s*([^:]+):(.*)$/;
+        var skipDisplay = false;
         for (var idx = 0; idx < lines.length; ++idx) {
             var line = lines[idx];
             var match = line.match(matcher);
@@ -16,14 +18,17 @@
                 compiler = match[1];
                 options = match[2];
             } else if (line.trim() !== "") {
-                source = source + line + "\n";
+                if (line === "// setup") {
+                    skipDisplay = true;
+                } else if (line[0] != ' ') {
+                    skipDisplay = false;
+                }
+
+                source += line + "\n";
+                if (!skipDisplay)
+                    displaySource += line + "\n"
             }
         }
-        var parent = element.parentElement;
-        element.remove();
-        var ceElement = document.createElement('iframe');
-        ceElement.setAttribute('width', '1200px');
-        ceElement.setAttribute('height', '300px');
         var content = [];
         content.push({
             type: 'component',
@@ -50,8 +55,26 @@
             version: 4,
             content: [{type: 'row', content: content}]
         };
-        ceElement.setAttribute('src', "http://localhost:10240/e#" + encodeURIComponent(JSON.stringify(obj)));
-        parent.appendChild(ceElement);
+        var ceFragment = encodeURIComponent(JSON.stringify(obj));
+
+        var parent = element.parentElement;
+        if (parent.tagName === "PRE") {
+            var a = document.createElement('a');
+            a.setAttribute('href', 'http://localhost:10240/#' + ceFragment);
+            a.setAttribute('target', '_blank');
+            a.textContent = 'View';
+            parent.parentElement.appendChild(a);
+            element.textContent = displaySource;
+        } else {
+            element.remove();
+            var ceElement = document.createElement('iframe');
+            ceElement.setAttribute('width', '1200px');
+            ceElement.setAttribute('height', '300px');
+
+            var embedUrl = "http://localhost:10240/e#" + ceFragment;
+            ceElement.setAttribute('src', embedUrl);
+            parent.appendChild(ceElement);
+        }
     }
 
 })();

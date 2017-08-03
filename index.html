@@ -25,10 +25,8 @@
         }
     </style>
 
-    <!-- Theme used for syntax highlighting of code -->
     <link rel="stylesheet" href="reveal.js/lib/css/zenburn.css">
 
-    <!-- Printing and PDF exports -->
     <script>
         var link = document.createElement('link');
         link.rel = 'stylesheet';
@@ -59,15 +57,17 @@
             <h3>Why am I here?</h3>
             <aside class="notes">
                 <p>I'm wondering that too. If I explain a bit about myself perhaps it'll help.</p>
-                <p>Passion for performance</p>
+                <p>Passion for performance, mechanical sympathy</p>
                 <h4>Potted history:</h4>
                 <ul>
                     <li>Learned Z80, 6502 assembly in the 80s to write my own games</li>
                     <li>Moved on to ARM assembly</li>
                     <li>Dismissed C as just a macro assembler</li>
+                    <li>Wrote full functioned IRC client in ARM asm</li>
                     <li>Learned C to write a MUD at Uni</li>
                     <li>Eventually moved on to C++</li>
                     <li>Got a job making games, high performance stuff</li>
+                    <li>Co-ran C++ tools company</li>
                     <li>Google; occasional performance stuff for cellphones</li>
                     <li>Now 6 years at DRW doing performance stuff for trading systems</li>
                     <li>Still an asm hacker at heart though don't touch it so more</li>
@@ -80,7 +80,7 @@
             <ul>
                 <li>Un-scary-fy assembler</li>
                 <li>Compilers are amazing</li>
-                <li>Trust but verify</li>
+                <li>Trust but verify</li><!-- TODO weak -->
             </ul>
         </section>
         <section>
@@ -145,10 +145,13 @@
             Instructions
             <pre><code data-trim class="x86asm">
                 mov eax, DWORD PTR [r14] ; eax = *(int32_t *)rdi
-                mov edx, DWORD PTR [r14 + 4] ; eax = *(int32_t *)(rdi + 4)
-                mov edx, DWORD PTR [r14 + 4 * rbx]
+                mov eax, DWORD PTR [r14 + 4] ; eax = *(int32_t *)(rdi + 4)
+                mov eax, DWORD PTR [r14 + 4 * rbx]
                         ; eax = *(int32_t *)(rdi + 4 * rbx)
+                lea eax, [r14 + 4 * rbx]
+                        ; eax = (rdi + 4 * rbx)
             </code></pre>
+            <!-- TODO is it [reg + constant + reg2 *(1,2,4,8) ? -->
         </section>
         <section>
             <h3>CE v1</h3>
@@ -227,7 +230,21 @@ int sum(const vector&lt;int> &v) {
                 </aside>
             </section>
             <section>
-            <pre><code data-trim class="x86asm">
+                <pre><code data-trim class="x86asm">
+  ; rdi = const vector&lt;int> *
+  mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
+  mov rcx, QWORD PTR [rdi+8]  ; rcx = *(rdi + 8)  &equiv; rdi->end
+                </code></pre>
+                <pre class="fragment"><code data-trim class="cpp">
+template&lt;typename T> struct _Vector_impl {
+  T *_M_start;
+  T *_M_finish;
+  T *_M_end_of_storage;
+};
+                    </code></pre>
+            </section>
+            <section>
+                <pre><code data-trim class="x86asm">
   ; rdi = const vector&lt;int> *
   mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
   mov rcx, QWORD PTR [rdi+8]  ; rcx = *(rdi + 8)  &equiv; rdi->end
@@ -235,22 +252,37 @@ int sum(const vector&lt;int> &v) {
   mov rax, rcx                ; rax = rcx &equiv; end - begin
   sar rax, 2                  ; rax = rax / 4
                               ;     &equiv; (end - begin) / sizeof(int)
-  test rax, rax               ; is rax  == 0?
+                </code></pre>
+                <pre class="fragment"><code data-trim class="cpp">
+size_t size() const noexcept {
+  return this->_M_impl._M_finish - this->_M_impl._M_start);
+}                    </code></pre>
+            </section>
+            <section>
+                <pre><code data-trim class="x86asm">
+  ; rdi = const vector&lt;int> *
+  mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
+  mov rcx, QWORD PTR [rdi+8]  ; rcx = *(rdi + 8)  &equiv; rdi->end
+  sub rcx, rdx                ; rcx = rcx - rdx   &equiv; end - begin
+  mov rax, rcx                ; rax = rcx &equiv; end - begin
+  sar rax, 2                  ; rax = rax / 4
+                              ;     &equiv; (end - begin) / sizeof(int)
+  test rax, rax               ; is rax == 0?
   je .L4                      ;   if so, goto L4
-            </code></pre>
+                </code></pre>
             </section>
             <section>
             <pre><code data-trim class="x86asm">
   add rcx, rdx                ; rcx += rdx
-                              ;     &equiv; begin + size
-                              ;     &equiv; end
+                              ;      &equiv; (end - begin) + begin
+                              ;      &equiv; end
   xor eax, eax                ; eax = 0
 .L3:
   add eax, DWORD PTR [rdx]    ; eax += *rdx
   add rdx, 4                  ; rdx += sizeof(int)
-  cmp rdx, rcx                ; is rdx == (begin + size)
+  cmp rdx, rcx                ; is rdx == end
   jne .L3                     ; if not, loop
-  rep ret                     ; we're done
+  ret                         ; we're done
 .L4:
   xor eax, eax                ; return 0
   ret
@@ -273,18 +305,21 @@ int mulByY(int x, int y) {
             </section>
             <section>
                 <h3>Multiplication</h3>
-                <pre class="ce">
+                <!-- TODO long multiplication -->
+            </section>
+            <section>
+                <h3>Multiplication</h3>
+                <pre><code class="cpp ce">
 /// g71:-O2
 int mulBy3(int x) { return x * 3; }
 int mulBy5(int x) { return x * 5; }
 int mulBy7(int x) { return x * 7; }
 int mulBy9(int x) { return x * 9; }
-                </pre>
-                <!-- TODO slide on a = &foo[3]? -->
+                </code></pre>
             </section>
             <section>
                 <h3>Multiplication</h3>
-                <pre class="ce">
+                <pre><code class="cpp ce">
 /// g71:-O2
 int mulBy65599(int a) {
   return (a << 16) + (a << 6) - a;
@@ -292,8 +327,7 @@ int mulBy65599(int a) {
   //     a * 65536      |
   //                  a * 64
   // 65536 + 64 - 1 = 65599
-}                </pre>
-                <!-- TODO slide on a = &foo[3]? -->
+}                </code></pre>
             </section>
             <section>
                 <h3>Division</h3>
@@ -305,19 +339,37 @@ int divByY(int x, int y) {
                 </pre>
             </section>
             <section>
+                <!-- TODO really understand the cdq here -->
                 <h3>Division</h3>
-                <pre class="ce">
+                <pre><code class="cpp ce">
 /// g71:-O2
 int divBy3(int x) { return x / 3; }
-                </pre>
+                </code></pre>
+            </section>
+            <section>
+                <h3>Division</h3>
+                <pre><code class="x86asm" data-trim>
+divBy3(int):
+  mov eax, edi          ; eax = x
+  mov edx, 1431655766
+  sar edi, 31           ; edi = x>>31
+                        ;     &equiv; x < 0 ? -1 : 0
+  imul edx              ; eax:edx = x * 1431655766
+  mov eax, edx          ;   (x * 1431655766) >> 32
+                        ; 1431655766 / 4294967296 = 0.3333333335
+  sub eax, edi          ; ... - (x < 0 ? -1 : 0)
+  ret
+                </code></pre>
+                <!--TODO explain more, improve, and make reveal-y-->
             </section>
             <section>
                 <h3>Modulus</h3>
-                <pre class="ce">
+                <pre><code class="cpp ce">
 /// g71:-O2
 int modBy3(int x) { return x % 3; }
-                </pre>
+                </code></pre>
             </section>
+            <!-- TODO perf measurements -->
         </section>
         <section>
             <h3>Compilers are super-smart!</h3>
@@ -325,7 +377,8 @@ int modBy3(int x) { return x % 3; }
         </section>
         <!-- TODO slides here about -O3 and what on earth it does? -->
         <section>
-            <pre class="ce">
+            <h3>Functions</h3>
+            <pre><code class="cpp ce">
 /// g71:-O2
 // setup
   #include &lt;vector>
@@ -337,7 +390,7 @@ int sum(const vector&lt;int> &v) {
   for (size_t i = 0; i < v.size(); ++i)
     result += someFunc(v[i]);
   return result;
-}</pre>
+}</code></pre>
             <aside class="notes">
                 Compiler can't make any assumptions about someFunc. So has to reload size.
                 Even though vector is const, compiler can't assume it's not going to change.
@@ -346,21 +399,7 @@ int sum(const vector&lt;int> &v) {
         </section>
         <section>
             <section>
-            <pre><code data-trim class="cpp">
-                struct Foo {
-                  Foo *next{nullptr};
-                  bool isOk() const;
-                };
-                void debugCheck(Foo *first) {
-                  for (auto p = first; p; p = p->next) {
-                    assert(p->isOk());
-                  }
-                }
-            </code></pre>
-            </section>
-            <section>
-                <!-- Can't get this one to work -->
-                <pre class="ce">
+            <pre><code data-trim class="cpp ce">
 /// g71:-O2 -DNDEBUG -std=c++14
 // setup
   #include &lt;cassert>
@@ -368,46 +407,52 @@ int sum(const vector&lt;int> &v) {
     Foo *next{nullptr};
     bool isOk() const;
   };
-void debugCheck(Foo *first) {
+static void debugCheck(Foo *first) {
   for (auto p = first; p; p = p->next) {
     assert(p->isOk());
   }
-}</pre>
+}
+
+bool test(Foo *f) {
+  debugCheck(f);
+  return f != nullptr;
+}
+            </code></pre>
             </section>
+            <!-- TODO get C++ standards quote -->
         </section>
         <section>
-            <section><h3>Unpicking your object hierarchy</h3></section>
-            <section>
-                <pre><code data-trim class="cpp">
-                struct Display {
-                    virtual ~Display() = default;
-                    virtual int width() const = 0;
-                    virtual int height() const = 0;
-                    virtual void putPixel(int x, int y, bool set) = 0;
-                };
+            <!-- display example too? this is good for static, but dynamic? -->
+            <!-- TODO split into simple slide and link -->
+            <section><h3>Unpicking your object hierarchy</h3>
+                <pre><code class="ce">
+/// g71:-O2 -std=c++1z
+namespace {
+  struct Base {
+    virtual ~Base() = default;
+    virtual int val() const = 0;
+  };
+  struct One : Base { int val() const override { return 1; } };
+  struct Two : Base { int val() const override { return 2; } };
+
+  int cost(const Base &b, int num) {
+    int a = 0;
+    for (int i = 0; i < num; ++i)
+      a += b.val();
+    return a;
+  }
+}
+
+int main(int argc, const char *argv[]) {
+  if (argc == 2)
+    return cost(Two(), 100);
+  else
+    return cost(One(), 100);
+}
                 </code></pre>
-            </section>
-            <section>struct Display {
-                virtual ~Display() = default;
-                virtual int width() const = 0;
-                virtual int height() const = 0;
-                virtual void putPixel(int x, int y, bool set) = 0;
-                };
-
-                struct Bitmap : Display {
-                bool screen[640 * 480];
-                virtual int width() const { return 640; }
-                virtual int height() const { return 480; }
-                virtual void putPixel(int x, int y, bool set) {
-                screen[x + y * 640] = set;
-                }
-                };
-
-                void clearScreen(Display &display) {
-                for (int y = 0; y < display.height(); ++y)
-                for (int x = 0; x < display.width(); ++x)
-                display.putPixel(x, y, false);
-                }
+                <aside class="notes">
+                    Show it as-is, show clang
+                </aside>
             </section>
         </section>
         <section>
@@ -415,7 +460,7 @@ void debugCheck(Foo *first) {
                 <h3>Appropriately defeating the optimizer to see what you'd expect</h3>
             </section>
             <section>
-                <pre class="ce">
+                <pre><code data-trim class="cpp ce">
 /// g71:-O2 -std=c++1z
 constexpr int sumTo(int x) {
   int sum = 0;
@@ -424,10 +469,10 @@ constexpr int sumTo(int x) {
   return sum;
 }
 
-int main() {
+int main(int argc, const char *argv[]) {
   return sumTo(20);
 }
-                </pre>
+            </code></pre>
                 <aside class="notes">
                     <ul>
                         <li>Show code</li>
@@ -442,7 +487,7 @@ int main() {
             </section>
             <section>
                 <h3>Classes?</h3>
-                <pre class="ce">
+                <pre><code class="cpp ce">
 /// g71:-O0 -std=c++1z
 class Holder {
   int value_{0};
@@ -451,7 +496,7 @@ public:
     return value_;
   }
 };
-                </pre>
+                </code></pre>
             </section>
             <section>
                 <h3>Templates</h3>
@@ -475,7 +520,7 @@ public:
             sanitisation)</h3></section>
         <section>
             <h3>Non-virtual thunks</h3>
-            <pre class="ce">
+            <pre><code class="cpp ce">
 /// clang400:-O1 -std=c++1z
 struct Foo { virtual void foo() = 0; };
 struct Bar { virtual void bar() = 0; };
@@ -487,7 +532,7 @@ struct FooBar : Foo, Bar {
 
 void FooBar::bar() {
   log();
-}            </pre>
+}           </code></pre>
             <aside class="notes">
                 line 35 of output with label and directive filter off
             </aside>
@@ -523,7 +568,9 @@ void FooBar::bar() {
             <section><h3>Case Study: hash maps</h3></section>
             <section>
                 <!-- clang vs gcc - ispow2!  https://github.com/llvm-mirror/libcxx/blob/master/include/__hash_table#L130  -->
-                <pre class="ce">
+                <!-- TODO - make sure understand exactly what's going on here -->
+                <!-- TODO maybe recap hash map? -->
+                <pre><code class="cpp ce">
 /// g71:-O2 -std=c++1z
 // setup
   #include &lt;unordered_map>
@@ -532,21 +579,64 @@ void FooBar::bar() {
 int findOrZero(
     const unordered_map&lt;int, int> &m,
     int key) {
-  if (auto it = m.find(key);
-      it != m.end()) {
+  if (auto it = m.find(key); it != m.end())
     return it->second;
-  }
   return 0;
 }
-              </pre>
+                </code></pre>
             </section>
         </section>
-        <section><h3>Case Study: order formatting</h3></section>
+        <section>
+            <section>
+                <h3>Hash maps in practice</h3>
+                Order book picture
+            </section>
+            <section>
+                <h3>Hash maps in practice</h3>
+                <pre><code data-trim class="cpp">
+                    enum class Type : uint8_t { Add = 0, Modify = 1, Remove = 2 };
+                    enum class Side : uint8_t { Buy, Sell };
+                    struct Message {
+                        Type type;
+                        uint64_t orderId;
+                        uint32_t product;
+                        Side side;
+                        uint64_t price;
+                        uint32_t quantity;
+                    } __attribute__((packed));
+                </code></pre>
+            </section>
+            <section>
+                <h3># msgs processed/day trading system?</h3>
+            </section>
+            <section>
+                <h3>Take one</h3>
+                <pre><code data-trim class="cpp">
+                    class Orders {
+                        unordered_map&lt;uint64_t, Order> orders_;
+                    public:
+                        void add(uint64_t orderId, uint32_t product, Side side, uint64_t price, uint32_t quantity);
+                        void modify(uint64_t orderId, uint32_t product, Side side, uint64_t newPrice, uint32_t newQuantity);
+                        void remove(uint64_t orderId, uint32_t product, Side side);
+                    };
+                </code></pre>
+            </section>
+            <section>
+                <h3>Take one</h3>
+                <pre><code data-trim class="cpp">
+                    struct Order {
+                    void add(uint64_t orderId, uint32_t product, Side side, uint64_t price, uint32_t quantity) {
+                        orders_.emplace(orderId, Order{product, side, price, quantity});
+                    }
+                </code></pre>
+            </section>
+        </section>
+        <section><h3>Case Study: order formatting? hash map update?</h3></section>
         <section><h3>Power Features</h3></section>
         <section>
             <section>
                 <h3>Case Study: auto copy / move / etc (Chrome copied all its images moved instead of moved..)</h3>
-                <pre class="ce">
+                <pre><code class="cpp ce">
  // setup
   #include &lt;vector>
   using namespace std;
@@ -560,16 +650,13 @@ double average(const ImageHolder &ih) {
   auto data = ih.intensities();
   int sum = 0;
   for (auto &&v : data) sum += v;
-  return sum / static_cast<double>(data.size());
+  return sum / static_cast&lt;double>(data.size());
 }
-                </pre>
+                </code></pre>
             </section>
         </section>
-        <section><h3>Case Study: clever compiler optimizations</h3></section>
-        <section><h3>Case Study: clang vs GCC inf loop detect</h3></section>
-        <section><h3>Case Study: closed form summation</h3></section>
         <section><h3>Cute tricks</h3>
-            <pre class="ce">
+            <pre><code class="ce">
 using func = int();
 
 int bar() { return 9527; }
@@ -584,54 +671,15 @@ int f(int i) {
 
 int d(int i) {
   static func *functions[] = {&bar, &foo};
-  const auto funcIndex = static_cast<int>(i < 0);
+  const auto funcIndex = static_cast&lt;int>(i < 0);
   return functions[funcIndex]();
 }
-            </pre>
+            </code></pre>
             <!-- TODO flesh this ^^ one out -->
-        </section>
-        <section><h3>Case Study: devirtualize</h3>
-            <pre class="ce">
-/// g71:-O2 -std=c++1z
-namespace {
-  struct Base {
-    virtual ~Base() = default;
-    virtual int val() const = 0;
-  };
-
-  struct One : Base {
-    int val() const override
-      { return 1; }
-  };
-
-  struct Two : Base {
-    int val() const override
-      { return 2; }
-  };
-
-  int cost(const Base &b, int num) {
-    int a = 0;
-    for (int i = 0; i < num; ++i)
-      a += b.val();
-    return a;
-  }
-}
-
-int main(int argc, const char *argv[]) {
-  One one;
-  Two two;
-  if (argc == 2)
-    return cost(two, 100);
-  else
-    return cost(one, 100);
-}            </pre>
-            <aside class="notes">
-                Show it as-is, show clang
-            </aside>
         </section>
         <section>
             pass by value / pass by reference https://godbolt.org/g/XWFR7s
-            <pre class="ce">
+            <pre><code class="cpp ce">
 using T = int;
 
 struct p1d { T x; };
@@ -678,12 +726,12 @@ T f5() {
   p5d p {1, 2, 3, 4, 5};
   return e_sum(p);
 }
-            </pre>
+            </code></pre>
         </section>
         <section>
             <h3>Restrict</h3>
             <!-- TODO - some story about compilers pessimistic? -->
-            <pre class="ce">
+            <pre><code class="ce">
 /// g71:-Ofast
 #include &lt;functional>
 
@@ -695,39 +743,40 @@ void max(
   for (auto i = begin; i != end; ++i) {
     *out = std::max(*i, *out);
   }
-}            </pre>
+}
+            </code></pre>
         </section>
         <section>
             <h3>Heap elision</h3>
-            <pre class="ce">
+            <pre><code class="ce">
 // TODO: unqiue_ptr to int return it, clang vs non-clang
-            </pre>
+            </code></pre>
         </section>
         <section>
             <h3>The address sanitizer</h3>
-            <pre class="ce">
+            <pre><code class="ce">
 /// g71:-O1
 // setup
   #include &lt;cstdlib>
 int read(int *array, size_t index) {
   return array[index];
 }
-            </pre>
+            </code></pre>
         </section>
         <section><h3>auto lambdas</h3>
             <!--TODO: lots here-->
-            <pre class="ce">
+            <pre><code class="ce">
 void test() {
     auto l = [](auto i) { return i > 10; };
     l(10);
     l(10.0);
 }
-        </pre>
+            </code></pre>
         </section>
         <section>
             <h3>Compiler differences?</h3>
             <!--clang vs gcc difference here -->
-            <pre class="ce">
+            <pre><code class="ce">
 /// g71:-O3 -march=haswell -std=c++1z
 // setup
   extern void bar();
@@ -741,11 +790,11 @@ void foo(int a, int b, int c, int d, int e, int f, int g, int h) {
     return;
   bar();
 }
-            </pre>
+            </code></pre>
         </section>
         <section>
             <h3>Variant</h3>
-            <pre class="ce">
+            <pre><code class="ce">
 /// clang_trunk:-O3 -march=haswell -std=c++1z -stdlib=libc++
 // setup
   #include &lt;variant>
@@ -760,7 +809,7 @@ int test2() {
   IntOrFloat iof { 1.f };
   return visit([](auto i) -> int{ return i; }, iof);
 }
-            </pre>
+            </code></pre>
         </section>
         <section>
             <!--    pass by value / pass by reference https://godbolt.org/g/XWFR7s-->
@@ -770,7 +819,7 @@ int test2() {
             entire smallpt?
             challenges: Microsoft
             <!--auto lambda demo: https://godbolt.org/g/5fOC4q-->
-            variant stuff, clang opts out ?
+            <!--variant stuff, clang opts out ?-->
             <!--Non virtual thunks-->
             <!--cute opt: https://godbolt.org/g/Tk8Af4 and https://godbolt.org/g/Zdvzke (ordering? interesting)-->
             <!--https://gcc.godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(j:1,source:'namespace+%7B%0A++struct+Iface+%7B%0A++++virtual+~Iface()+%7B%7D%0A++++virtual+int+doThing()+const+%3D+0%3B%0A++%7D%3B%0A%0A++struct+Bob+:+Iface+%7B+%0A++++int+doThing()+const+override+%7B+return+1%3B+%7D%0A++%7D%3B%0A%0A++struct+Ian+:+Iface+%7B+%0A++++int+doThing()+const+override+%7B+return+2%3B+%7D%0A++%7D%3B%0A%0A++int+test(const+Iface+%26obj)+%7B%0A++++int+a+%3D+0%3B%0A++++for+(int+i+%3D+0%3B+i+%3C+10000%3B+%2B%2Bi)%0A++++++a+%2B%3D+obj.doThing()%3B%0A++++return+a%3B%0A++%7D%0A%7D%0A%0Aint+main(int+argc,+const+char+*argv%5B%5D)+%7B%0A++Ian+ian%3B%0A++Bob+bob%3B%0A++if+(argc+%3D%3D+2)+%0A++++return+test(ian)%3B%0A++else%0A++++return+test(bob)%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',m:100,n:'0',o:'',s:0,t:'0'),(g:!((g:!((h:compiler,i:(compiler:g7snapshot,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),options:'-O3',source:1),l:'5',n:'0',o:'x86-64+gcc+7+(snapshot)+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',m:50.05471818428769,n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:clang_trunk,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),options:'-O3',source:1),l:'5',n:'0',o:'x86-64+clang+(trunk)+(Editor+%231,+Compiler+%232)',t:'0')),l:'4',m:49.94528181571231,n:'0',o:'',s:0,t:'0')),k:50,l:'3',n:'0',o:'',t:'0')),l:'2',n:'0',o:'',t:'0')),version:4`-->
@@ -787,6 +836,100 @@ int test2() {
                 <li>Compiler optimization team at Google</li>
                 <li>"Works on my machine" / Godbolt</li>
             </ul>
+        </section>
+        <section>
+            <section>
+                <h3>How it works</h3>
+                <!-- TODO picture of duct tape disaster -->
+            </section>
+            <section>
+                <h3>How it works - Backend</h3>
+                <ul>
+                    <li>Written in <code>node.js</code></li>
+                    <li>Runs on Amazon EC2</li>
+                </ul>
+            </section>
+            <section>
+                <h3><code>node.js</code></h3>
+                <pre><code class="javascript" data-trim>
+function compile(req, res, next) {
+    // exec req.compiler, feed it req.body, parse output, return via res
+}
+var webServer = express();
+var apiHandler = express.Router();
+apiHandler.param('compiler', function (req, res, next, compilerName) {
+    req.compiler = compilerName;
+    next();
+};
+apiHandler.post('/compiler/:compiler/compile', compileHandler);
+webServer.use('/api', apiHandler);
+webServer.listen(10240);
+                </code></pre>
+            </section>
+            <section>
+                <h3>Amazon EC2</h3>
+                <ul>
+                    <li>Load balancer</li>
+                    <li>Virtual machines</li>
+                    <li>Shared compiler storage</li>
+                </ul>
+            </section>
+            <section>
+                <h3>The compilers</h3>
+                <ul>
+                    <li>Built through docker images</li>
+                    <li>Compilers stored on S3</li>
+                    <li>OSS ones publically available</li>
+                    <!-- TODO: link! -->
+                </ul>
+                <aside class="notes">
+                    30+ GB of compilers currently
+                </aside>
+            </section>
+            <section>
+                <h3>How it works - security</h3>
+                <ul>
+                    <li>Compilers: huge attack vector</li>
+                    <li>Principal of "what's the worst could happen"</li>
+                    <li>Docker</li>
+                    <li>
+                        <pre>LD_PRELOAD</pre>
+                    </li>
+                </ul>
+                <aside class="notes">
+                    Known attacks:
+                    * crash clang leaving temporary file, filename in crash dump, load temporary file using compiler
+                    plugin
+                    * crash compiler with temporary file (the input) in /tmp, use it as a specs file
+                </aside>
+            </section>
+            <section>
+                <h3>How it works - Frontend</h3>
+                <ul>
+                    <li>Monaco</li>
+                    <li>GoldenLayout</li>
+                </ul>
+                <h5 class="fragment">Thank you!</h5>
+            </section>
+            <section>
+                <h3>The code</h3>
+                <ul>
+                    <li><a href="https://github.com/mattgodbolt/compiler-explorer">github.com/mattgodbolt/compiler-explorer</a>
+                    </li>
+                    <li><a href="https://github.com/mattgodbolt/compiler-explorer-image">github.com/mattgodbolt/compiler-explorer-image</a>
+                    </li>
+                </ul>
+            </section>
+        </section>
+        <section>
+            <h3>Conclusions</h3>
+            <ul>
+                <li>Thanks to contributors</li>
+                <li>Thanks to Patreon folks</li>
+                <li>Thanks to awesome C++ community</li>
+                <li class="fragment">Thanks to you!</li>
+            </ul>
+            <!-- TODO -->
         </section>
         <!--
                 <section>
@@ -878,7 +1021,7 @@ int test2() {
             <hr>
             <img src="DRWSmallLogo.png" width="50" height="16">
         </div>
-</div>
+    </section>
 </div>
 
 <script src="reveal.js/lib/js/head.min.js"></script>
