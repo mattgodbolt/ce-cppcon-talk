@@ -85,6 +85,19 @@
         </section>
         <section>
             <h3>Backstory</h3>
+            <pre class="fragment"><code data-trim class="cpp">
+                int sum(const vector&lt;int> &v) {
+                  int result = 0;
+                  for (size_t i = 0; i < v.size(); ++i)
+                    result += v[i];
+                  return result;
+                }</code></pre>
+            <pre class="fragment"><code data-trim class="cpp">
+                int sum(const vector&lt;int> &v) {
+                  int result = 0;
+                  for (int x : i) result += x;
+                  return result;
+                }</code></pre>
             <aside class="notes">
                 <ul>
                     <li>love performance</li>
@@ -92,22 +105,6 @@
                     <li>2012, C++11isms, range-for</li>
                 </ul>
             </aside>
-        </section>
-        <section>
-            <h3>Backstory</h3>
-            <pre><code data-trim class="cpp">
-                int sum(const vector&lt;int> &v) {
-                  int result = 0;
-                  for (size_t i = 0; i < v.size(); ++i)
-                    result += v[i];
-                  return result;
-                }</code></pre>
-            <pre><code data-trim class="cpp">
-                int sum(const vector&lt;int> &v) {
-                  int result = 0;
-                  for (int x : i) result += x;
-                  return result;
-                }</code></pre>
         </section>
         <section>
             <h3>WARNING</h3>
