@@ -58,22 +58,36 @@
         var ceFragment = encodeURIComponent(JSON.stringify(obj));
 
         var parent = element.parentElement;
+
+        function replaceWithIFrame() {
+            return function (parent, element) {
+                element.remove();
+                var ceElement = document.createElement('iframe');
+                ceElement.setAttribute('width', '1200px');
+                ceElement.setAttribute('height', '300px');
+
+                var embedUrl = "http://localhost:10240/e#" + ceFragment;
+                ceElement.setAttribute('src', embedUrl);
+                parent.appendChild(ceElement);
+            }
+        }
+
         if (parent.tagName === "PRE") {
             var a = document.createElement('a');
             a.setAttribute('href', 'http://localhost:10240/#' + ceFragment);
             a.setAttribute('target', '_blank');
             a.textContent = 'View';
             parent.parentElement.appendChild(a);
+            // TODO can't do this it seems, hljs may have tinkered?
+            // a.onclick = function () {
+            //     console.log("badgers");
+            //     console.log(element);
+            //     element.remove();
+            //     // replaceWithIFrame(parent.parentElement, parent);
+            // };
             element.textContent = displaySource;
         } else {
-            element.remove();
-            var ceElement = document.createElement('iframe');
-            ceElement.setAttribute('width', '1200px');
-            ceElement.setAttribute('height', '300px');
-
-            var embedUrl = "http://localhost:10240/e#" + ceFragment;
-            ceElement.setAttribute('src', embedUrl);
-            parent.appendChild(ceElement);
+            replaceWithIFrame(parent, element);
         }
     }
 
