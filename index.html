@@ -42,6 +42,7 @@
 <body>
 <div class="reveal">
     <!-- TODO compile all with -Wall -Wextra -->
+    <!-- TODO unify indentation -->
     <section class="slides">
         <section id="intro">
             <em>September 2017</em>
@@ -193,7 +194,22 @@
 
         <!------------------------------------------------------->
         <section id="back2backstory">
-            <!-- TODO slide here to re-intro the example code -->
+            <section>
+                <h3>Where were we?</h3>
+                <pre><code data-trim class="cpp">
+                int sum(const vector&lt;int> &v) {
+                  int result = 0;
+                  for (size_t i = 0; i < v.size(); ++i)
+                    result += v[i];
+                  return result;
+                }</code></pre>
+                <pre><code data-trim class="cpp">
+                int sum(const vector&lt;int> &v) {
+                  int result = 0;
+                  for (int x : v) result += x;
+                  return result;
+                }</code></pre>
+            </section>
             <section>
                 <h3>CE v1</h3>
                 <pre><code data-noescape data-trim class="bash">
@@ -251,7 +267,7 @@ sum(std::vector&lt;int, std::allocator&lt;int> > const&):
             <section>
                 <h3>Demo</h3>
                 <pre class="ce">
-/// g71:-O2
+/// g71:-O2 -std=c++1z
 // setup
   #include &lt;numeric>
   #include &lt;vector>
@@ -302,7 +318,7 @@ template&lt;typename T> struct _Vector_impl {
                 </code></pre>
                 <pre class="fragment"><code data-trim class="cpp">
 size_t size() const noexcept {
-  return this->_M_impl._M_finish - this->_M_impl._M_start);
+  return _M_finish - _M_start;
 }                    </code></pre>
             </section>
             <section>
@@ -340,7 +356,6 @@ size_t size() const noexcept {
             </section>
             <section><h3>Backstory</h3>
                 <h5>So, which approach is best?</h5></section>
-            <!-- TODO link to comparisons? Or do live? -->
             <section><h3>Optimization</h3></section>
         </section>
 
@@ -351,7 +366,7 @@ size_t size() const noexcept {
             <section>
                 <h3>Multiplication</h3>
                 <pre class="ce">
-/// g71:-O2
+/// g71:-O2 -std=c++1z
 int mulByY(int x, int y) {
   return x * y;
 }
@@ -359,12 +374,12 @@ int mulByY(int x, int y) {
             </section>
             <section>
                 <h3>Multiplication</h3>
-                <!-- TODO long multiplication -->
+                <h5>TODO long multiplication</h5>
             </section>
             <section>
                 <h3>Multiplication</h3>
                 <pre><code class="cpp ce">
-/// g71:-O2
+/// g71:-O2 -std=c++1z
 int mulBy3(int x) { return x * 3; }
 int mulBy5(int x) { return x * 5; }
 int mulBy7(int x) { return x * 7; }
@@ -374,19 +389,23 @@ int mulBy9(int x) { return x * 9; }
             <section>
                 <h3>Multiplication</h3>
                 <pre><code class="cpp ce">
-/// g71:-O2
+/// g71:-O2 -std=c++1z
 int mulBy65599(int a) {
   return (a << 16) + (a << 6) - a;
   //         ^          ^
   //     a * 65536      |
   //                  a * 64
-  // 65536 + 64 - 1 = 65599
+  // 65536a + 64a - 1a = 65599a
 }                </code></pre>
+                <aside class="notes">
+                    <pre>-march=i486 -m32</pre>
+                    shows up what you asked
+                </aside>
             </section>
             <section>
                 <h3>Division</h3>
                 <pre class="ce">
-/// g71:-O2
+/// g71:-O2 -std=c++1z
 int divByY(int x, int y) {
   return x / y;
 }
@@ -398,7 +417,7 @@ int modByY(int x, int y) {
             <section>
                 <h3>Division</h3>
                 <pre><code class="cpp ce">
-/// g71:-O2
+/// g71:-O2 -std=c++1z
 int divBy3(int x) { return x / 3; }
                 </code></pre>
                 <aside class="notes">
@@ -426,32 +445,33 @@ divBy3(int):
             <section>
                 <h3>Modulus</h3>
                 <pre><code class="cpp ce">
-/// g71:-O2
+/// g71:-O2 -std=c++1z
 int modBy3(int x) { return x % 3; }
                 </code></pre>
             </section>
             <!-- TODO perf measurements -->
             <section><h3>Ternary operator</h3>
                 <pre><code class="ce">
-/// TODO
+/// g71:-O2 -std=c++1z
 int func(int i) {
     return (i < 0) ? 1234 : 5678;
 }            </code></pre>
-                <!-- TODO flesh this ^^ one out -->
             </section>
             <section><h3>Counting bits</h3>
                 <pre><code class="ce">
-/// TODO
-int numBits(unsigned int a) {
+/// g71:-O2 -std=c++1z -march=haswell
+int countSetBits(int a) {
     int count = 0;
     while (a) {
-        count ++;
-        a &= (a-1);
+        count++;
+        a &amp;= (a-1);
     }
     return count;
 }
             </code></pre>
-                <!-- TODO flesh this ^^ one out -->
+                <aside class="notes">
+                    Explain a &amp; (a - 1)
+                </aside>
             </section>
             <section>
                 pass by value / pass by reference https://godbolt.org/g/XWFR7s
@@ -508,21 +528,11 @@ T f5() {
             <section>
                 <h3>The address sanitizer</h3>
                 <pre><code class="ce">
-/// g71:-O1
+/// g71:-O2 -fsanitize=address
 // setup
   #include &lt;cstdlib>
 int read(int *array, size_t index) {
   return array[index];
-}
-            </code></pre>
-            </section>
-            <section><h3>auto lambdas</h3>
-                <!--TODO: lots here-->
-                <pre><code class="ce">
-void test() {
-    auto l = [](auto i) { return i > 10; };
-    l(10);
-    l(10.0);
 }
             </code></pre>
             </section>
@@ -535,16 +545,14 @@ void test() {
                 <h3>Compilers are super-smart!</h3>
                 <h5 class="fragment">...but aren't clairvoyant</h5>
             </section>
-            <!-- TODO slides here about -O3 and what on earth it does? -->
             <section>
                 <h3>Functions</h3>
                 <pre><code class="cpp ce">
-/// g71:-O2
+/// g71:-O2 -std=c++1z
 // setup
   #include &lt;vector>
   using namespace std;
-  extern int someFunc(int);
-
+int someFunc(int);
 int sum(const vector&lt;int> &v) {
   int result = 0;
   for (size_t i = 0; i < v.size(); ++i)
@@ -554,16 +562,15 @@ int sum(const vector&lt;int> &v) {
                 <aside class="notes">
                     Compiler can't make any assumptions about someFunc. So has to reload size.
                     Even though vector is const, compiler can't assume it's not going to change.
-                    Using range-for fixes issue as rang-efor is defined to copy the extents of the iterand outsid of
+                    Using range-for fixes issue as range-for is defined to copy the extents of the iterand outside of
                     loop.
                 </aside>
             </section>
-            <section>
-                <section><h3>Virtual methods</h3>
-                    <pre><code class="ce">
+            <section><h3>Virtual methods</h3>
+                <pre><code class="ce">
 /// g71:-O2 -std=c++1z
 //setup
-  #include <vector>
+  #include &lt;vector>
   using namespace std;
 struct Coster { virtual int costFor(int x) const = 0; };
 
@@ -574,35 +581,35 @@ int totalCost(const Coster &coster, const vector&lt;int> &v) {
   return result;
 }
                 </code></pre>
-                </section>
-                <!-- TODO WORK HERE
+            </section>
+            <!-- TODO WORK HERE
 
-                needs to have a better "theme". fit in with story?
-                vector is good but complicates code?
-                nextCost?
-                even this generates tons of code
+            needs to have a better "theme". fit in with story?
+            vector is good but complicates code?
+            nextCost?
+            even this generates tons of code
 
-        //setup
-        #include <vector>
-        using namespace std;
-        struct Coster { virtual int nextCost()  = 0; };
+    //setup
+    #include &lt;vector>
+    using namespace std;
+    struct Coster { virtual int nextCost()  = 0; };
 
-        int costForX(Coster &c, int x) {
-        int totalCost = 0;
-        for (int i = 0; i < x; ++i)
-          totalCost += c.nextCost();
-        return totalCost;
-        } ?
-        void costForX(Coster &c, int x, int *totalCost) {
-        for (int i = 0; i < x; ++i)
-          *totalCost += c.nextCost();
-        }
-                -->
-                <section><h3>Virtual methods</h3>
-                    <pre><code class="ce">
+    int costForX(Coster &c, int x) {
+    int totalCost = 0;
+    for (int i = 0; i < x; ++i)
+      totalCost += c.nextCost();
+    return totalCost;
+    } ?
+    void costForX(Coster &c, int x, int *totalCost) {
+    for (int i = 0; i < x; ++i)
+      *totalCost += c.nextCost();
+    }
+            -->
+            <section><h3>Virtual methods</h3>
+                <pre><code class="ce">
 /// g71:-O2 -std=c++1z
 //setup
-  #include <vector>
+  #include &lt;vector>
   using namespace std;
   struct Coster { virtual int costFor(int x) = 0; };
 
@@ -617,12 +624,12 @@ int totalCost(const Coster &coster, const vector&lt;int> &v) {
   return result;
 }
                 </code></pre>
-                </section>
-                <section><h3>Unpicking your object hierarchy</h3>
-                    <pre><code class="ce">
+            </section>
+            <section><h3>Unpicking your object hierarchy</h3>
+                <pre><code class="ce">
 /// g71:-O2 -std=c++1z
 //setup
-  #include <vector>
+  #include &lt;vector>
   using namespace std;
   namespace {
   struct Coster { virtual int costFor(int x) = 0; };
@@ -643,10 +650,9 @@ int main(int argv, const char *argv[]) {
 
 }
                 </code></pre>
-                    <aside class="notes">
-                        Show it as-is, show clang
-                    </aside>
-                </section>
+                <aside class="notes">
+                    Show it as-is, show clang
+                </aside>
             </section>
             <section>
                 <h3>Restrict</h3>
@@ -735,7 +741,7 @@ double average(const ImageHolder &ih) {
                 <h3>Infinite loops</h3>
                 <!-- TODO get C++ standards quote -->
                 <pre><code data-trim class="cpp ce">
-/// g71:-O2 -DNDEBUG -std=c++14
+/// g71:-O2 -DNDEBUG -std=c++1z
 // setup
   #include &lt;cassert>
   struct Foo {

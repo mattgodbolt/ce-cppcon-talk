@@ -60,16 +60,14 @@
         var parent = element.parentElement;
 
         function replaceWithIFrame() {
-            return function (parent, element) {
-                element.remove();
-                var ceElement = document.createElement('iframe');
-                ceElement.setAttribute('width', '1200px');
-                ceElement.setAttribute('height', '300px');
+            element.remove();
+            var ceElement = document.createElement('iframe');
+            ceElement.setAttribute('width', '1200px');
+            ceElement.setAttribute('height', '300px');
 
-                var embedUrl = "http://localhost:10240/e#" + ceFragment;
-                ceElement.setAttribute('src', embedUrl);
-                parent.appendChild(ceElement);
-            }
+            var embedUrl = "http://localhost:10240/e#" + ceFragment;
+            ceElement.setAttribute('src', embedUrl);
+            parent.appendChild(ceElement);
         }
 
         if (parent.tagName === "PRE") {
