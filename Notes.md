@@ -1,7 +1,7 @@
 # Latest Outline
 
 * Why
-* Goals
+  * Goals
 * Backstory
 * ASM 101
   * Registers
@@ -9,7 +9,9 @@
   * Instructions
   * Memory instructions
 * Back to backstory
-  * Demo
+  * v1!
+* And now
+  * Demo  
   * Code walkthrough
   * Optimizer off
   * Show the other approaches
@@ -22,10 +24,14 @@
     * maybe here do hash? TODO
   * Sums
   * "cute tricks" TODO
+    * TODO: numBitsSet
   * pass by value/ref? TODO
 * Compilers not clairvoyant
   * external functions
+  * virtual functions
+    * devirt, static, non-static TODO
   * __restrict max
+  * optimized sum TODO
   * guessing likelihood (foo(int a, int b, int c...)) clang vs gcc TODO
 * UB can be your friend? shout to Chandler
   * Inf loops in clang
@@ -35,6 +41,7 @@
   * Defeating optimizer TODO
   * Templates TODO
   * Power use demo?
+* Case study - how I use it?
 * Uses of CE TODO
 * How it works
   * node
@@ -46,26 +53,9 @@
 * Conclusions
 
 ## TO BE PLACED
-* virtual methods (static and dynamic devirtualisation)
-* heap elision
 * non-virtual thunks (scrap?)
-* hash maps
-  * hash maps in practice
-* case study:
-  * copy vs move
 * variant?
-
-from above: maybe templatie to show how to detemplate?
-```
-#include <cstdint>
-
-int sum1000(char *a, int32_t offset) {
-    int res = 0; 
-    for (decltype(offset) i = 0; i < 1000; ++i)
-        res += a[offset + i];
-    return res;
-}
-```
+* vectorization?
 
 ----
 

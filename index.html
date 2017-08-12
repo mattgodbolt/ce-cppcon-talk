@@ -43,7 +43,7 @@
 <div class="reveal">
     <!-- TODO compile all with -Wall -Wextra -->
     <section class="slides">
-        <section>
+        <section id="intro">
             <em>September 2017</em>
             <!-- TODO, better title format -->
             <h3>Unbolting the Compiler's Lid:</h3>
@@ -57,79 +57,96 @@
             <br>
             <em><a href="https://drw.com/careers">drw.com</a></em>
         </section>
-        <section>
-            <h3>Why am I here?</h3>
-            <aside class="notes">
-                <p>I'm wondering that too. If I explain a bit about myself perhaps it'll help.</p>
-                <p>Passion for performance, mechanical sympathy</p>
-                <h4>Potted history:</h4>
+
+
+        <!------------------------------------------------------>
+        <section id="why">
+            <section>
+                <h3>Why am I here?</h3>
+                <aside class="notes">
+                    <p>I'm wondering that too. If I explain a bit about myself perhaps it'll help.</p>
+                    <p>Passion for performance, mechanical sympathy</p>
+                </aside>
+            </section>
+            <section>
+                <h3>My background</h3>
+                <!-- TODO z80 and 6502 pics -->
+                <aside class="notes">
+                    <h4>Potted history:</h4>
+                    <ul>
+                        <li>Learned Z80, 6502 assembly in the 80s to write my own games</li>
+                        <li>Moved on to ARM assembly</li>
+                        <li>Wrote full functioned IRC client in ARM asm</li>
+                        <li>Dismissed C as just a macro assembler</li>
+                        <li>Learned C to write a MUD at Uni</li>
+                        <li>Eventually moved on to C++</li>
+                        <li>Got a job making games, high performance stuff</li>
+                        <li>Co-ran C++ tools company</li>
+                        <li>Google; occasional performance stuff for cellphones</li>
+                        <li>Now 6 years at DRW doing performance stuff for trading systems</li>
+                        <li>Still an asm hacker at heart though don't touch it so more</li>
+                    </ul>
+                    <p>Amazing opportunity to talk to lots of C++ programmers at all levels. My passion.</p>
+                </aside>
+            </section>
+            <section>
+                <h3>My goals</h3>
                 <ul>
-                    <li>Learned Z80, 6502 assembly in the 80s to write my own games</li>
-                    <li>Moved on to ARM assembly</li>
-                    <li>Dismissed C as just a macro assembler</li>
-                    <li>Wrote full functioned IRC client in ARM asm</li>
-                    <li>Learned C to write a MUD at Uni</li>
-                    <li>Eventually moved on to C++</li>
-                    <li>Got a job making games, high performance stuff</li>
-                    <li>Co-ran C++ tools company</li>
-                    <li>Google; occasional performance stuff for cellphones</li>
-                    <li>Now 6 years at DRW doing performance stuff for trading systems</li>
-                    <li>Still an asm hacker at heart though don't touch it so more</li>
+                    <li>Un-scary-fy assembler</li>
+                    <li>Compilers are amazing</li>
+                    <li class="fragment">...but always worth checking</li>
                 </ul>
-                <p>Amazing opportunity to talk to lots of C++ programmers at all levels. My passion.</p>
-            </aside>
+            </section>
         </section>
-        <section>
-            <h3>My goals</h3>
-            <ul>
-                <li>Un-scary-fy assembler</li>
-                <li>Compilers are amazing</li>
-                <li>Trust but verify</li><!-- TODO weak -->
-            </ul>
-        </section>
-        <section>
-            <h3>Backstory</h3>
-            <pre class="fragment"><code data-trim class="cpp">
+
+
+        <!------------------------------------------------------>
+        <section id="backstory">
+            <section>
+                <h3>Backstory</h3>
+                <pre class="fragment"><code data-trim class="cpp">
                 int sum(const vector&lt;int> &v) {
                   int result = 0;
                   for (size_t i = 0; i < v.size(); ++i)
                     result += v[i];
                   return result;
                 }</code></pre>
-            <pre class="fragment"><code data-trim class="cpp">
+                <pre class="fragment"><code data-trim class="cpp">
                 int sum(const vector&lt;int> &v) {
                   int result = 0;
                   for (int x : v) result += x;
                   return result;
                 }</code></pre>
-            <aside class="notes">
+                <aside class="notes">
+                    <ul>
+                        <li>love performance</li>
+                        <li>work in trading where every microsecond can count</li>
+                        <li>2012, C++11isms, range-for</li>
+                    </ul>
+                </aside>
+            </section>
+            <section>
+                <h3>Backstory</h3>
+                <h5>Why do we care?</h5>
+                <!-- TODO ... cite Carl's talk? -->
+            </section>
+            <section>
+                <h3>WARNING</h3>
                 <ul>
-                    <li>love performance</li>
-                    <li>work in trading where every microsecond can count</li>
-                    <li>2012, C++11isms, range-for</li>
+                    <li>Reading assembly alone is bad</li>
+                    <li><em>Always</em> measure too</li>
                 </ul>
-            </aside>
-        </section>
-        <section>
-            <h3>Backstory</h3>
-            <h5>Why do we care?</h5>
-            <!-- TODO ... cite Carl's talk? -->
-        </section>
-        <section>
-            <h3>WARNING</h3>
-            <ul>
-                <li>Reading assembly alone is bad</li>
-                <li><em>Always</em> measure too</li>
-            </ul>
-            <aside class="notes">
-                Shout out to google benchmarking tool. Microbenchmarks, perils.
+                <aside class="notes">
+                    Shout out to google benchmarking tool. Microbenchmarks, perils.
 
-                But always measure end-to-end perf if you can too.
-            </aside>
+                    But always measure end-to-end perf if you can too.
+                </aside>
+            </section>
         </section>
+
 
         <!------------------------------------------------------->
-        <section>
+        <section id="asm101">
             <!-- reference "just enough asm to be dangerous talk -->
             <section>
                 <h3>x86 Assembly 101</h3>
@@ -161,20 +178,30 @@
                 lea eax, [r14 + 4 * rbx]
                         ; eax = (rdi + 4 * rbx)
             </code></pre>
-                <!-- TODO is it [reg + constant + reg2 *(1,2,4,8) ? -->
+            </section>
+            <section>
+                <h3>Miscellaneous</h3>
+                <pre><code data-trim class="x86asm">
+                    vpaddd ymm0, ymm0, ymmword ptr [rax]
+                    popcnt rax
+                    bsf rax
+                    int 3
+            </code></pre>
             </section>
         </section>
 
+
         <!------------------------------------------------------->
-        <!-- TODO slide here to re-intro the example code -->
-        <section>
-            <h3>CE v1</h3>
-            <pre><code data-noescape data-trim class="bash">
+        <section id="back2backstory">
+            <!-- TODO slide here to re-intro the example code -->
+            <section>
+                <h3>CE v1</h3>
+                <pre><code data-noescape data-trim class="bash">
                  $ g++ /tmp/test.cc -O1 -c -S -o -masm=intel -
                    <span class="fragment" data-fragment-index="3">| c++filt</span>
                    <span class="fragment" data-fragment-index="4">| grep -vE '\s+\.'</span>
             </code></pre>
-            <div class="replacecontainer">
+                <div class="replacecontainer">
                 <pre class="fragment current-visible replaceable" data-fragment-index="2"><code class="x86asm"
                                                                                                 data-trim>
     .file	"test.cc"
@@ -188,8 +215,8 @@ _Z3sumRKSt6vectorIiSaIiEE:
     mov	rax, QWORD PTR 8[rdi]
     sub	rax, rcx
     ...</code></pre>
-                <pre class="fragment current-visible replaceable" data-fragment-index="3"><code class="x86asm"
-                                                                                                data-trim>
+                    <pre class="fragment current-visible replaceable" data-fragment-index="3"><code class="x86asm"
+                                                                                                    data-trim>
     .file	"test.cc"
     .text
     .globl	sum(std::vector&lt;int, std::allocator&lt;int> > const&)
@@ -201,8 +228,8 @@ sum(std::vector&lt;int, std::allocator&lt;int> > const&):
     mov	rax, QWORD PTR 8[rdi]
     sub	rax, rcx
     ...</code></pre>
-                <pre class="fragment current-visible replaceable" data-fragment-index="4"><code class="x86asm"
-                                                                                                data-trim>
+                    <pre class="fragment current-visible replaceable" data-fragment-index="4"><code class="x86asm"
+                                                                                                    data-trim>
 sum(std::vector&lt;int, std::allocator&lt;int> > const&):
 .LFB786:
     mov	rcx, QWORD PTR [rdi]
@@ -214,9 +241,13 @@ sum(std::vector&lt;int, std::allocator&lt;int> > const&):
     mov	edx, 0
     mov eax, 0
     ...</code></pre>
-            </div>
+                </div>
+            </section>
         </section>
-        <section>
+
+
+        <!------------------------------------------------------->
+        <section id="andNow">
             <section>
                 <h3>Demo</h3>
                 <pre class="ce">
@@ -308,11 +339,14 @@ size_t size() const noexcept {
                 <!-- TODO this ^^^ -->
             </section>
             <section><h3>Backstory</h3>
-            <h5>So, which approach is best?</h5></section>\
+                <h5>So, which approach is best?</h5></section>
             <!-- TODO link to comparisons? Or do live? -->
             <section><h3>Optimization</h3></section>
         </section>
-        <section>
+
+
+        <!------------------------------------------------------->
+        <section id="compilersAreSuperSmart">
             <section><h3>Compilers are super-smart!</h3></section>
             <section>
                 <h3>Multiplication</h3>
@@ -397,330 +431,31 @@ int modBy3(int x) { return x % 3; }
                 </code></pre>
             </section>
             <!-- TODO perf measurements -->
-        </section>
-        <section>
-            <section>
-                <h3>Appropriately defeating the optimizer to see what you'd expect</h3>
+            <section><h3>Ternary operator</h3>
+                <pre><code class="ce">
+/// TODO
+int func(int i) {
+    return (i < 0) ? 1234 : 5678;
+}            </code></pre>
+                <!-- TODO flesh this ^^ one out -->
             </section>
-            <section>
-                <pre><code data-trim class="cpp ce">
-/// g71:-O2 -std=c++1z
-constexpr int sumTo(int x) {
-  int sum = 0;
-  for (int i = 0; i &lt;= x; ++i)
-    sum += i;
-  return sum;
-}
-
-int main(int argc, const char *argv[]) {
-  return sumTo(20);
+            <section><h3>Counting bits</h3>
+                <pre><code class="ce">
+/// TODO
+int numBits(unsigned int a) {
+    int count = 0;
+    while (a) {
+        count ++;
+        a &= (a-1);
+    }
+    return count;
 }
             </code></pre>
-                <aside class="notes">
-                    <ul>
-                        <li>Show code</li>
-                        <li>Modify code to show how to make it depend on argc/argv</li>
-                        <li>Show clang's cleverness</li>
-                        <li>Show clang's weirdness if starting at 1 instead of 0</li>
-                    </ul>
-                </aside>
+                <!-- TODO flesh this ^^ one out -->
             </section>
             <section>
-                TODO: math bit? maybe show nice n x (n-1)
-            </section>
-            <section>
-                <h3>Classes?</h3>
+                pass by value / pass by reference https://godbolt.org/g/XWFR7s
                 <pre><code class="cpp ce">
-/// g71:-O0 -std=c++1z
-class Holder {
-  int value_{0};
-public:
-  int value() const {
-    return value_;
-  }
-};
-                </code></pre>
-            </section>
-            <section>
-                <h3>Templates</h3>
-                <!--tODO-->
-            </section>
-        </section>
-        <section>
-            <h3>Compilers are super-smart!</h3>
-            <h5 class="fragment">...but aren't clairvoyant</h5>
-        </section>
-        <!-- TODO slides here about -O3 and what on earth it does? -->
-        <section>
-            <h3>Functions</h3>
-            <pre><code class="cpp ce">
-/// g71:-O2
-// setup
-  #include &lt;vector>
-  using namespace std;
-  extern int someFunc(int);
-
-int sum(const vector&lt;int> &v) {
-  int result = 0;
-  for (size_t i = 0; i < v.size(); ++i)
-    result += someFunc(v[i]);
-  return result;
-}</code></pre>
-            <aside class="notes">
-                Compiler can't make any assumptions about someFunc. So has to reload size.
-                Even though vector is const, compiler can't assume it's not going to change.
-                Using range-for fixes issue as rang-efor is defined to copy the extents of the iterand outsid of loop.
-            </aside>
-        </section>
-        <section>
-            <section><h3>Virtual methods</h3>
-                <pre><code class="ce">
-/// g71:-O2 -std=c++1z
-//setup
-  #include <vector>
-  using namespace std;
-struct Coster { virtual int costFor(int x) const = 0; };
-
-int totalCost(const Coster &coster, const vector&lt;int> &v) {
-  int result = 0;
-  for (auto i : v)
-    result += coster.costFor(i);
-  return result;
-}
-                </code></pre>
-            </section>
-            <!-- TODO WORK HERE
-
-            needs to have a better "theme". fit in with story?
-            vector is good but complicates code?
-            nextCost?
-            even this generates tons of code
-
-//setup
-  #include <vector>
-  using namespace std;
-  struct Coster { virtual int nextCost()  = 0; };
-
-int costForX(Coster &c, int x) {
-    int totalCost = 0;
-    for (int i = 0; i < x; ++i)
-      totalCost += c.nextCost();
-    return totalCost;
-} ?
-void costForX(Coster &c, int x, int *totalCost) {
-    for (int i = 0; i < x; ++i)
-      *totalCost += c.nextCost();
-}
-            -->
-            <section><h3>Virtual methods</h3>
-                <pre><code class="ce">
-/// g71:-O2 -std=c++1z
-//setup
-  #include <vector>
-  using namespace std;
-  struct Coster { virtual int costFor(int x) = 0; };
-
-struct StaticCost : Coster {
-    virtual int costFor(int x) const { return x; }
-};
-
-int totalCost(const Coster &coster, const vector&lt;int> &v) {
-  int result = 0;
-  for (auto i : v)
-    result += coster.costFor(i);
-  return result;
-}
-                </code></pre>
-            </section>
-            <section><h3>Unpicking your object hierarchy</h3>
-                <pre><code class="ce">
-/// g71:-O2 -std=c++1z
-//setup
-  #include <vector>
-  using namespace std;
-  namespace {
-  struct Coster { virtual int costFor(int x) = 0; };
-  struct StaticCost : Coster {
-      virtual int costFor(int x) const { return x; }
-  };
-  }
-
-namespace {
-int totalCost(Coster &coster, const vector<int> &v) {
-  int result = 0;
-  for (size_t i = 0; i < v.size(); ++i)
-    result += coster.costFor(v[i]);
-  return result;
-}
-}
-int main(int argv, const char *argv[]) {
-
-}
-                </code></pre>
-                <aside class="notes">
-                    Show it as-is, show clang
-                </aside>
-            </section>
-        </section>
-        <section><h3>Demo some "power features" that some people don't necessarily know about (diff view, multiple
-            editors) - depends on screen resolution of the project and visibility.</h3></section>
-        <section><h3>Case Studies, including things like:</h3></section>
-        <section><h3>Loop iteration shoot-out, pre-increment vs post-increment vs range-for vs std::algorithms</h3>
-        </section>
-        <section><h3>Compiler Explorer in low-latency trading: formatting exchange orders (and/or processing market
-            data)</h3></section>
-        <section>
-            <h3>Undefined behaviour is your friend, or how clang beats gcc with linked list iteration</h3>
-            <h3>Signed vs unsigned</h3>
-        </section>
-        <section><h3>Plus, many, many more (allocation elision in clang, non-virtual thunks, write combining, address
-            sanitisation)</h3></section>
-        <section>
-            <h3>Non-virtual thunks</h3>
-            <pre><code class="cpp ce">
-/// clang400:-O1 -std=c++1z
-struct Foo { virtual void foo() = 0; };
-struct Bar { virtual void bar() = 0; };
-extern void logFoo(const Foo &);
-struct FooBar : Foo, Bar {
-  void bar() override;
-  void log();
-};
-
-void FooBar::bar() {
-  log();
-}           </code></pre>
-            <aside class="notes">
-                line 35 of output with label and directive filter off
-            </aside>
-        </section>
-        <section><h3>How other people use it, including things like</h3>
-            <ul>
-                <li>Compiler teams (e.g. at Google)</li>
-                <li>Twitter competition to "generate most code from 140c of code"</li>
-                <li>Template metaprogramming REPL using constepr</li>
-                <li>Minimal bug reports for compilers / search for regressions</li>
-            </ul>
-        </section>
-        <section><h3>Case Study: range for and pre-post increment, vs std::algorithm</h3>
-            https://godbolt.org/g/gS9NOV
-        </section>
-        <section>
-            <section><h3>Case Study: hash maps</h3></section>
-            <section>
-                <!-- clang vs gcc - ispow2!  https://github.com/llvm-mirror/libcxx/blob/master/include/__hash_table#L130  -->
-                <!-- TODO - make sure understand exactly what's going on here -->
-                <!-- TODO maybe recap hash map? -->
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  #include &lt;unordered_map>
-  using namespace std;
-
-int findOrZero(
-    const unordered_map&lt;int, int> &m,
-    int key) {
-  if (auto it = m.find(key); it != m.end())
-    return it->second;
-  return 0;
-}
-                </code></pre>
-            </section>
-        </section>
-        <section>
-            <section>
-                <h3>Hash maps in practice</h3>
-                Order book picture
-            </section>
-            <section>
-                <h3>Hash maps in practice</h3>
-                <pre><code data-trim class="cpp">
-                    enum class Type : uint8_t { Add = 0, Modify = 1, Remove = 2 };
-                    enum class Side : uint8_t { Buy, Sell };
-                    struct Message {
-                        Type type;
-                        uint64_t orderId;
-                        uint32_t product;
-                        Side side;
-                        uint64_t price;
-                        uint32_t quantity;
-                    } __attribute__((packed));
-                </code></pre>
-            </section>
-            <section>
-                <h3># msgs processed/day trading system?</h3>
-            </section>
-            <section>
-                <h3>Take one</h3>
-                <pre><code data-trim class="cpp">
-                    class Orders {
-                        unordered_map&lt;uint64_t, Order> orders_;
-                    public:
-                        void add(uint64_t orderId, uint32_t product, Side side, uint64_t price, uint32_t quantity);
-                        void modify(uint64_t orderId, uint32_t product, Side side, uint64_t newPrice, uint32_t newQuantity);
-                        void remove(uint64_t orderId, uint32_t product, Side side);
-                    };
-                </code></pre>
-            </section>
-            <section>
-                <h3>Take one</h3>
-                <pre><code data-trim class="cpp">
-                    struct Order {
-                    void add(uint64_t orderId, uint32_t product, Side side, uint64_t price, uint32_t quantity) {
-                        orders_.emplace(orderId, Order{product, side, price, quantity});
-                    }
-                </code></pre>
-            </section>
-        </section>
-        <section><h3>Case Study: order formatting? hash map update?</h3></section>
-        <section><h3>Power Features</h3></section>
-        <section>
-            <section>
-                <h3>Case Study: auto copy / move / etc (Chrome copied all its images moved instead of moved..)</h3>
-                <pre><code class="cpp ce">
- // setup
-  #include &lt;vector>
-  using namespace std;
-
-struct ImageHolder {
-  const vector&lt;int> &
-    intensities() const;
-};
-
-double average(const ImageHolder &ih) {
-  auto data = ih.intensities();
-  int sum = 0;
-  for (auto &&v : data) sum += v;
-  return sum / static_cast&lt;double>(data.size());
-}
-                </code></pre>
-            </section>
-        </section>
-        <section><h3>Cute tricks</h3>
-            <pre><code class="ce">
-using func = int();
-
-int bar() { return 9527; }
-int foo() { return 102539; }
-
-int f(int i) {
-  if(i < 0)
-    return foo();
-  else
-    return bar();
-}
-
-int d(int i) {
-  static func *functions[] = {&bar, &foo};
-  const auto funcIndex = static_cast&lt;int>(i < 0);
-  return functions[funcIndex]();
-}
-            </code></pre>
-            <!-- TODO flesh this ^^ one out -->
-        </section>
-        <section>
-            pass by value / pass by reference https://godbolt.org/g/XWFR7s
-            <pre><code class="cpp ce">
 using T = int;
 
 struct p1d { T x; };
@@ -768,11 +503,155 @@ T f5() {
   return e_sum(p);
 }
             </code></pre>
+                <!-- TODO flesh this ^^ one out -->
+            </section>
+            <section>
+                <h3>The address sanitizer</h3>
+                <pre><code class="ce">
+/// g71:-O1
+// setup
+  #include &lt;cstdlib>
+int read(int *array, size_t index) {
+  return array[index];
+}
+            </code></pre>
+            </section>
+            <section><h3>auto lambdas</h3>
+                <!--TODO: lots here-->
+                <pre><code class="ce">
+void test() {
+    auto l = [](auto i) { return i > 10; };
+    l(10);
+    l(10.0);
+}
+            </code></pre>
+            </section>
         </section>
-        <section>
-            <h3>Restrict</h3>
-            <!-- TODO - some story about compilers pessimistic? -->
-            <pre><code class="ce">
+
+
+        <!------------------------------------------------------->
+        <section id="butNotClair">
+            <section>
+                <h3>Compilers are super-smart!</h3>
+                <h5 class="fragment">...but aren't clairvoyant</h5>
+            </section>
+            <!-- TODO slides here about -O3 and what on earth it does? -->
+            <section>
+                <h3>Functions</h3>
+                <pre><code class="cpp ce">
+/// g71:-O2
+// setup
+  #include &lt;vector>
+  using namespace std;
+  extern int someFunc(int);
+
+int sum(const vector&lt;int> &v) {
+  int result = 0;
+  for (size_t i = 0; i < v.size(); ++i)
+    result += someFunc(v[i]);
+  return result;
+}</code></pre>
+                <aside class="notes">
+                    Compiler can't make any assumptions about someFunc. So has to reload size.
+                    Even though vector is const, compiler can't assume it's not going to change.
+                    Using range-for fixes issue as rang-efor is defined to copy the extents of the iterand outsid of
+                    loop.
+                </aside>
+            </section>
+            <section>
+                <section><h3>Virtual methods</h3>
+                    <pre><code class="ce">
+/// g71:-O2 -std=c++1z
+//setup
+  #include <vector>
+  using namespace std;
+struct Coster { virtual int costFor(int x) const = 0; };
+
+int totalCost(const Coster &coster, const vector&lt;int> &v) {
+  int result = 0;
+  for (auto i : v)
+    result += coster.costFor(i);
+  return result;
+}
+                </code></pre>
+                </section>
+                <!-- TODO WORK HERE
+
+                needs to have a better "theme". fit in with story?
+                vector is good but complicates code?
+                nextCost?
+                even this generates tons of code
+
+        //setup
+        #include <vector>
+        using namespace std;
+        struct Coster { virtual int nextCost()  = 0; };
+
+        int costForX(Coster &c, int x) {
+        int totalCost = 0;
+        for (int i = 0; i < x; ++i)
+          totalCost += c.nextCost();
+        return totalCost;
+        } ?
+        void costForX(Coster &c, int x, int *totalCost) {
+        for (int i = 0; i < x; ++i)
+          *totalCost += c.nextCost();
+        }
+                -->
+                <section><h3>Virtual methods</h3>
+                    <pre><code class="ce">
+/// g71:-O2 -std=c++1z
+//setup
+  #include <vector>
+  using namespace std;
+  struct Coster { virtual int costFor(int x) = 0; };
+
+struct StaticCost : Coster {
+    virtual int costFor(int x) const { return x; }
+};
+
+int totalCost(const Coster &coster, const vector&lt;int> &v) {
+  int result = 0;
+  for (auto i : v)
+    result += coster.costFor(i);
+  return result;
+}
+                </code></pre>
+                </section>
+                <section><h3>Unpicking your object hierarchy</h3>
+                    <pre><code class="ce">
+/// g71:-O2 -std=c++1z
+//setup
+  #include <vector>
+  using namespace std;
+  namespace {
+  struct Coster { virtual int costFor(int x) = 0; };
+  struct StaticCost : Coster {
+      virtual int costFor(int x) const { return x; }
+  };
+  }
+
+namespace {
+int totalCost(Coster &coster, const vector<int> &v) {
+  int result = 0;
+  for (size_t i = 0; i < v.size(); ++i)
+    result += coster.costFor(v[i]);
+  return result;
+}
+}
+int main(int argv, const char *argv[]) {
+
+}
+                </code></pre>
+                    <aside class="notes">
+                        Show it as-is, show clang
+                    </aside>
+                </section>
+            </section>
+            <section>
+                <h3>Restrict</h3>
+                <!-- TODO - some story about compilers pessimistic? -->
+                <pre><code class="ce">
 /// g71:-Ofast
 #include &lt;functional>
 
@@ -786,10 +665,75 @@ void max(
   }
 }
             </code></pre>
-        </section>
-        <section>
+            </section>
             <section>
-                <h3>Loops</h3>
+                <h3>Likelihood analysis</h3>
+                <!-- TODO -->
+                <!--clang vs gcc difference here -->
+                <pre><code class="ce">
+/// g71:-O3 -march=haswell -std=c++1z
+// setup
+  extern void bar();
+void foo(int a, int b, int c) {
+  if (a == 0 && b == 0 && c == 0) return;
+  bar();
+}
+void foo(int a, int b, int c, int d, int e, int f, int g, int h) {
+  if (a == 0 && b == 0 && c == 0 && d == 0 && e == 0
+  && f == 0 && g == 0 && h == 0)
+    return;
+  bar();
+}
+            </code></pre>
+            </section>
+            <section>
+                <h3>Helping the compiler out</h3>
+                <pre><code class="cpp ce">
+/// g71:-O3 -std=c++1z -march=haswell
+// setup
+  #include &lt;cstddef>
+int testFunction(const int *input, size_t length) {
+  input = static_cast&lt;decltype(input)>(__builtin_assume_aligned(input, 64));
+  if (length & 63) __builtin_unreachable();
+  if (length == 0) __builtin_unreachable();
+
+  int sum = 0;
+  for (int i = 0; i < length; ++i) {
+    sum += input[i];
+  }
+  return sum;
+}
+                </code></pre>
+            </section>
+            <section>
+                <h3>Case Study: auto copy / move / etc (Chrome copied all its images moved instead of moved..)</h3>
+                <pre><code class="cpp ce">
+// setup
+  #include &lt;vector>
+  using namespace std;
+
+struct ImageHolder {
+  const vector&lt;int> &
+    intensities() const;
+};
+
+double average(const ImageHolder &ih) {
+  auto data = ih.intensities();
+  int sum = 0;
+  for (auto &&v : data) sum += v;
+  return sum / static_cast&lt;double>(data.size());
+}
+                </code></pre>
+            </section>
+        </section>
+
+
+        <!------------------------------------------------------->
+        <section id="ubIsYourFriend">
+            <!-- TODO -->
+            <section>
+                <h3>Infinite loops</h3>
+                <!-- TODO get C++ standards quote -->
                 <pre><code data-trim class="cpp ce">
 /// g71:-O2 -DNDEBUG -std=c++14
 // setup
@@ -810,88 +754,183 @@ bool test(Foo *f) {
 }
             </code></pre>
             </section>
-            <!-- TODO get C++ standards quote -->
+            <section><h3>index signed vs unsigned</h3>
+                <pre><code data-trim class="cpp ce">
+/// g71:-O2 -std=c++1z
+  // setup
+  #include &lt;cstdint>
+
+int sum1000(char *a, int32_t offset) {
+    int res = 0;
+    for (decltype(offset) i = 0; i < 1000; ++i)
+        res += a[offset + i];
+    return res;
+}
+                </code></pre>
+                <aside class="notes">
+                    show it uint32_t and int32_t
+                </aside>
+            </section>
+            <section><h3>heap elision?</h3></section>
         </section>
-        <section>
-            <h3>Heap elision</h3>
-            <pre><code class="ce">
-// TODO: unqiue_ptr to int return it, clang vs non-clang
+
+
+        <!------------------------------------------------------->
+        <section id="usingCE">
+            <!-- TODO -->
+            <section>
+                <section>
+                    <h3>Appropriately defeating the optimizer to see what you'd expect</h3>
+                </section>
+                <section>
+                <pre><code data-trim class="cpp ce">
+/// g71:-O2 -std=c++1z
+constexpr int sumTo(int x) {
+  int sum = 0;
+  for (int i = 0; i &lt;= x; ++i)
+    sum += i;
+  return sum;
+}
+
+int main(int argc, const char *argv[]) {
+  return sumTo(20);
+}
             </code></pre>
+                    <aside class="notes">
+                        <ul>
+                            <li>Show code</li>
+                            <li>Modify code to show how to make it depend on argc/argv</li>
+                            <li>Show clang's cleverness</li>
+                            <li>Show clang's weirdness if starting at 1 instead of 0</li>
+                        </ul>
+                    </aside>
+                </section>
+                <section>
+                    TODO: math bit? maybe show nice n x (n-1)
+                </section>
+                <section>
+                    <h3>Classes?</h3>
+                    <pre><code class="cpp ce">
+/// g71:-O0 -std=c++1z
+class Holder {
+  int value_{0};
+public:
+  int value() const {
+    return value_;
+  }
+};
+                </code></pre>
+                </section>
+                <section>
+                    <h3>Templates</h3>
+                    <!--tODO-->
+                </section>
+            </section>
+            <section><h3>Templates</h3></section>
+            <section><h3>Power use demo</h3></section>
         </section>
-        <section>
-            <h3>The address sanitizer</h3>
-            <pre><code class="ce">
-/// g71:-O1
+
+
+        <!------------------------------------------------------->
+        <section id="ceAtDRW">
+            <section><h3>Case Study: hash maps</h3></section>
+            <section>
+                <!-- clang vs gcc - ispow2!  https://github.com/llvm-mirror/libcxx/blob/master/include/__hash_table#L130  -->
+                <!-- TODO - make sure understand exactly what's going on here -->
+                <!-- TODO maybe recap hash map? -->
+                <pre><code class="cpp ce">
+/// g71:-O2 -std=c++1z
 // setup
-  #include &lt;cstdlib>
-int read(int *array, size_t index) {
-  return array[index];
-}
-            </code></pre>
-        </section>
-        <section><h3>auto lambdas</h3>
-            <!--TODO: lots here-->
-            <pre><code class="ce">
-void test() {
-    auto l = [](auto i) { return i > 10; };
-    l(10);
-    l(10.0);
-}
-            </code></pre>
-        </section>
-        <section>
-            <h3>Compiler differences?</h3>
-            <!--clang vs gcc difference here -->
-            <pre><code class="ce">
-/// g71:-O3 -march=haswell -std=c++1z
-// setup
-  extern void bar();
-void foo(int a, int b, int c) {
-  if (a == 0 && b == 0 && c == 0) return;
-  bar();
-}
-void foo(int a, int b, int c, int d, int e, int f, int g, int h) {
-  if (a == 0 && b == 0 && c == 0 && d == 0 && e == 0
-  && f == 0 && g == 0 && h == 0)
-    return;
-  bar();
-}
-            </code></pre>
-        </section>
-        <section>
-            <h3>Variant</h3>
-            <pre><code class="ce">
-/// clang_trunk:-O3 -march=haswell -std=c++1z -stdlib=libc++
-// setup
-  #include &lt;variant>
+  #include &lt;unordered_map>
   using namespace std;
 
-using IntOrFloat = variant&lt;int, float>;
-int test(IntOrFloat iof) {
-  return visit([](auto i) -> int{ return i; }, iof);
+int findOrZero(
+    const unordered_map&lt;int, int> &m,
+    int key) {
+  if (auto it = m.find(key); it != m.end())
+    return it->second;
+  return 0;
 }
-// TODO:
-int test2() {
-  IntOrFloat iof { 1.f };
-  return visit([](auto i) -> int{ return i; }, iof);
-}
-            </code></pre>
+                </code></pre>
+            </section>
+            <section>
+                <h3>Hash maps in practice</h3>
+                Order book picture
+            </section>
+            <section>
+                <h3>Hash maps in practice</h3>
+                <pre><code data-trim class="cpp">
+                    enum class Type : uint8_t { Add = 0, Modify = 1, Remove = 2 };
+                    enum class Side : uint8_t { Buy, Sell };
+                    struct Message {
+                        Type type;
+                        uint64_t orderId;
+                        uint32_t product;
+                        Side side;
+                        uint64_t price;
+                        uint32_t quantity;
+                    } __attribute__((packed));
+                </code></pre>
+            </section>
+            <section>
+                <h3># msgs processed/day trading system?</h3>
+            </section>
+            <section>
+                <h3>Take one</h3>
+                <pre><code data-trim class="cpp">
+                    class Orders {
+                        unordered_map&lt;uint64_t, Order> orders_;
+                    public:
+                        void add(uint64_t orderId, uint32_t product, Side side, uint64_t price, uint32_t quantity);
+                        void modify(uint64_t orderId, uint32_t product, Side side, uint64_t newPrice, uint32_t newQuantity);
+                        void remove(uint64_t orderId, uint32_t product, Side side);
+                    };
+                </code></pre>
+            </section>
+            <section>
+                <h3>Take one</h3>
+                <pre><code data-trim class="cpp">
+                    struct Order {
+                    void add(uint64_t orderId, uint32_t product, Side side, uint64_t price, uint32_t quantity) {
+                        orders_.emplace(orderId, Order{product, side, price, quantity});
+                    }
+                </code></pre>
+            </section>
+            <section><h3>Case Study: order formatting</h3></section>
         </section>
-        <section>
-            <h3>CE the REPL</h3>
+
+
+        <!------------------------------------------------------->
+        <section id="otherPeople">
+            <!-- TODO -->
+            <section><h3>uses</h3></section>
+            <section>
+                <h3>CE the REPL</h3>
+            </section>
+            <section><h3>How other people use it, including things like</h3>
+                <ul>
+                    <li>Compiler teams (e.g. at Google)</li>
+                    <li>Twitter competition to "generate most code from 140c of code"</li>
+                    <li>Template metaprogramming REPL using constepr</li>
+                    <li>Minimal bug reports for compilers / search for regressions</li>
+                </ul>
+            </section>
+            <section><h3>Case Study: other people's usage</h3>
+                <ul>
+                    <li>Trying out new features</li>
+                    <li>"most output from a tweet" competition</li>
+                    <li>creating minimal bug reports for compilers</li>
+                    <li>TMP repl using static_assert</li>
+                    <li>ease of use means people try things out they would never have thought of</li>
+                    <li>Compiler optimization team at Google</li>
+                    <li>"Works on my machine" / Godbolt</li>
+                </ul>
+            </section>
         </section>
-        <section><h3>Case Study: other people's usage</h3>
-            <ul>
-                <li>Trying out new features</li>
-                <li>"most output from a tweet" competition</li>
-                <li>creating minimal bug reports for compilers</li>
-                <li>TMP repl using static_assert</li>
-                <li>ease of use means people try things out they would never have thought of</li>
-                <li>Compiler optimization team at Google</li>
-                <li>"Works on my machine" / Godbolt</li>
-            </ul>
-        </section>
-        <section>
+
+
+        <!------------------------------------------------------->
+        <section id="howitworks">
             <section>
                 <h3>How it works</h3>
                 <!-- TODO picture of duct tape disaster -->
@@ -967,7 +1006,8 @@ webServer.listen(10240);
             <section>
                 <h3>The code</h3>
                 <ul>
-                    <li><a href="https://github.com/mattgodbolt/compiler-explorer">github.com/mattgodbolt/compiler-explorer</a>
+                    <li>
+                        <a href="https://github.com/mattgodbolt/compiler-explorer">github.com/mattgodbolt/compiler-explorer</a>
                     </li>
                     <li><a href="https://github.com/mattgodbolt/compiler-explorer-image">github.com/mattgodbolt/compiler-explorer-image</a>
                     </li>
@@ -977,117 +1017,82 @@ webServer.listen(10240);
                 <h3>Running it locally</h3>
             </section>
         </section>
-        <section>
-            <h3>Conclusions</h3>
-            <ul>
-                <li>Thanks to contributors</li>
-                <li>Thanks to Patreon folks</li>
-                <li>Thanks to awesome C++ community</li>
-                <li class="fragment">Thanks to you!</li>
-            </ul>
-            <!-- TODO -->
+
+
+        <!------------------------------------------------------->
+        <section id="conclusions">
+            <section>
+                <h3>Conclusions</h3>
+                <ul>
+                    <li>Thanks to contributors</li>
+                    <li>Thanks to Patreon folks</li>
+                    <li>Thanks to awesome C++ community</li>
+                    <li class="fragment">Thanks to you!</li>
+                </ul>
+                <!-- TODO -->
+            </section>
+            <section><h3>Conclusions and call to action!</h3></section>
+            <section><h3>Everyone should be using this!</h3></section>
+            <section><h3>Thanks to my contributors and patreon supporters</h3></section>
+            <section><h3>Help wanted</h3></section>
+            <section>
+                <h3>Go read some assembly!</h3>
+                <br>
+                { <a href="https://gcc.godbolt.org/">gcc</a>
+                , <a href="https://gcc.godbolt.org/">cppx</a>
+                , <a href="https://d.godbolt.org/">d</a>
+                , <a href="https://swift.godbolt.org/">swift</a>
+                , <a href="https://haskell.godbolt.org/">haskell</a>
+                , <a href="https://go.godbolt.org/">go</a>
+                , <a href="https://ispc.godbolt.org/">ispc</a> }.godbolt.org
+            </section>
         </section>
-        <section><h3>Conclusions and call to action!</h3></section>
-        <section><h3>Everyone should be using this!</h3></section>
-        <section><h3>Thanks to my contributors and patreon supporters</h3></section>
-        <section><h3>Help wanted</h3></section>
+
+
+        <!------------------------------------------------------->
+        <!------------------------------------------------------->
+        <!------------------------------------------------------->
+        <!------------------------------------------------------->
         <section>
-            <h3>Go read some assembly!</h3>
-            <br>
-            { <a href="https://gcc.godbolt.org/">gcc</a>
-            , <a href="https://gcc.godbolt.org/">cppx</a>
-            , <a href="https://d.godbolt.org/">d</a>
-            , <a href="https://swift.godbolt.org/">swift</a>
-            , <a href="https://haskell.godbolt.org/">haskell</a>
-            , <a href="https://go.godbolt.org/">go</a>
-            , <a href="https://ispc.godbolt.org/">ispc</a> }.godbolt.org
+            <h3>Non-virtual thunks</h3>
+            <pre><code class="cpp ce">
+/// clang400:-O1 -std=c++1z
+struct Foo { virtual void foo() = 0; };
+struct Bar { virtual void bar() = 0; };
+extern void logFoo(const Foo &);
+struct FooBar : Foo, Bar {
+  void bar() override;
+  void log();
+};
+
+void FooBar::bar() {
+  log();
+}           </code></pre>
+            <aside class="notes">
+                line 35 of output with label and directive filter off
+            </aside>
         </section>
-        <!--
-                <section>
-                    <h3>Compiler Explorer v1</h3>
-                    <pre><code class="bash">$ watch 'g++ -O2 -S /tmp/test.cc -o - | c++filt'</code></pre>
-                    <a href="http://localhost:10240/#z:OYLghAFBqd5TKALEBjA9gEwKYFFMCWALugE4A0BIEAZugHZEDKqAhgDbYgCMAdABwBWAOyCATAAYAnGIBsw7lKVTh5AFY9yAZ3QBXUqi4ByAKRiAzAXqp2unAGoT5gMKotRTOwIAjJ7hMSAIJmlta2Dk7OAG7YqCSkfgHBQdgAHkTYpPT2UegEmPaY6EzoALbYREhWwBBWRACUTgBCSUm5%2BfZ0pNisqEgQGPTu9u6YICAxcWSRdX6OclH1jsItQfadZPYQWgQAXtgA%2BkT2BI7mACL2Es0nZ845vDv7EI3mTfMtYk0EjWvrhcUyhUqvQalETIJvhDzq9VsFhOcjPVyOwQEZBEZyPQ0RJMeg0c4zJ93jp9IZ5uZuJiiDikciANYgQQSFFogAsmNKTJZ2KMuPI%2BKMmK0IBZNL5SPIcFgKAwpQADgROBQqAMyorlSAAPS6LSkLXeKxa4BEonkGhKjKkEUQby08hy8qMADy9HYAE97YRunECDERRLKIxsKiJci6IwWBwuHwhKJJDJ5IplKp0PKiAQGAGALTOsTCvQGGPI0MYrH2wU6vUGo0mr5Erb4YibELccj2ZzqpWZCncerU2n1ZFIHo4UjUBnc1lGDnlwOC4Wi8ji3FD6f58hc5lz/kL5eDqWIaXINBYPCEeKUagR5hsTg8AQicTSOQKZQqdQgMTaQuGNEhKwbDsbA7jcDwvF8cx/CCACwmAu5JniRIYJSdJMmydoCiKEpykqapakYWFWiCTCNm6Xp%2BkGYZRnGRDphcWYoPmWRFmWOF1i6LY6nsVJ7BAHJfkCf4ARw4F8NSIiYIRSVS0xXldwJU0vhGX8QJCDcVzpcgR1YMcJ3IRlt1DWctx5Cs0UXMUD2PCBZS7ZUrzVBVu3HKt9UNehjSUppzUtTIbTtQNHWwF03U9QNvViDN/XtOoQwPG8o3vWMnwTV9kyUVN00zIY0VzDdSSLL8SzRMt5LxNE3JrTy62JRsLxbCxvw7eye3U/t9zDYdR0yfTDJZYy5PMoVtCXTS11DDdTJ3CqRvGyduAkAa0XMIb5wszrV2RGJrRykA2SAA%3D%3D">Or
-                        here</a>
-                </section>
-                <section>
-                    <h3>Some assembly</h3>
-                    <iframe width="1000px" height="300px"
-                            src="http://localhost:10240/e#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.5479341055999998,j:1,source:'int+square(int+num)+%7B%0A++++return+num+*+num%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:/usr/bin/g%2B%2B,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),fontScale:1.5479341055999998,options:'',source:1),l:'5',n:'0',o:'/usr/bin/g%2B%2B+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"></iframe>
-                </section>
-                <section>
-                    <h3>Intel asm 101</h3>
-                    <pre><code data-trim class="asm">
-                        mov dest, src
-                        add dest, arg
-                        cmp reg, arg
-                        jmp dest
-                    </code></pre>
-                </section>
-                <section>
-                    <h3>Intel registers</h3>
-                    <ul>
-                        <li>rax</li>
-                        <li>rcx</li>
-                        <li>rdx</li>
-                        <li>rbx</li>
-                        <li>rsp</li>
-                        <li>rbp</li>
-                        <li>rsi</li>
-                        <li>rdi</li>
-                        <li>r8-r15</li>
-                    </ul>
-                </section>
-                <section>
-                    <h3>Intel registers</h3>
-                    <table class="reg">
-                        <tr>
-                            <td colspan="8" class="reg">rax</td>
-                        </tr>
-                        <tr>
-                            <td colspan="4"></td>
-                            <td colspan="4" class="reg">eax</td>
-                        </tr>
-                        <tr>
-                            <td colspan="6"></td>
-                            <td colspan="2" class="reg">ax</td>
-                        </tr>
-                        <tr>
-                            <td colspan="6"></td>
-                            <td colspan="1" class="reg">ah</td>
-                            <td colspan="1" class="reg">al</td>
-                        </tr>
-                        <tr>
-                            <td>...</td>
-                            <td>...</td>
-                            <td>...</td>
-                            <td>...</td>
-                            <td>...</td>
-                            <td>...</td>
-                            <td>...</td>
-                            <td>...</td>
-                        </tr>
-                    </table>
-                </section>
-                <section>
-                    <h3>Intel registers</h3>
-                    <pre><code data-trim class="cpp">
-                        union {
-                          struct {
-                            uint8_t al;
-                            uint8_t ah;
-                          };
-                          uint16_t ax;
-                          uint32_t eax;
-                          uint64_t rax;
-                        };
-                    </code></pre>
-                </section>
-                <section>
-                    <h3>Cleverness</h3>
-                    <iframe width="1000px" height="300px"
-                            src="http://localhost:10240/e#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.2899450879999999,j:1,source:'int+times9(int+num)+%7B%0A++++return+num+*+9%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:/usr/bin/g%2B%2B,filters:(b:'0',commentOnly:'0',directives:'0',intel:'0'),fontScale:1.2899450879999999,options:'-O1',source:1),l:'5',n:'0',o:'/usr/bin/g%2B%2B+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"></iframe>
-                </section>
-        -->
+
+        <section>
+            <h3>Variant</h3>
+            <pre><code class="ce">
+/// clang_trunk:-O3 -march=haswell -std=c++1z -stdlib=libc++
+// setup
+  #include &lt;variant>
+  using namespace std;
+
+using IntOrFloat = variant&lt;int, float>;
+int test(IntOrFloat iof) {
+  return visit([](auto i) -> int{ return i; }, iof);
+}
+// TODO:
+int test2() {
+  IntOrFloat iof { 1.f };
+  return visit([](auto i) -> int{ return i; }, iof);
+}
+            </code></pre>
+        </section>
+
         <div class="footer">
             <hr>
             <img src="DRWSmallLogo.png" width="50" height="16">
