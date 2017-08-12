@@ -127,29 +127,33 @@
                 But always measure end-to-end perf if you can too.
             </aside>
         </section>
+
+        <!------------------------------------------------------->
         <section>
-            <h3>x86 Assembly 101</h3>
-            Registers <!-- TODO -->
-            Calling convention <!-- TODO -->
-            <aside class="notes">
-                Faking it with x86 asm.
-            </aside>
-        </section>
-        <section>
-            <h3>x86 Assembly 101</h3>
-            Instructions
-            <pre><code data-trim class="x86asm">
+            <!-- reference "just enough asm to be dangerous talk -->
+            <section>
+                <h3>x86 Assembly 101</h3>
+                <h5>Registers</h5>
+            </section>
+            <section>
+                <h3>x86 Assembly 101</h3>
+                <h5>Calling convention</h5>
+            </section>
+            <section>
+                <h3>x86 Assembly 101</h3>
+                <h5>Instructions</h5>
+                <pre><code data-trim class="x86asm">
                 mov eax, 1234       ; eax = 1234
                 mov ecx, 5678       ; ecx = 5678
                 add eax, ecx        ; eax += ecx
                 cmp eax, 6912       ; eax == 6912 ?
                 je all_ok           ;  then goto all_ok
             </code></pre>
-        </section>
-        <section>
-            <h3>x86 Assembly 101</h3>
-            Instructions
-            <pre><code data-trim class="x86asm">
+            </section>
+            <section>
+                <h3>x86 Assembly 101</h3>
+                <h5>Instructions</h5>
+                <pre><code data-trim class="x86asm">
                 mov eax, DWORD PTR [r14] ; eax = *(int32_t *)rdi
                 mov eax, DWORD PTR [r14 + 4] ; eax = *(int32_t *)(rdi + 4)
                 mov eax, DWORD PTR [r14 + 4 * rbx]
@@ -157,8 +161,12 @@
                 lea eax, [r14 + 4 * rbx]
                         ; eax = (rdi + 4 * rbx)
             </code></pre>
-            <!-- TODO is it [reg + constant + reg2 *(1,2,4,8) ? -->
+                <!-- TODO is it [reg + constant + reg2 *(1,2,4,8) ? -->
+            </section>
         </section>
+
+        <!------------------------------------------------------->
+        <!-- TODO slide here to re-intro the example code -->
         <section>
             <h3>CE v1</h3>
             <pre><code data-noescape data-trim class="bash">
@@ -299,8 +307,10 @@ size_t size() const noexcept {
             </code></pre>
                 <!-- TODO this ^^^ -->
             </section>
-            <section><h3>Optimizer off</h3></section>
-            <section><h3>Other approaches</h3></section>
+            <section><h3>Backstory</h3>
+            <h5>So, which approach is best?</h5></section>\
+            <!-- TODO link to comparisons? Or do live? -->
+            <section><h3>Optimization</h3></section>
         </section>
         <section>
             <section><h3>Compilers are super-smart!</h3></section>

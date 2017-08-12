@@ -1,3 +1,74 @@
+# Latest Outline
+
+* Why
+* Goals
+* Backstory
+* ASM 101
+  * Registers
+  * Calling convention
+  * Instructions
+  * Memory instructions
+* Back to backstory
+  * Demo
+  * Code walkthrough
+  * Optimizer off
+  * Show the other approaches
+* Compilers are super smart!
+  * LICM? (Assuming size() is this) TODO
+  * CSE? TODO  
+  * TODO Constants TODO?
+  * Multiplication
+  * Divi / Hash
+    * maybe here do hash? TODO
+  * Sums
+  * "cute tricks" TODO
+  * pass by value/ref? TODO
+* Compilers not clairvoyant
+  * external functions
+  * __restrict max
+  * guessing likelihood (foo(int a, int b, int c...)) clang vs gcc TODO
+* UB can be your friend? shout to Chandler
+  * Inf loops in clang
+  * index signed vs unsigned? TODO see below
+  * heap elision? TODO
+* Using CE
+  * Defeating optimizer TODO
+  * Templates TODO
+  * Power use demo?
+* Uses of CE TODO
+* How it works
+  * node
+  * EC2
+  * the compilers
+  * security
+  * frontend
+  * running it locally
+* Conclusions
+
+## TO BE PLACED
+* virtual methods (static and dynamic devirtualisation)
+* heap elision
+* non-virtual thunks (scrap?)
+* hash maps
+  * hash maps in practice
+* case study:
+  * copy vs move
+* variant?
+
+from above: maybe templatie to show how to detemplate?
+```
+#include <cstdint>
+
+int sum1000(char *a, int32_t offset) {
+    int res = 0; 
+    for (decltype(offset) i = 0; i < 1000; ++i)
+        res += a[offset + i];
+    return res;
+}
+```
+
+----
+
 Titles:
 * 5 years of Compiler Explorer
 * 14 million compilations
