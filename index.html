@@ -569,7 +569,7 @@ int sum(const vector&lt;int> &v) {
             <section><h3>Virtual methods</h3>
                 <pre><code class="ce">
 /// g71:-O2 -std=c++1z
-//setup
+// setup
   #include &lt;vector>
   using namespace std;
 struct Coster { virtual int costFor(int x) const = 0; };
@@ -589,7 +589,7 @@ int totalCost(const Coster &coster, const vector&lt;int> &v) {
             nextCost?
             even this generates tons of code
 
-    //setup
+    // setup
     #include &lt;vector>
     using namespace std;
     struct Coster { virtual int nextCost()  = 0; };
@@ -655,19 +655,19 @@ int main(int argv, const char *argv[]) {
                 </aside>
             </section>
             <section>
-                <h3>Restrict</h3>
+                <h3>Aliasing</h3>
                 <!-- TODO - some story about compilers pessimistic? -->
                 <pre><code class="ce">
-/// g71:-Ofast
-#include &lt;functional>
+/// g71:-O2 -std=c++1z
+// setup
+  #include &lt;functional>
+  #include &lt;cstddef>
 
-void max(
-    int *__restrict begin,
-    int *__restrict end,
-    int *__restrict out) {
-  *out = *begin;
-  for (auto i = begin; i != end; ++i) {
-    *out = std::max(*i, *out);
+void sum(int *first, size_t num,
+         int *out_sum) {
+  *out_sum = 0;
+  for (size_t i = 0; i < num; ++i) {
+    *out_sum += first[i];
   }
 }
             </code></pre>
@@ -676,19 +676,20 @@ void max(
                 <h3>Likelihood analysis</h3>
                 <!-- TODO -->
                 <!--clang vs gcc difference here -->
+                <!-- likely doesn't work here in clang :'( -->
                 <pre><code class="ce">
-/// g71:-O3 -march=haswell -std=c++1z
+/// g71:-O2 -std=c++1z
 // setup
-  extern void bar();
-void foo(int a, int b, int c) {
-  if (a == 0 && b == 0 && c == 0) return;
-  bar();
+  extern void allZero();
+  extern void notAllZero();
+void testZeroFirst(int a, int b, int c) {
+  if (a == 0 && b == 0 && c == 0) allZero();
+  else notAllZero();
 }
-void foo(int a, int b, int c, int d, int e, int f, int g, int h) {
-  if (a == 0 && b == 0 && c == 0 && d == 0 && e == 0
-  && f == 0 && g == 0 && h == 0)
-    return;
-  bar();
+
+void testNotZeroFirst(int a, int b, int c) {
+  if (!(a == 0 && b == 0 && c == 0)) notAllZero();
+  else allZero();
 }
             </code></pre>
             </section>
@@ -698,8 +699,9 @@ void foo(int a, int b, int c, int d, int e, int f, int g, int h) {
 /// g71:-O3 -std=c++1z -march=haswell
 // setup
   #include &lt;cstddef>
-int testFunction(const int *input, size_t length) {
-  input = static_cast&lt;decltype(input)>(__builtin_assume_aligned(input, 64));
+int sum(const int *input, size_t length) {
+  input = static_cast&lt;decltype(input)>(
+                    __builtin_assume_aligned(input, 64));
   if (length & 63) __builtin_unreachable();
   if (length == 0) __builtin_unreachable();
 
@@ -712,6 +714,7 @@ int testFunction(const int *input, size_t length) {
                 </code></pre>
             </section>
             <section>
+                <!-- TODO this still? -->
                 <h3>Case Study: auto copy / move / etc (Chrome copied all its images moved instead of moved..)</h3>
                 <pre><code class="cpp ce">
 // setup
@@ -736,7 +739,10 @@ double average(const ImageHolder &ih) {
 
         <!------------------------------------------------------->
         <section id="ubIsYourFriend">
-            <!-- TODO -->
+            <section>
+                <h3>Undefined behaviour</h3>
+                <h5 class="fragment">Can be your friend</h5>
+            </section>
             <section>
                 <h3>Infinite loops</h3>
                 <!-- TODO get C++ standards quote -->
@@ -763,21 +769,36 @@ bool test(Foo *f) {
             <section><h3>index signed vs unsigned</h3>
                 <pre><code data-trim class="cpp ce">
 /// g71:-O2 -std=c++1z
-  // setup
+// setup
   #include &lt;cstdint>
 
-int sum1000(char *a, int32_t offset) {
+int sum1000(const char *a, uint32_t offset) {
     int res = 0;
-    for (decltype(offset) i = 0; i < 1000; ++i)
-        res += a[offset + i];
+    auto end = offset + 1000;
+    while (offset < end)
+        res += a[offset++];
     return res;
 }
                 </code></pre>
                 <aside class="notes">
                     show it uint32_t and int32_t
+                    TODO still weak
                 </aside>
             </section>
-            <section><h3>heap elision?</h3></section>
+            <section><h3>Heap elision</h3>
+                <pre><code data-trim class="cpp ce">
+/// g71:-O2 -std=c++1z
+// setup
+  #include &lt;memory>
+  using namespace std;
+
+int func() {
+    auto a = make_unique&lt;int>(42);
+    auto b = make_unique&lt;int>(24);
+    return *a + *b;
+}
+                </code></pre>
+            </section>
         </section>
 
 
@@ -785,10 +806,10 @@ int sum1000(char *a, int32_t offset) {
         <section id="usingCE">
             <!-- TODO -->
             <section>
-                <section>
-                    <h3>Appropriately defeating the optimizer to see what you'd expect</h3>
-                </section>
-                <section>
+                <h3>Using Compiler Explorer</h3>
+            </section>
+            <section>
+                <h3>Optimizer too clever</h3>
                 <pre><code data-trim class="cpp ce">
 /// g71:-O2 -std=c++1z
 constexpr int sumTo(int x) {
@@ -802,22 +823,22 @@ int main(int argc, const char *argv[]) {
   return sumTo(20);
 }
             </code></pre>
-                    <aside class="notes">
-                        <ul>
-                            <li>Show code</li>
-                            <li>Modify code to show how to make it depend on argc/argv</li>
-                            <li>Show clang's cleverness</li>
-                            <li>Show clang's weirdness if starting at 1 instead of 0</li>
-                        </ul>
-                    </aside>
-                </section>
-                <section>
-                    TODO: math bit? maybe show nice n x (n-1)
-                </section>
-                <section>
-                    <h3>Classes?</h3>
-                    <pre><code class="cpp ce">
-/// g71:-O0 -std=c++1z
+                <aside class="notes">
+                    <ul>
+                        <li>Show code</li>
+                        <li>Modify code to show how to make it depend on argc/argv</li>
+                        <li>Show clang's cleverness</li>
+                        <li>Show clang's weirdness if starting at 1 instead of 0</li>
+                    </ul>
+                </aside>
+            </section>
+            <section>
+                TODO: math bit? maybe show nice n x (n-1)
+            </section>
+            <section>
+                <h3>Classes?</h3>
+                <pre><code class="cpp ce">
+/// g71:-O2 -std=c++1z
 class Holder {
   int value_{0};
 public:
@@ -826,13 +847,20 @@ public:
   }
 };
                 </code></pre>
-                </section>
-                <section>
-                    <h3>Templates</h3>
-                    <!--tODO-->
-                </section>
+                <aside class="notes">
+                    <ul>
+                        <li>
+                            <pre>auto f = &amp;Holder::value;</pre>
+                        </li>
+                        <li>define out of line</li>
+                        <li>call from a test function</li>
+                    </ul>
+                </aside>
             </section>
-            <section><h3>Templates</h3></section>
+            <section>
+                <h3>Templates</h3>
+                <!--tODO-->
+            </section>
             <section><h3>Power use demo</h3></section>
         </section>
 
@@ -952,15 +980,17 @@ int findOrZero(
                 <h3><code>node.js</code></h3>
                 <pre><code class="javascript" data-trim>
 function compile(req, res, next) {
-    // exec req.compiler, feed it req.body, parse output, return via res
+  // exec req.compiler, feed it req.body
+  // parse output, return via res
 }
 var webServer = express();
 var apiHandler = express.Router();
-apiHandler.param('compiler', function (req, res, next, compilerName) {
-    req.compiler = compilerName;
-    next();
-};
-apiHandler.post('/compiler/:compiler/compile', compileHandler);
+apiHandler.param('compiler',
+    function (req, res, next, compiler) {
+  req.compiler = compiler;
+  next();
+});
+apiHandler.post('/compiler/:compiler/compile', compile);
 webServer.use('/api', apiHandler);
 webServer.listen(10240);
                 </code></pre>
@@ -1037,10 +1067,6 @@ webServer.listen(10240);
                 </ul>
                 <!-- TODO -->
             </section>
-            <section><h3>Conclusions and call to action!</h3></section>
-            <section><h3>Everyone should be using this!</h3></section>
-            <section><h3>Thanks to my contributors and patreon supporters</h3></section>
-            <section><h3>Help wanted</h3></section>
             <section>
                 <h3>Go read some assembly!</h3>
                 <br>
