@@ -361,6 +361,10 @@ sum(std::vector&lt;int, std::allocator&lt;int> > const&):
     mov eax, 0
     ...</code></pre>
             </section>
+            <section><h3>Compiler Explorer v0.1</h3>
+                <div>Not very pretty</div>
+                <h5 class="fragment">To the web!</h5>
+            </section>
         </section>
 
 
@@ -386,13 +390,11 @@ int sum(const vector&lt;int> &v) {
                         <li>Pop out</li>
                         <li>Walk through code (using following slides), note optimizer is on</li>
                         <li>Show optimizer off</li>
-                        <li>Use range-for, show it's the same</li>
-                        <li>Ditto std::accumulate</li>
                     </ul>
-                    Show code, show same happens with auto & and std::accumulate
                 </aside>
             </section>
             <section>
+                <h3>Walkthrough</h3>
                 <pre><code data-trim class="x86asm">
   ; rdi = const vector&lt;int> *
   mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
@@ -407,13 +409,14 @@ template&lt;typename T> struct _Vector_impl {
                     </code></pre>
             </section>
             <section>
+                <h3>Walkthrough</h3>
                 <pre><code data-trim class="x86asm faded">
   ; rdi = const vector&lt;int> *
   mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
   mov rcx, QWORD PTR [rdi+8]  ; rcx = *(rdi + 8)  &equiv; rdi->end
                 </code></pre>
                 <pre><code data-trim class="x86asm">
-  sub rcx, rdx                ; rcx = rcx - rdx   &equiv; end - begin
+  sub rcx, rdx                ; rcx -= rdx        &equiv; end - begin
   mov rax, rcx                ; rax = rcx &equiv; end - begin
   sar rax, 2                  ; rax = rax / 4
                               ;     &equiv; (end - begin) / sizeof(int)
@@ -424,11 +427,12 @@ size_t size() const noexcept {
 }                    </code></pre>
             </section>
             <section>
+                <h3>Walkthrough</h3>
                 <pre><code data-trim class="x86asm faded">
   ; rdi = const vector&lt;int> *
   mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
   mov rcx, QWORD PTR [rdi+8]  ; rcx = *(rdi + 8)  &equiv; rdi->end
-  sub rcx, rdx                ; rcx = rcx - rdx   &equiv; end - begin
+  sub rcx, rdx                ; rcx -= rdx        &equiv; end - begin
   mov rax, rcx                ; rax = rcx &equiv; end - begin
   sar rax, 2                  ; rax = rax / 4
                               ;     &equiv; (end - begin) / sizeof(int)
@@ -439,26 +443,50 @@ size_t size() const noexcept {
                 </code></pre>
             </section>
             <section>
-            <pre><code data-trim class="x86asm">
+                <h3>Walkthrough</h3>
+                <pre><code data-trim class="x86asm faded">
+  ; rdi = const vector&lt;int> *
+  mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
+  mov rcx, QWORD PTR [rdi+8]  ; rcx = *(rdi + 8)  &equiv; rdi->end
+  sub rcx, rdx                ; rcx -= rdx        &equiv; end - begin
+  mov rax, rcx                ; rax = rcx &equiv; end - begin
+  sar rax, 2                  ; rax = rax / 4
+                              ;     &equiv; (end - begin) / sizeof(int)
+  test rax, rax               ; is rax == 0?
+  je .L4                      ;   if so, goto L4
+                </code></pre>
+                <pre><code data-trim class="x86asm">
   add rcx, rdx                ; rcx += rdx
                               ;      &equiv; (end - begin) + begin
                               ;      &equiv; end
   xor eax, eax                ; eax = 0
+            </code></pre>
+            </section>
+            <section>
+                <h3>Walkthrough</h3>
+                <pre><code data-trim class="x86asm">
+; rcx &equiv; end, rdx = begin, eax = 0
 .L3:
   add eax, DWORD PTR [rdx]    ; eax += *rdx
   add rdx, 4                  ; rdx += sizeof(int)
-  cmp rdx, rcx                ; is rdx == end
-  jne .L3                     ; if not, loop
+  cmp rdx, rcx                ; is rdx == end?
+  jne .L3                     ;   if not, loop
   ret                         ; we're done
+            </code></pre>
+            </section>
+            <section>
+                <h3>Walkthrough</h3>
+                <pre><code data-trim class="x86asm">
 .L4:
   xor eax, eax                ; return 0
   ret
             </code></pre>
-                <!-- TODO this ^^^ -->
             </section>
             <section><h3>Backstory</h3>
                 <h5>So, which approach is best?</h5></section>
-            <section><h3>Optimization</h3></section>
+            <section>
+                <h3>Optimization</h3>
+            </section>
         </section>
 
 
