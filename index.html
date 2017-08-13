@@ -504,7 +504,23 @@ int mulByY(int x, int y) {
             </section>
             <section>
                 <h3>Multiplication</h3>
-                <h5>TODO long multiplication</h5>
+                <pre>
+                            <span
+                                    data-fragment-index="4"
+                                    class="fragment highlight-current-red">1</span><span
+                        data-fragment-index="3" class="fragment highlight-current-red">1</span><span
+                        data-fragment-index="2" class="fragment highlight-current-red">0</span><span
+                        data-fragment-index="1" class="fragment highlight-current-red">1</span>    (13)
+                          x 0101     (5)
+                        --------
+                            <span data-fragment-index="1" class="fragment">1101</span>
+                           <span data-fragment-index="2" class="fragment">0000</span>
+                          <span data-fragment-index="3" class="fragment">1101</span>
+                       <span data-fragment-index="4" class="fragment">+ 0000</span>
+                        <span data-fragment-index="5" class="fragment">--------
+                        01000001    (65)</span></pre>
+                <div class="fragment">That's a lot of additions!</div>
+                <div class="fragment">Haswell 32-bit multiply - 4 cycles</div>
             </section>
             <section>
                 <h3>Multiplication</h3>
@@ -543,6 +559,7 @@ int modByY(int x, int y) {
   return x % y;
 }
                 </pre>
+                <div class="fragment">Haswell 32-bit divide - 22-29 cycles!</div>
             </section>
             <section>
                 <h3>Division</h3>
@@ -551,7 +568,7 @@ int modByY(int x, int y) {
 int divBy3(int x) { return x / 3; }
                 </code></pre>
                 <aside class="notes">
-                    <code>cdq</code> is an anachronism. <code>div</code> divides eax:edx with the operand, results in
+                    <code>cdq</code> does sign expansion into registers. <code>div</code> divides eax:edx with the operand, results in
                     eax (divisor) and edx (dividend).
                     <code>cdq</code> sign extends eax into edx, ready for a div
                 </aside>
@@ -591,12 +608,12 @@ int func(int i) {
                 <pre><code class="ce">
 /// g71:-O2 -std=c++1z -march=haswell
 int countSetBits(int a) {
-    int count = 0;
-    while (a) {
-        count++;
-        a &amp;= (a-1);
-    }
-    return count;
+  int count = 0;
+  while (a) {
+    count++;
+    a &amp;= (a-1);
+  }
+  return count;
 }
             </code></pre>
                 <aside class="notes">
