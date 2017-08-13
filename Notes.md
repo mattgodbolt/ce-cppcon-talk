@@ -16,16 +16,9 @@
   * Optimizer off
   * Show the other approaches
 * Compilers are super smart!
-  * LICM? (Assuming size() is this) TODO
-  * CSE? TODO  
-  * TODO Constants TODO?
   * Multiplication
   * Divi / Hash
-    * maybe here do hash? TODO
-  * Sums
-  * "cute tricks" TODO
-    * TODO: numBitsSet
-  * pass by value/ref? TODO
+  * numBitsSet
 * Compilers not clairvoyant
   * external functions
   * virtual functions
@@ -56,6 +49,11 @@
 * non-virtual thunks (scrap?)
 * variant?
 * vectorization?
+* asan
+* pass by reference
+  * LICM? (Assuming size() is this) TODO
+  * CSE? TODO  
+  * TODO Constants TODO?
 
 ----
 

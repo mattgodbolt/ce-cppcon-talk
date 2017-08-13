@@ -52,6 +52,18 @@
         #registers td.al {
             background: rgb(128, 177, 211);
         }
+
+        .soh {
+            color: rgb(27, 145, 33);
+        }
+
+        .fix-key {
+            color: #03330c;
+        }
+
+        .fix-value {
+            color: #1f1f1f;
+        }
     </style>
 
     <link rel="stylesheet" href="reveal.js/lib/css/zenburn.css">
@@ -279,6 +291,8 @@
                     sub eax, edi
                     movsx rax, di
                     push rax
+                    call func
+                    ret
                     vpaddd ymm0, ymm0, ymmword ptr [rax]
                     popcnt rax
                     bsf rax
@@ -568,7 +582,8 @@ int modByY(int x, int y) {
 int divBy3(int x) { return x / 3; }
                 </code></pre>
                 <aside class="notes">
-                    <code>cdq</code> does sign expansion into registers. <code>div</code> divides eax:edx with the operand, results in
+                    <code>cdq</code> does sign expansion into registers. <code>div</code> divides eax:edx with the
+                    operand, results in
                     eax (divisor) and edx (dividend).
                     <code>cdq</code> sign extends eax into edx, ready for a div
                 </aside>
@@ -620,74 +635,11 @@ int countSetBits(int a) {
                     Explain a &amp; (a - 1)
                 </aside>
             </section>
-            <section>
-                pass by value / pass by reference https://godbolt.org/g/XWFR7s
-                <pre><code class="cpp ce">
-using T = int;
-
-struct p1d { T x; };
-struct p2d { T x; T y; };
-struct p3d { T x; T y; T z; };
-struct p4d { T x; T y; T z; T a; };
-struct p5d { T x; T y; T z; T a; T b; };
-
-T sum(p1d p) {
-  return p.x;
-}
-
-T sum(const p2d p) {
-  return p.x + p.y;
-}
-
-T sum(p3d p) {
-  return p.x + p.y + p.z;
-}
-
-T sum(p4d p) {
-  return p.x + p.y + p.z + p.a;
-}
-
-T sum(p5d p) {
-  return p.x + p.y + p.z + p.a + p.b;
-}
-
-extern T e_sum(p3d p);
-extern T e_sum(p4d p);
-extern T e_sum(const p5d &p);
-
-T f3() {
-  p3d p {1, 2, 3};
-  return e_sum(p);
-}
-
-T f4() {
-  p4d p {1, 2, 3, 4};
-  return e_sum(p);
-}
-
-T f5() {
-  p5d p {1, 2, 3, 4, 5};
-  return e_sum(p);
-}
-            </code></pre>
-                <!-- TODO flesh this ^^ one out -->
-            </section>
-            <section>
-                <h3>The address sanitizer</h3>
-                <pre><code class="ce">
-/// g71:-O2 -fsanitize=address
-// setup
-  #include &lt;cstdlib>
-int read(int *array, size_t index) {
-  return array[index];
-}
-            </code></pre>
-            </section>
         </section>
 
 
         <!------------------------------------------------------->
-        <section id="butNotClair">
+        <section id="butNotClairvoyant">
             <section>
                 <h3>Compilers are super-smart!</h3>
                 <h5 class="fragment">...but aren't clairvoyant</h5>
@@ -1013,7 +965,7 @@ public:
 
 
         <!------------------------------------------------------->
-        <section id="ceAtDRW">
+        <section id="ceAtDRW_hash">
             <section><h3>Case Study: hash maps</h3></section>
             <section>
                 <!-- clang vs gcc - ispow2!  https://github.com/llvm-mirror/libcxx/blob/master/include/__hash_table#L130  -->
@@ -1048,7 +1000,7 @@ int findOrZero(
                         uint64_t orderId;
                         uint32_t product;
                         Side side;
-                        uint64_t price;
+                        int64_t price;
                         uint32_t quantity;
                     } __attribute__((packed));
                 </code></pre>
@@ -1062,7 +1014,7 @@ int findOrZero(
                     class Orders {
                         unordered_map&lt;uint64_t, Order> orders_;
                     public:
-                        void add(uint64_t orderId, uint32_t product, Side side, uint64_t price, uint32_t quantity);
+                        void add(uint64_t orderId, uint32_t product, Side side, int64_t price, uint32_t quantity);
                         void modify(uint64_t orderId, uint32_t product, Side side, uint64_t newPrice, uint32_t newQuantity);
                         void remove(uint64_t orderId, uint32_t product, Side side);
                     };
@@ -1072,12 +1024,259 @@ int findOrZero(
                 <h3>Take one</h3>
                 <pre><code data-trim class="cpp">
                     struct Order {
-                    void add(uint64_t orderId, uint32_t product, Side side, uint64_t price, uint32_t quantity) {
+                    void add(uint64_t orderId, uint32_t product, Side side, int64_t price, uint32_t quantity) {
                         orders_.emplace(orderId, Order{product, side, price, quantity});
                     }
                 </code></pre>
             </section>
+        </section>
+
+        <!------------------------------------------------------->
+        <section id="ceAtDRW_order">
             <section><h3>Case Study: order formatting</h3></section>
+            <section>
+                <h3>An order</h3>
+                <pre><span class="fix-key">8</span>=<span class="fix-value">FIX.4.2</span><span
+                        class="soh">␁</span><span
+                        class="fix-key">9</span>=<span class="fix-value">224</span><span class="soh">␁</span><span
+                        class="fix-key">35</span>=<span class="fix-value">D</span><span class="soh">␁</span><span
+                        class="fix-key">34</span>=<span class="fix-value">698</span><span
+                        class="soh">␁</span><span
+                        class="fix-key">49</span>=<span class="fix-value">ABCDEFG</span><span class="soh">␁</span><span
+                        class="fix-key">52</span>=<span class="fix-value">20150910-18:38:30</span><span
+                        class="soh">␁</span><br><span
+                        class="fix-key">56</span>=<span class="fix-value">CME</span><span class="soh">␁</span><span
+                        class="fix-key">57</span>=<span class="fix-value">G</span><span class="soh">␁</span><span
+                        class="fix-key">60</span>=<span class="fix-value">20150910-18:38:30</span><span
+                        class="soh">␁</span><span
+                        class="fix-key">167</span>=<span class="fix-value">FUT</span><span class="soh">␁</span><span
+                        class="fix-key">21</span>=<span class="fix-value">1</span><span class="soh">␁</span><span
+                        class="fix-key">204</span>=<span class="fix-value">0</span><span class="soh">␁</span><span
+                        class="fix-key">9702</span>=<span class="fix-value">2</span><span class="soh">␁</span><span
+                        class="fix-key">40</span>=<span class="fix-value">2</span><span class="soh">␁</span><br><span
+                        class="fix-key">59</span>=<span class="fix-value">0</span><span class="soh">␁</span><span
+                        class="fix-key">11</span>=<span class="fix-value">RS</span><span class="soh">␁</span><span
+                        class="fix-key">54</span>=<span class="fix-value">1</span><span class="soh">␁</span><span
+                        class="fix-key">38</span>=<span class="fix-value">4</span><span class="soh">␁</span><span
+                        class="fix-key">44</span>=<span class="fix-value">-65</span><span class="soh">␁</span><span
+                        class="fix-key">55</span>=<span class="fix-value">CL</span><span class="soh">␁</span><span
+                        class="fix-key">107</span>=<span class="fix-value">CLF6-CLG6</span><span
+                        class="soh">␁</span><span
+                        class="fix-key">1028</span>=<span class="fix-value">N</span><span class="soh">␁</span><span
+                        class="fix-key">50</span>=<span class="fix-value">DRWTRDR</span><span
+                        class="soh">␁</span><br><span
+                        class="fix-key">142</span>=<span class="fix-value">US,IL</span><span class="soh">␁</span><span
+                        class="fix-key">1</span>=<span class="fix-value">2375404</span><span class="soh">␁</span><span
+                        class="fix-key">10</span>=<span class="fix-value">027</span><span class="soh">␁</span></pre>
+            </section>
+            <section>
+                <h2>Simplified Order</h2>
+                <pre>NEW <i>stock</i> <i>price</i> <i>quantity</i></pre>
+                <pre class="fragment"><code data-trim class="cpp ce">
+/// g71:-O2 -std=c++1z
+// setup
+  #include &lt;string>
+  #include &lt;sstream>
+  using namespace std;
+string newOrder(string stock, int price, int quantity) {
+  stringstream s;
+  s << "NEW " << stock << " " << price << " " << quantity;
+  return s.str();
+}</code></pre>
+            </section>
+            <section>
+                <h2>How Fast Is It?</h2>
+                <ul>
+                    <li>Time 100 million orders, get average time</li>
+                    <li class="fragment">550ns per order (on 3.5GHz Haswell)</li>
+                    <li class="fragment">We can do better!</li>
+                </ul>
+            </section>
+            <section>
+                <h2>Profile</h2>
+                <pre><code class="bash">$ perf record ./app
+$ perf report</code></pre>
+                <pre class="fragment">26.46%  __dynamic_cast
+ 6.00%  ostream::_M_insert
+ 5.12%  __strcmp_sse2_unaligned
+ 4.10%  _int_free
+ 3.99%  basic_streambuf::xsputn
+ 3.96%  __int_to_char
+ 3.72%  newOrder
+ 3.68%  basic_ostream& __ostream_insert
+ 3.67%  num_put::_M_insert_int
+ 2.36%  malloc</pre>
+            </section>
+            <section><h2>Dynamic cast?</h2>
+                <pre>__dynamic_cast()
+bool std::has_facet(std::locale const&)
+std::basic_ios::_M_cache_locale(std::locale const&)
+std::basic_ios::init(...)
+std::basic_istream::basic_istream(...)
+std::basic_iostream::basic_iostream(...)
+std::basic_stringstream::basic_stringstream(...)
+newOrder</pre>
+            </section>
+            <section>
+                <h2>Dynamic cast?</h2>
+                <pre><code class="cpp" data-trim>
+template&lt;typename _Facet> bool
+has_facet(const locale& __loc) {
+  const size_t __i = _Facet::id._M_id();
+  const locale::facet** __facets = __loc._M_impl->_M_facets;
+  return (__i < __loc._M_impl->_M_facets_size
+    &amp;&amp; dynamic_cast&lt;const _Facet*>(__facets[__i]));
+}
+                </code></pre>
+            </section>
+            <section>
+                <h2>Take Two</h2>
+                <pre><code class="cpp ce" data-trim>
+/// g71:-O2
+// setup
+  #include &lt;cstdio>
+void newOrder(char *buf, const char *stock,
+              int price, int quantity) {
+  sprintf(buf, "NEW %s %d %d", stock, price, quantity);
+}</code></pre>
+            </section>
+
+            <section>
+                <h2>Take Two - Results</h2>
+                <ul>
+                    <li>130ns per order</li>
+                    <li>4x faster!</li>
+                    <li class="fragment">We can still do better!</li>
+                </ul>
+                <pre class="fragment">47.38%  <a
+                        href="http://osxr.org/glibc/source/stdio-common/vfprintf.c?v=glibc-2.19.0#0221">vfprintf</a>
+21.51%  <a href="http://osxr.org/glibc/source/libio/genops.c?v=2.19.0#0442">_IO_default_xsputn</a>
+9.81%  <a href="http://osxr.org/glibc/source/string/strchrnul.c?v=glibc-2.16.0#0032">__strchrnul</a>
+6.80%  <a href="http://osxr.org/glibc/source/stdio-common/_itoa.c?v=glibc-2.19.0#0163">_itoa_word</a>
+ </pre>
+            </section>
+
+            <section>
+                <h2>Take Three - Rethink</h2>
+                <ul class="fragment">
+                    <li>Don't need full generality of printf</li>
+                    <li>Create a custom formatter</li>
+                    <li>Maybe end up with a faster <code>_itoa_word</code></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>How to do itoa?</h2>
+                <ul class="fragment">
+                    <li>Rightmost digit is <code>value % 10</code></li>
+                    <li>Next digit is <code>(value / 10) % 10</code></li>
+                    <li>And so on...</li>
+                    <li>Digits come out in reverse order</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Take Three</h2>
+                <pre><code class="cpp">class Format {
+  char _buffer[2048];
+  int _ptr;
+public:
+  Format() : _ptr(0) {}
+  void append(char c) { _buffer[_ptr++] = c; }
+  void append(const char *data) {
+    while (*data) append(*data++);
+  }
+  void finish() { append('\x00'); }
+  void decimalAppend(int value);
+  void decimalAppendNonNeg(unsigned value);
+};</code></pre>
+            </section>
+
+            <section>
+                <h2>Take Three</h2>
+                <pre><code class="cpp">void Format::decimalAppend(int value) {
+  if (value < 0) {
+    append('-');
+    value = -value;
+  }
+  decimalAppendNonNeg(value);
+}</code></pre>
+            </section>
+            <section>
+                <h2>Take Three</h2>
+                <pre><code class="cpp ce">
+/// g71:-O3 -std=c++1z -march=haswell
+// setup
+  #include &lt;utility>
+  using namespace std;
+
+  class Format {
+    char _buffer[2048];
+    int _ptr;
+  public:
+    Format() : _ptr(0) {}
+    void append(char c) { _buffer[_ptr++] = c; }
+
+    void decimalAppendNonNeg(unsigned value);
+
+    void decimalAppend(int value) {
+      if (value < 0) {
+        append('-');
+        value = -value;
+      }
+      decimalAppendNonNeg(value);
+    }
+  };
+
+void Format::decimalAppendNonNeg(unsigned value) {
+  int startPos = _ptr;
+  do {
+    append((char)(value % 10) + '0');
+    value /= 10;
+  } while (value);
+  // Reverse the digits.
+  auto end = &_buffer[_ptr - 1];
+  auto start = &_buffer[startPos];
+  while (end > start) swap(*start++, *end--);
+}
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Take Three</h2>
+                <pre><code class="cpp">void newOrder(Format &format, const char *stock,
+              int price, int quantity) {
+  format.append("NEW ");
+  format.append(stock);
+  format.append(' ');
+  format.decimalAppend(price);
+  format.append(' ');
+  format.decimalAppendNonNeg(quantity);
+  format.finish();
+}</code></pre>
+            </section>
+
+            <section>
+                <h2>Take Three - Results</h2>
+                <ul>
+                    <li>20ns / order</li>
+                    <li>~100 CPU clock cycles</li>
+                    <li>27x faster than Take One</li>
+                    <li>6.5x faster than Take Two</li>
+                </ul>
+            </section>
+            <section>
+                <h2>Take Three - Profile</h2>
+                <pre>94.93% newOrder(Format&, char const*, int, int)
+ 4.86% main</pre>
+            </section>
+            <section>
+                <h2>Take Three - continued</h2>
+                <ul>
+                    <li>Can we do better?</li>
+                    <li class="fragment">Yes!</li>
+                </ul>
+            </section>
         </section>
 
 
@@ -1268,6 +1467,71 @@ int test(IntOrFloat iof) {
 int test2() {
   IntOrFloat iof { 1.f };
   return visit([](auto i) -> int{ return i; }, iof);
+}
+            </code></pre>
+        </section>
+
+        <section>
+            pass by value / pass by reference https://godbolt.org/g/XWFR7s
+            <pre><code class="cpp ce">
+using T = int;
+
+struct p1d { T x; };
+struct p2d { T x; T y; };
+struct p3d { T x; T y; T z; };
+struct p4d { T x; T y; T z; T a; };
+struct p5d { T x; T y; T z; T a; T b; };
+
+T sum(p1d p) {
+  return p.x;
+}
+
+T sum(const p2d p) {
+  return p.x + p.y;
+}
+
+T sum(p3d p) {
+  return p.x + p.y + p.z;
+}
+
+T sum(p4d p) {
+  return p.x + p.y + p.z + p.a;
+}
+
+T sum(p5d p) {
+  return p.x + p.y + p.z + p.a + p.b;
+}
+
+extern T e_sum(p3d p);
+extern T e_sum(p4d p);
+extern T e_sum(const p5d &p);
+
+T f3() {
+  p3d p {1, 2, 3};
+  return e_sum(p);
+}
+
+T f4() {
+  p4d p {1, 2, 3, 4};
+  return e_sum(p);
+}
+
+T f5() {
+  p5d p {1, 2, 3, 4, 5};
+  return e_sum(p);
+}
+            </code></pre>
+            <!-- TODO flesh this ^^ one out -->
+        </section>
+
+        <section>
+            <h3>The address sanitizer</h3>
+            <pre><code class="ce">
+/// g71:-O2
+// setup
+  #include &lt;cstdlib>
+int read(int *array, size_t index) {
+  return array[index];
 }
             </code></pre>
         </section>
