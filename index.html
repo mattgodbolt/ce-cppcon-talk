@@ -10,22 +10,47 @@
     <link rel="stylesheet" href="drw.css">
 
     <style>
-        td.reg {
-            background-color: #333;
-            text-align: center !important
-        }
-
-        .replaceable {
-            position: absolute !important;
-            width: 800px;
-        }
-
-        .replacecontainer {
-            position: relative;
-        }
-
         .faded {
             opacity: 0.7;
+        }
+
+        div.footnote {
+            margin-top: 4em;
+            font-size: smaller;
+            font-style: italic;
+        }
+
+        #registers th {
+            font-size: smaller;
+            text-align: center;
+        }
+
+        #registers td {
+            text-align: center;
+        }
+
+        #registers td.register {
+            border: 1px solid black;
+        }
+
+        #registers td.rax {
+            background: rgb(141, 211, 199);
+        }
+
+        #registers td.eax {
+            background: rgb(255, 255, 179);
+        }
+
+        #registers td.ax {
+            background: rgb(190, 186, 218);
+        }
+
+        #registers td.ah {
+            background: rgb(251, 128, 114);
+        }
+
+        #registers td.al {
+            background: rgb(128, 177, 211);
         }
     </style>
 
@@ -44,7 +69,7 @@
     <!-- TODO compile all with -Wall -Wextra -->
     <!-- TODO unify indentation -->
     <section class="slides">
-        <section id="intro">
+        <section id="title">
             <em>September 2017</em>
             <!-- TODO, better title format -->
             <h3>Unbolting the Compiler's Lid:</h3>
@@ -71,7 +96,15 @@
             </section>
             <section>
                 <h3>My background</h3>
-                <!-- TODO z80 and 6502 pics -->
+                <div class="fragment">
+                    <img src="images/6502_z80.jpg" width="200">
+                    <img src="images/red_dog.png" width="200">
+                </div>
+                <div class="fragment">
+                    <img src="images/profactor.jpg" width="100">
+                    <img src="images/google.png" width="100">
+                    <img src="images/DRWSmallLogo.png" width="100">
+                </div>
                 <aside class="notes">
                     <h4>Potted history:</h4>
                     <ul>
@@ -118,6 +151,7 @@
                   for (int x : v) result += x;
                   return result;
                 }</code></pre>
+                <div class="fragment">Which is better? Check the compiler output!</div>
                 <aside class="notes">
                     <ul>
                         <li>love performance</li>
@@ -151,15 +185,70 @@
             <!-- reference "just enough asm to be dangerous talk -->
             <section>
                 <h3>x86 Assembly 101</h3>
-                <h5>Registers</h5>
             </section>
             <section>
-                <h3>x86 Assembly 101</h3>
-                <h5>Calling convention</h5>
+                <h3>Registers</h3>
+                <ul>
+                    <li>rax, rbx, rcx, rdx, rsp, rbp, rsi, rdi, r8-r15</li>
+                    <li>xmm0-15, ymm0-15, zmm0-15</li>
+                    <li>cs, ds, ss, es, fs, gs</li>
+                    <li>flags</li>
+                </ul>
             </section>
             <section>
-                <h3>x86 Assembly 101</h3>
-                <h5>Instructions</h5>
+                <h3>Registers</h3>
+                <table id="registers">
+                    <thead>
+                    <tr>
+                        <th>63...56</th>
+                        <th>55...48</th>
+                        <th>47...40</th>
+                        <th>39...32</th>
+                        <th>31...24</th>
+                        <th>23...16</th>
+                        <th>15...8</th>
+                        <th>7...0</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td colspan="8" class="register rax">rax</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">(zeroed out)</td>
+                        <td colspan="4" class="register eax">eax</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6"></td>
+                        <td colspan="2" class="register ax">ax</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6"></td>
+                        <td colspan="1" class="register ah">ah</td>
+                        <td colspan="1"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="7"></td>
+                        <td colspan="1" class="register al">al</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section>
+                <h3>Calling convention</h3>
+                <pre><code class="cpp">long func(int a, short b, char c);</code></pre>
+                <ul class="fragment">
+                    <li>Params: rdi, rsi, rdx, rcx, r8, r9; xmm0-7</li>
+                    <li>Return: eax / xmm0</li>
+                    <li>Callee-save: rbp, rbx, r12–r15</li>
+                </ul>
+                <div class="fragment">
+                    <pre><code class="cpp">rax func(edi a, si b, dl c);</code></pre>
+                </div>
+                <div class="footnote">(System V AMD64 ABI)</div>
+            </section>
+            <section>
+                <h3>Instructions</h3>
                 <pre><code data-trim class="x86asm">
                 mov eax, 1234       ; eax = 1234
                 mov ecx, 5678       ; ecx = 5678
@@ -169,20 +258,27 @@
             </code></pre>
             </section>
             <section>
-                <h3>x86 Assembly 101</h3>
-                <h5>Instructions</h5>
+                <h3>Instructions</h3>
                 <pre><code data-trim class="x86asm">
-                mov eax, DWORD PTR [r14] ; eax = *(int32_t *)rdi
-                mov eax, DWORD PTR [r14 + 4] ; eax = *(int32_t *)(rdi + 4)
+                mov eax, DWORD PTR [r14]     ; eax = *(uint32_t *)rdi
+                mov eax, DWORD PTR [r14 + 4] ; eax = *(uint32_t *)(rdi + 4)
                 mov eax, DWORD PTR [r14 + 4 * rbx]
-                        ; eax = *(int32_t *)(rdi + 4 * rbx)
-                lea eax, [r14 + 4 * rbx]
-                        ; eax = (rdi + 4 * rbx)
-            </code></pre>
+                                             ; eax = *(uint32_t *)(rdi + 4 * rbx)
+                lea rax, [r14 + 4 * rbx]     ; eax = (rdi + 4 * rbx)
+                </code></pre>
+                <pre class="fragment"><code data-trim class="cpp">
+                int eax = *r14;              // int *r14;
+                int eax = r14[1];
+                int eax = r14[rbx];
+                int *rax = &r14[rbx];
+                </code></pre>
             </section>
             <section>
-                <h3>Miscellaneous</h3>
+                <h3>Instructions</h3>
                 <pre><code data-trim class="x86asm">
+                    sub eax, edi
+                    movsx rax, di
+                    push rax
                     vpaddd ymm0, ymm0, ymmword ptr [rax]
                     popcnt rax
                     bsf rax
@@ -211,15 +307,11 @@
                 }</code></pre>
             </section>
             <section>
-                <h3>CE v1</h3>
+                <h3>Compiler Explorer v0.1</h3>
                 <pre><code data-noescape data-trim class="bash">
                  $ g++ /tmp/test.cc -O1 -c -S -o -masm=intel -
-                   <span class="fragment" data-fragment-index="3">| c++filt</span>
-                   <span class="fragment" data-fragment-index="4">| grep -vE '\s+\.'</span>
             </code></pre>
-                <div class="replacecontainer">
-                <pre class="fragment current-visible replaceable" data-fragment-index="2"><code class="x86asm"
-                                                                                                data-trim>
+                <pre class="fragment"><code class="x86asm" data-trim>
     .file	"test.cc"
     .text
     .globl	_Z3sumRKSt6vectorIiSaIiEE
@@ -231,8 +323,13 @@ _Z3sumRKSt6vectorIiSaIiEE:
     mov	rax, QWORD PTR 8[rdi]
     sub	rax, rcx
     ...</code></pre>
-                    <pre class="fragment current-visible replaceable" data-fragment-index="3"><code class="x86asm"
-                                                                                                    data-trim>
+            </section>
+            <section>
+                <h3>Compiler Explorer v0.1</h3>
+                <pre><code data-noescape data-trim class="bash">
+                 $ g++ /tmp/test.cc -O1 -c -S -o -masm=intel - | c++filt
+            </code></pre>
+                <pre><code class="x86asm" data-trim>
     .file	"test.cc"
     .text
     .globl	sum(std::vector&lt;int, std::allocator&lt;int> > const&)
@@ -244,8 +341,14 @@ sum(std::vector&lt;int, std::allocator&lt;int> > const&):
     mov	rax, QWORD PTR 8[rdi]
     sub	rax, rcx
     ...</code></pre>
-                    <pre class="fragment current-visible replaceable" data-fragment-index="4"><code class="x86asm"
-                                                                                                    data-trim>
+            </section>
+            <section>
+                <h3>Compiler Explorer v0.1</h3>
+                <pre><code data-noescape data-trim class="bash">
+                 $ g++ /tmp/test.cc -O1 -c -S -o -masm=intel - | c++filt \
+                    | grep -vE '\s+\.'
+            </code></pre>
+                <pre><code class="x86asm" data-trim>
 sum(std::vector&lt;int, std::allocator&lt;int> > const&):
 .LFB786:
     mov	rcx, QWORD PTR [rdi]
@@ -257,7 +360,6 @@ sum(std::vector&lt;int, std::allocator&lt;int> > const&):
     mov	edx, 0
     mov eax, 0
     ...</code></pre>
-                </div>
             </section>
         </section>
 
@@ -1127,7 +1229,7 @@ int test2() {
 
         <div class="footer">
             <hr>
-            <img src="DRWSmallLogo.png" width="50" height="16">
+            <img src="images/DRWSmallLogo.png" width="50" height="16">
         </div>
     </section>
 </div>
