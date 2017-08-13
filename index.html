@@ -968,65 +968,40 @@ public:
         <section id="ceAtDRW_hash">
             <section><h3>Case Study: hash maps</h3></section>
             <section>
+                <h3>An order book</h3>
+                <img src="images/TwtrLadder.png">
+            </section>
+            <section>
+                <h3>Updating the order book</h3>
+                <ul>
+                    <li>New order</li>
+                    <li>Modify order</li>
+                    <li>Remove order</li>
+                </ul>
+                <div class="fragment">150 million per day</div>
+                <div class="fragment">2 million in first 30 seconds</div>
+                <div class="fragment">...for just one exchange</div>
+            </section>
+            <section>
                 <!-- clang vs gcc - ispow2!  https://github.com/llvm-mirror/libcxx/blob/master/include/__hash_table#L130  -->
                 <!-- TODO - make sure understand exactly what's going on here -->
                 <!-- TODO maybe recap hash map? -->
+                <h3>Finding an order</h3>
                 <pre><code class="cpp ce">
 /// g71:-O2 -std=c++1z
 // setup
   #include &lt;unordered_map>
+  #include &lt;cstdint>
   using namespace std;
-
-int findOrZero(
-    const unordered_map&lt;int, int> &m,
-    int key) {
+  struct Order;
+using OrderId = uint64_t;
+Order *findOrder(
+    const unordered_map&lt;OrderId, Order *> &m,
+    OrderId key) {
   if (auto it = m.find(key); it != m.end())
     return it->second;
-  return 0;
+  return nullptr;
 }
-                </code></pre>
-            </section>
-            <section>
-                <h3>Hash maps in practice</h3>
-                Order book picture
-            </section>
-            <section>
-                <h3>Hash maps in practice</h3>
-                <pre><code data-trim class="cpp">
-                    enum class Type : uint8_t { Add = 0, Modify = 1, Remove = 2 };
-                    enum class Side : uint8_t { Buy, Sell };
-                    struct Message {
-                        Type type;
-                        uint64_t orderId;
-                        uint32_t product;
-                        Side side;
-                        int64_t price;
-                        uint32_t quantity;
-                    } __attribute__((packed));
-                </code></pre>
-            </section>
-            <section>
-                <h3># msgs processed/day trading system?</h3>
-            </section>
-            <section>
-                <h3>Take one</h3>
-                <pre><code data-trim class="cpp">
-                    class Orders {
-                        unordered_map&lt;uint64_t, Order> orders_;
-                    public:
-                        void add(uint64_t orderId, uint32_t product, Side side, int64_t price, uint32_t quantity);
-                        void modify(uint64_t orderId, uint32_t product, Side side, uint64_t newPrice, uint32_t newQuantity);
-                        void remove(uint64_t orderId, uint32_t product, Side side);
-                    };
-                </code></pre>
-            </section>
-            <section>
-                <h3>Take one</h3>
-                <pre><code data-trim class="cpp">
-                    struct Order {
-                    void add(uint64_t orderId, uint32_t product, Side side, int64_t price, uint32_t quantity) {
-                        orders_.emplace(orderId, Order{product, side, price, quantity});
-                    }
                 </code></pre>
             </section>
         </section>
