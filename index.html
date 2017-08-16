@@ -65,6 +65,11 @@
             background: rgb(128, 177, 211);
         }
 
+        #registers td.regnote {
+            font-size: smaller;
+            font-style: italic;
+        }
+
         .soh {
             color: rgb(27, 145, 33);
         }
@@ -175,17 +180,13 @@
                   for (int x : v) result += x;
                   return result;
                 }</code></pre>
-                <div class="fragment">Which is better? Check the compiler output!</div>
+                <div class="fragment">Which is better?</div>
+                <div class="fragment">Why care?</div>
                 <aside class="notes">
                     <ul>
                         <li>2012, C++11isms, range-for</li>
                     </ul>
                 </aside>
-            </section>
-            <section>
-                <h3>Backstory</h3>
-                <h5>Why do we care?</h5>
-                <!-- TODO ... cite Carl's talk? -->
             </section>
             <section>
                 <h3>WARNING</h3>
@@ -237,7 +238,7 @@
                         <td colspan="8" class="register rax">rax</td>
                     </tr>
                     <tr>
-                        <td colspan="4">(zeroed out)</td>
+                        <td colspan="4" class="regnote">(zeroed on write)</td>
                         <td colspan="4" class="register eax">eax</td>
                     </tr>
                     <tr>
@@ -272,14 +273,27 @@
             <section>
                 <h3>Instructions</h3>
                 <pre><code data-trim class="x86asm">
-                  mov eax, 1234       ; eax = 1234
-                  mov ecx, 5678       ; ecx = 5678
-                  add eax, ecx        ; eax += ecx
-                  cmp eax, 6912       ; eax == 6912 ?
-                  je all_ok           ;  then goto all_ok
-                  call report_error   ; else report error
+                    op
+                    op dest
+                    op dest, src
+                </code></pre>
+                <ul>
+                    <li><code>op</code> is e.g. <code>add</code>, <code>sub</code>, <code>sub</code></li>
+                    <li><code>src</code>, <code>dest</code> is a register or a memory reference</li>
+                </ul>
+                <div class="footnote">(Intel asm syntax)</div>
+            </section>
+            <section>
+                <h3>Instructions</h3>
+                <pre><code data-trim class="x86asm">
+                  mov eax, 1234             ; eax = 1234
+                  mov ecx, DWORD PTR g[rip] ; ecx = contents of global variable g
+                  add eax, ecx              ; eax += ecx
+                  cmp eax, 6912             ; eax == 6912 ?
+                  je all_ok                 ;  then goto all_ok
+                  call report_error         ; else report error
                 all_ok:
-                  ret                 ; and return
+                  ret                       ; and return
             </code></pre>
             </section>
             <section>
@@ -308,7 +322,18 @@
                     lzcnt eax, edi
                     bsf rax
                     int 3
-            </code></pre>
+                </code></pre>
+            </section>
+            <section>
+                <h3>Summary</h3>
+                <ul>
+                    <li>Registers: <code>rax</code>, <code>rbx</code>, <code>rcx</code> ...</li>
+                    <li>Size: <code>rax</code>, <code>eax</code>, <code>ax</code> ...</li>
+                    <li>Params: <code>rdi</code>, <code>rsi</code>, <code>rdx</code>, <code>rcx</code> ...</li>
+                    <li>Result: <code>rax</code></li>
+                    <li><code>op dest, src</code></li>
+                    <li><code>dest</code>, <code>src</code> are registers or memory</li>
+                </ul>
             </section>
         </section>
 
@@ -510,7 +535,11 @@ size_t size() const noexcept {
             <section><h3>Backstory</h3>
                 <h5>So, which approach is best?</h5></section>
             <section>
-                <h3>Optimization</h3>
+                <h3>Also</h3>
+                <ul>
+                    <li>Optimizer settings are important</li>
+                    <li><code>std::accumulate</code></li>
+                </ul>
             </section>
         </section>
 
