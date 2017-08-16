@@ -1416,7 +1416,7 @@ void Format::decimalAppendNonNeg(unsigned value) {
             <section>
                 <h3>Best so far</h3>
                 <ul>
-                    <li>Work out num digits</li>
+                    <li>Work out number of digits</li>
                     <li>Generate bespoke routine for N digits</li>
                     <li>Do two digits at a time <code>table[x % 100];</code></li>
                     <li class="fragment">13ns / order</li>
@@ -1424,13 +1424,16 @@ void Format::decimalAppendNonNeg(unsigned value) {
             </section>
             <section>
                 <h3>log10(x)</h3>
-                Number of digits in result, N is <code>1 + log10(x)</code>:
                 <ul>
-                    <li><code>log2(x)</code> with <code class="asm">31 - clz</code></li>
+                    <li>Number of digits in result is <code>1 + log10(x)</code></li>
                     <li><code>log10(x) = log2(x) * (ln(2)/ln(10))</code></li>
+                    <li><code>log2(x)</code> is <code class="asm">31 - clz</code></li>
                     <li><code>log(2) / log(10) ~ 0.30103 ~ 1233/4096</code></li>
                 </ul>
-                <pre><code class="cpp" data-trim>
+            </section>
+            <section>
+                <h3>log10(x)</h3>
+                <pre><code class="ce cpp" data-trim>
 constexpr unsigned PowersOf10[] = {
     1, 10, 100, 1000, 10000, 100000,
     1000000, 10000000, 100000000,
@@ -1442,7 +1445,6 @@ unsigned numDigits(unsigned v) {
   auto log10 = log10Approx - (v < PowersOf10[log10Approx]);
   return log10 + 1;
 }
-
 </code></pre>
             </section>
 
@@ -1452,29 +1454,23 @@ unsigned numDigits(unsigned v) {
         <!------------------------------------------------------->
         <section id="otherPeople">
             <!-- TODO -->
-            <section><h3>uses</h3></section>
+            <section><h3>Uses</h3></section>
             <section>
-                <h3>CE the REPL</h3>
-            </section>
-            <section><h3>How other people use it, including things like</h3>
+                <h3>C++ REPL</h3>
                 <ul>
-                    <li>Compiler teams (e.g. at Google)</li>
-                    <li>Twitter competition to "generate most code from 140c of code"</li>
-                    <li>Template metaprogramming REPL using constepr</li>
-                    <li>Minimal bug reports for compilers / search for regressions</li>
+                    <li>Quick turnaround for ideas</li>
+                    <li>"Does this even compile?"</li>
+                    <li>Minimal bug reports for compilers</li>
                 </ul>
             </section>
-            <section><h3>Case Study: other people's usage</h3>
+            <section>
+                <h3>Other uses</h3>
                 <ul>
-                    <li>Trying out new features</li>
-                    <li>"most output from a tweet" competition</li>
-                    <li>creating minimal bug reports for compilers</li>
-                    <li>TMP repl using static_assert</li>
-                    <li>ease of use means people try things out they would never have thought of</li>
-                    <li>Compiler optimization team at Google</li>
-                    <li>"Works on my machine" / Godbolt</li>
+                    <li>Compiler teams</li>
+                    <li>"Works on my machine"</li>
                 </ul>
             </section>
+
         </section>
 
 
