@@ -20,6 +20,18 @@
             font-style: italic;
         }
 
+        #sum td {
+            border: 1px solid black;
+        }
+
+        #sum tr {
+            border: 1px solid black;
+        }
+
+        #sum .filled {
+            background: rgb(141, 211, 199);
+        }
+
         #registers th {
             font-size: smaller;
             text-align: center;
@@ -166,8 +178,6 @@
                 <div class="fragment">Which is better? Check the compiler output!</div>
                 <aside class="notes">
                     <ul>
-                        <li>love performance</li>
-                        <li>work in trading where every microsecond can count</li>
                         <li>2012, C++11isms, range-for</li>
                     </ul>
                 </aside>
@@ -251,7 +261,7 @@
                 <pre><code class="cpp">long func(int a, short b, char c);</code></pre>
                 <ul class="fragment">
                     <li>Params: rdi, rsi, rdx, rcx, r8, r9; xmm0-7</li>
-                    <li>Return: eax / xmm0</li>
+                    <li>Return: rax / xmm0</li>
                     <li>Callee-save: rbp, rbx, r12–r15</li>
                 </ul>
                 <div class="fragment">
@@ -262,39 +272,40 @@
             <section>
                 <h3>Instructions</h3>
                 <pre><code data-trim class="x86asm">
-                mov eax, 1234       ; eax = 1234
-                mov ecx, 5678       ; ecx = 5678
-                add eax, ecx        ; eax += ecx
-                cmp eax, 6912       ; eax == 6912 ?
-                je all_ok           ;  then goto all_ok
+                  mov eax, 1234       ; eax = 1234
+                  mov ecx, 5678       ; ecx = 5678
+                  add eax, ecx        ; eax += ecx
+                  cmp eax, 6912       ; eax == 6912 ?
+                  je all_ok           ;  then goto all_ok
+                  call report_error   ; else report error
+                all_ok:
+                  ret                 ; and return
             </code></pre>
             </section>
             <section>
                 <h3>Instructions</h3>
                 <pre><code data-trim class="x86asm">
-                mov eax, DWORD PTR [r14]     ; eax = *(uint32_t *)rdi
-                mov eax, DWORD PTR [r14 + 4] ; eax = *(uint32_t *)(rdi + 4)
-                mov eax, DWORD PTR [r14 + 4 * rbx]
-                                             ; eax = *(uint32_t *)(rdi + 4 * rbx)
-                lea rax, [r14 + 4 * rbx]     ; eax = (rdi + 4 * rbx)
+                mov eax, DWORD PTR [r14]     ; eax = *(uint32_t *)r14
+                add eax, DWORD PTR [r14 + 4] ; eax += *(uint32_t *)(r14 + 4)
+                sub eax, DWORD PTR [r14 + 4 * rbx]
+                                             ; eax -= *(uint32_t *)(r14 + 4 * rbx)
+                lea rax, [r14 + 4 * rbx]     ; eax = r14 + 4 * rbx
                 </code></pre>
                 <pre class="fragment"><code data-trim class="cpp">
                 int eax = *r14;              // int *r14;
-                int eax = r14[1];
-                int eax = r14[rbx];
+                eax += r14[1];
+                eax -= r14[rbx];
                 int *rax = &r14[rbx];
                 </code></pre>
             </section>
             <section>
                 <h3>Instructions</h3>
                 <pre><code data-trim class="x86asm">
-                    sub eax, edi
                     movsx rax, di
                     push rax
-                    call func
-                    ret
                     vpaddd ymm0, ymm0, ymmword ptr [rax]
                     popcnt rax
+                    lzcnt eax, edi
                     bsf rax
                     int 3
             </code></pre>
@@ -666,14 +677,15 @@ int sum(const vector&lt;int> &v) {
                 </aside>
             </section>
             <section><h3>Virtual methods</h3>
-                <pre><code class="ce">
+                <pre><code class="cpp ce">
 /// g71:-O2 -std=c++1z
 // setup
   #include &lt;vector>
   using namespace std;
-struct Coster { virtual int costFor(int x) const = 0; };
+struct Coster { virtual int costFor(int x) = 0; };
 
-int totalCost(const Coster &coster, const vector&lt;int> &v) {
+int totalCost(Coster &coster,
+              const vector&lt;int> &v) {
   int result = 0;
   for (auto i : v)
     result += coster.costFor(i);
@@ -705,18 +717,19 @@ int totalCost(const Coster &coster, const vector&lt;int> &v) {
     }
             -->
             <section><h3>Virtual methods</h3>
-                <pre><code class="ce">
+                <pre><code class="cpp ce">
 /// g71:-O2 -std=c++1z
-//setup
+// setup
   #include &lt;vector>
   using namespace std;
   struct Coster { virtual int costFor(int x) = 0; };
 
 struct StaticCost : Coster {
-    virtual int costFor(int x) const { return x; }
+  virtual int costFor(int x) { return x; }
 };
 
-int totalCost(const Coster &coster, const vector&lt;int> &v) {
+int totalCost(Coster &coster,
+              const vector&lt;int> &v) {
   int result = 0;
   for (auto i : v)
     result += coster.costFor(i);
@@ -725,15 +738,15 @@ int totalCost(const Coster &coster, const vector&lt;int> &v) {
                 </code></pre>
             </section>
             <section><h3>Unpicking your object hierarchy</h3>
-                <pre><code class="ce">
+                <pre><code class="cpp ce">
 /// g71:-O2 -std=c++1z
-//setup
+// setup
   #include &lt;vector>
   using namespace std;
   namespace {
   struct Coster { virtual int costFor(int x) = 0; };
   struct StaticCost : Coster {
-      virtual int costFor(int x) const { return x; }
+    virtual int costFor(int x) const { return x; }
   };
   }
 
@@ -756,7 +769,7 @@ int main(int argv, const char *argv[]) {
             <section>
                 <h3>Aliasing</h3>
                 <!-- TODO - some story about compilers pessimistic? -->
-                <pre><code class="ce">
+                <pre><code class="cpp ce">
 /// g71:-O2 -std=c++1z
 // setup
   #include &lt;functional>
@@ -776,7 +789,7 @@ void sum(int *first, size_t num,
                 <!-- TODO -->
                 <!--clang vs gcc difference here -->
                 <!-- likely doesn't work here in clang :'( -->
-                <pre><code class="ce">
+                <pre><code class="cpp ce">
 /// g71:-O2 -std=c++1z
 // setup
   extern void allZero();
@@ -932,14 +945,48 @@ int main(int argc, const char *argv[]) {
                 </aside>
             </section>
             <section>
-                TODO: math bit? maybe show nice n x (n-1)
+                <h3>Sum(x)</h3>
+                <table id="sum">
+                    <tbody>
+                    <tr class="fragment">
+                        <td class="filled"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="fragment">
+                        <td class="filled"></td>
+                        <td class="filled"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="fragment">
+                        <td class="filled"></td>
+                        <td class="filled"></td>
+                        <td class="filled"></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="fragment">
+                        <td class="filled"></td>
+                        <td class="filled"></td>
+                        <td class="filled"></td>
+                        <td class="filled"></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="fragment">(x * (x + 1)) / 2</div>
+                <div class="fragment">((x - 1) * x) / 2 + x</div>
             </section>
             <section>
-                <h3>Classes?</h3>
+                <h3>Classes</h3>
                 <pre><code class="cpp ce">
 /// g71:-O2 -std=c++1z
 class Holder {
-  int value_{0};
+  int value_{};
 public:
   int value() const {
     return value_;
@@ -958,7 +1005,17 @@ public:
             </section>
             <section>
                 <h3>Templates</h3>
-                <!--tODO-->
+                <pre><code class="cpp ce">
+/// g71:-O2 -std=c++1z
+template&lt;typename T>
+class Holder {
+  T value_{};
+public:
+  T value() const {
+    return value_;
+  }
+};
+                </code></pre>
             </section>
             <section><h3>Power use demo</h3></section>
         </section>
@@ -1045,7 +1102,7 @@ Order *findOrder(
                         class="fix-key">10</span>=<span class="fix-value">027</span><span class="soh">␁</span></pre>
             </section>
             <section>
-                <h2>Simplified Order</h2>
+                <h3>Simplified Order</h3>
                 <pre>NEW <i>stock</i> <i>price</i> <i>quantity</i></pre>
                 <pre class="fragment"><code data-trim class="cpp ce">
 /// g71:-O2 -std=c++1z
@@ -1060,7 +1117,7 @@ string newOrder(string stock, int price, int quantity) {
 }</code></pre>
             </section>
             <section>
-                <h2>How Fast Is It?</h2>
+                <h3>How Fast Is It?</h3>
                 <ul>
                     <li>Time 100 million orders, get average time</li>
                     <li class="fragment">550ns per order (on 3.5GHz Haswell)</li>
@@ -1068,7 +1125,7 @@ string newOrder(string stock, int price, int quantity) {
                 </ul>
             </section>
             <section>
-                <h2>Profile</h2>
+                <h3>Profile</h3>
                 <pre><code class="bash">$ perf record ./app
 $ perf report</code></pre>
                 <pre class="fragment">26.46%  __dynamic_cast
@@ -1082,7 +1139,7 @@ $ perf report</code></pre>
  3.67%  num_put::_M_insert_int
  2.36%  malloc</pre>
             </section>
-            <section><h2>Dynamic cast?</h2>
+            <section><h3>Dynamic cast?</h3>
                 <pre>__dynamic_cast()
 bool std::has_facet(std::locale const&)
 std::basic_ios::_M_cache_locale(std::locale const&)
@@ -1093,7 +1150,7 @@ std::basic_stringstream::basic_stringstream(...)
 newOrder</pre>
             </section>
             <section>
-                <h2>Dynamic cast?</h2>
+                <h3>Dynamic cast?</h3>
                 <pre><code class="cpp" data-trim>
 template&lt;typename _Facet> bool
 has_facet(const locale& __loc) {
@@ -1105,7 +1162,7 @@ has_facet(const locale& __loc) {
                 </code></pre>
             </section>
             <section>
-                <h2>Take Two</h2>
+                <h3>Take Two</h3>
                 <pre><code class="cpp ce" data-trim>
 /// g71:-O2
 // setup
@@ -1117,7 +1174,7 @@ void newOrder(char *buf, const char *stock,
             </section>
 
             <section>
-                <h2>Take Two - Results</h2>
+                <h3>Take Two - Results</h3>
                 <ul>
                     <li>130ns per order</li>
                     <li>4x faster!</li>
@@ -1132,7 +1189,7 @@ void newOrder(char *buf, const char *stock,
             </section>
 
             <section>
-                <h2>Take Three - Rethink</h2>
+                <h3>Take Three - Rethink</h3>
                 <ul class="fragment">
                     <li>Don't need full generality of printf</li>
                     <li>Create a custom formatter</li>
@@ -1141,7 +1198,7 @@ void newOrder(char *buf, const char *stock,
             </section>
 
             <section>
-                <h2>How to do itoa?</h2>
+                <h3>itoa</h3>
                 <ul class="fragment">
                     <li>Rightmost digit is <code>value % 10</code></li>
                     <li>Next digit is <code>(value / 10) % 10</code></li>
@@ -1151,7 +1208,7 @@ void newOrder(char *buf, const char *stock,
             </section>
 
             <section>
-                <h2>Take Three</h2>
+                <h3>Take Three</h3>
                 <pre><code class="cpp">class Format {
   char _buffer[2048];
   int _ptr;
@@ -1168,7 +1225,7 @@ public:
             </section>
 
             <section>
-                <h2>Take Three</h2>
+                <h3>Take Three</h3>
                 <pre><code class="cpp">void Format::decimalAppend(int value) {
   if (value < 0) {
     append('-');
@@ -1178,7 +1235,7 @@ public:
 }</code></pre>
             </section>
             <section>
-                <h2>Take Three</h2>
+                <h3>Take Three</h3>
                 <pre><code class="cpp ce">
 /// g71:-O3 -std=c++1z -march=haswell
 // setup
@@ -1218,7 +1275,7 @@ void Format::decimalAppendNonNeg(unsigned value) {
             </section>
 
             <section>
-                <h2>Take Three</h2>
+                <h3>Take Three</h3>
                 <pre><code class="cpp">void newOrder(Format &format, const char *stock,
               int price, int quantity) {
   format.append("NEW ");
@@ -1232,7 +1289,7 @@ void Format::decimalAppendNonNeg(unsigned value) {
             </section>
 
             <section>
-                <h2>Take Three - Results</h2>
+                <h3>Take Three - Results</h3>
                 <ul>
                     <li>20ns / order</li>
                     <li>~100 CPU clock cycles</li>
@@ -1241,17 +1298,50 @@ void Format::decimalAppendNonNeg(unsigned value) {
                 </ul>
             </section>
             <section>
-                <h2>Take Three - Profile</h2>
+                <h3>Take Three - Profile</h3>
                 <pre>94.93% newOrder(Format&, char const*, int, int)
  4.86% main</pre>
             </section>
             <section>
-                <h2>Take Three - continued</h2>
+                <h3>Take Three</h3>
                 <ul>
                     <li>Can we do better?</li>
                     <li class="fragment">Yes!</li>
                 </ul>
             </section>
+            <section>
+                <h3>Best so far</h3>
+                <ul>
+                    <li>Work out num digits</li>
+                    <li>Generate bespoke routine for N digits</li>
+                    <li>Do two digits at a time <code>table[x % 100];</code></li>
+                    <li class="fragment">13ns / order</li>
+                </ul>
+            </section>
+            <section>
+                <h3>log10(x)</h3>
+                Number of digits in result, N is <code>1 + log10(x)</code>:
+                <ul>
+                    <li><code>log2(x)</code> with <code class="asm">31 - clz</code></li>
+                    <li><code>log10(x) = log2(x) * (ln(2)/ln(10))</code></li>
+                    <li><code>log(2) / log(10) ~ 0.30103 ~ 1233/4096</code></li>
+                </ul>
+                <pre><code class="cpp" data-trim>
+constexpr unsigned PowersOf10[] = {
+    1, 10, 100, 1000, 10000, 100000,
+    1000000, 10000000, 100000000,
+    1000000000 }; // etc
+
+unsigned numDigits(unsigned v) {
+  auto log2 = 31 - __builtin_clz(v);
+  auto log10Approx = (log2 + 1) * 1233 >> 12;
+  auto log10 = log10Approx - (v < PowersOf10[log10Approx]);
+  return log10 + 1;
+}
+
+</code></pre>
+            </section>
+
         </section>
 
 

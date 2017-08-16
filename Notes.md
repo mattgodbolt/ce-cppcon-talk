@@ -42,18 +42,40 @@
   * the compilers
   * security
   * frontend
+  * TODO stats on usage, errors etc
   * running it locally
 * Conclusions
+
+NOTES
+* Add summary slides after each section?
+* counting bits seems out of place 
+a = (x**2)/2 + x / 2
+a - x = (x**2)/2 - x/2  
 
 ## TO BE PLACED
 * non-virtual thunks (scrap?)
 * variant?
 * vectorization?
+* stats
 * asan
 * pass by reference
   * LICM? (Assuming size() is this) TODO
   * CSE? TODO  
   * TODO Constants TODO?
+* Timings for "add order" / "remove order" / ""
+
+
+```
+unsigned clz(unsigned a) {
+  unsigned mask = 0x80000000;
+  unsigned count = 0;
+  while (mask) {
+    if (a & mask) count++;
+    mask>>=1;
+  }
+  return count;
+}
+```
 
 ----
 
