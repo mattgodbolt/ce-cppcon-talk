@@ -74,6 +74,7 @@
             var a = document.createElement('a');
             a.setAttribute('href', 'http://localhost:10240/#' + ceFragment);
             a.setAttribute('target', '_blank');
+            a.setAttribute('class', 'view-button');
             a.textContent = 'View';
             parent.parentElement.appendChild(a);
             // TODO can't do this it seems, hljs may have tinkered?

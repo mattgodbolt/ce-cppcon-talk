@@ -74,6 +74,20 @@
             color: rgb(27, 145, 33);
         }
 
+        a.view-button {
+            font-size: 12px;
+        }
+
+        div.left-pane {
+            width: 50%;
+            float: left;
+        }
+
+        div.right-pane {
+            width: 50%;
+            float: right;
+        }
+
         .fix-key {
             color: #03330c;
         }
@@ -549,12 +563,22 @@ size_t size() const noexcept {
             <section><h3>Compilers are super-smart!</h3></section>
             <section>
                 <h3>Multiplication</h3>
-                <pre class="ce">
+                <div class="left-pane">
+                    <pre><code class="cpp ce" data-trim>
 /// g71:-O2 -std=c++1z
 int mulByY(int x, int y) {
   return x * y;
 }
-                </pre>
+                    </code></pre>
+                </div>
+                <div class="right-pane">
+                    <pre><code class="x86asm" data-trim>
+mulByY(int, int):
+  mov eax, edi
+  imul eax, esi
+  ret
+                    </code></pre>
+                </div>
             </section>
             <section>
                 <h3>Multiplication</h3>
@@ -604,15 +628,32 @@ int mulBy65599(int a) {
             </section>
             <section>
                 <h3>Division</h3>
-                <pre class="ce">
-/// g71:-O2 -std=c++1z
+                <div class="left-pane">
+                    <!---/// g71:-O2 -std=c++1z -->
+                    <pre><code class="cpp ce" data-trim>
 int divByY(int x, int y) {
   return x / y;
 }
 int modByY(int x, int y) {
   return x % y;
 }
-                </pre>
+                    </code></pre>
+                </div>
+                <div class="right-pane">
+                    <pre><code class="x86asm" data-trim>
+divByY(int, int):
+  mov eax, edi
+  cdq
+  idiv esi
+  ret
+modByY(int, int):
+  mov eax, edi
+  cdq
+  idiv esi
+  mov eax, edx
+  ret
+                    </code></pre>
+                </div>
                 <div class="fragment">Haswell 32-bit divide - 22-29 cycles!</div>
             </section>
             <section>
@@ -646,18 +687,50 @@ divBy3(int):
             </section>
             <section>
                 <h3>Modulus</h3>
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-int modBy3(int x) { return x % 3; }
-                </code></pre>
+                <div class="left-pane">
+                    <!---/// g71:-O2 -std=c++1z -->
+                    <pre><code class="cpp ce" data-trim>
+int modBy3(int x) {
+  return x % 3;
+}
+                    </code></pre>
+                </div>
+                <div class="right-pane">
+                    <pre><code class="x86asm" data-noescape data-trim>
+<span class="faded">modBy3(int):
+  mov eax, edi
+  mov edx, 1431655766
+  imul edx
+  mov eax, edi
+  sar eax, 31
+  sub edx, eax
+</span>  lea eax, [rdx+rdx*2]
+  sub edi, eax
+  mov eax, edi
+  ret
+                    </code></pre>
+                </div>
             </section>
             <!-- TODO perf measurements -->
             <section><h3>Ternary operator</h3>
-                <pre><code class="ce">
-/// g71:-O2 -std=c++1z
+                <div class="left-pane">
+                    <!---/// g71:-O2 -std=c++1z -->
+                    <pre><code class="cpp ce" data-trim>
 int func(int i) {
-    return (i < 0) ? 1234 : 5678;
-}            </code></pre>
+  return (i < 0) ? 1234 : 5678;
+}
+                    </code></pre>
+                </div>
+                <div class="right-pane">
+                    <pre><code class="x86asm" data-noescape data-trim>
+func(int):
+  mov eax, edi
+  sar eax, 31
+  and eax, -4444
+  add eax, 5678
+  ret
+                    </code></pre>
+                </div>
             </section>
             <section><h3>Counting bits</h3>
                 <pre><code class="ce">
@@ -674,6 +747,10 @@ int countSetBits(int a) {
                 <aside class="notes">
                     Explain a &amp; (a - 1)
                 </aside>
+            </section>
+            <section>
+                <h3>Summary</h3>
+                Compilers are pretty smart at cute arithmetic tricks.
             </section>
         </section>
 
@@ -754,7 +831,7 @@ int totalCost(Coster &coster,
   struct Coster { virtual int costFor(int x) = 0; };
 
 struct StaticCost : Coster {
-  virtual int costFor(int x) { return x; }
+  virtual int costFor(int x) { return 1; }
 };
 
 int totalCost(Coster &coster,
@@ -766,50 +843,32 @@ int totalCost(Coster &coster,
 }
                 </code></pre>
             </section>
-            <section><h3>Unpicking your object hierarchy</h3>
+            <section><h3>Virtual methods</h3>
                 <pre><code class="cpp ce">
 /// g71:-O2 -std=c++1z
 // setup
   #include &lt;vector>
   using namespace std;
-  namespace {
   struct Coster { virtual int costFor(int x) = 0; };
-  struct StaticCost : Coster {
-    virtual int costFor(int x) const { return x; }
-  };
-  }
-
-namespace {
-int totalCost(Coster &coster, const vector<int> &v) {
-  int result = 0;
-  for (size_t i = 0; i < v.size(); ++i)
-    result += coster.costFor(v[i]);
-  return result;
-}
-}
-int main(int argv, const char *argv[]) {
-
-}
+struct StaticCost : Coster {
+  virtual int costFor(int x) { return x; }
+};
+/// TODO!
                 </code></pre>
-                <aside class="notes">
-                    Show it as-is, show clang
-                </aside>
             </section>
             <section>
                 <h3>Aliasing</h3>
-                <!-- TODO - some story about compilers pessimistic? -->
                 <pre><code class="cpp ce">
 /// g71:-O2 -std=c++1z
 // setup
   #include &lt;functional>
   #include &lt;cstddef>
 
-void sum(int *first, size_t num,
+void sum(int *first, int num,
          int *out_sum) {
   *out_sum = 0;
-  for (size_t i = 0; i < num; ++i) {
+  for (int i = 0; i < num; ++i)
     *out_sum += first[i];
-  }
 }
             </code></pre>
             </section>
@@ -842,7 +901,7 @@ void testNotZeroFirst(int a, int b, int c) {
   #include &lt;cstddef>
 int sum(const int *input, size_t length) {
   input = static_cast&lt;decltype(input)>(
-                    __builtin_assume_aligned(input, 64));
+    __builtin_assume_aligned(input, 64));
   if (length & 63) __builtin_unreachable();
   if (length == 0) __builtin_unreachable();
 
@@ -855,21 +914,21 @@ int sum(const int *input, size_t length) {
                 </code></pre>
             </section>
             <section>
-                <!-- TODO this still? -->
-                <h3>Case Study: auto copy / move / etc (Chrome copied all its images moved instead of moved..)</h3>
+                <h3>Helping the compiler out?</h3>
                 <pre><code class="cpp ce">
+/// g71:-O2 -std=c++1z
 // setup
   #include &lt;vector>
   using namespace std;
 
 struct ImageHolder {
-  const vector&lt;int> &
-    intensities() const;
+  const vector&lt;int> &intensities() const;
 };
 
 double average(const ImageHolder &ih) {
   auto data = ih.intensities();
-  int sum = 0;
+  if (data.empty()) return 0;
+  long sum = 0;
   for (auto &&v : data) sum += v;
   return sum / static_cast&lt;double>(data.size());
 }
@@ -907,25 +966,25 @@ bool test(Foo *f) {
 }
             </code></pre>
             </section>
-            <section><h3>index signed vs unsigned</h3>
-                <pre><code data-trim class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  #include &lt;cstdint>
+            <!--            <section><h3>index signed vs unsigned</h3>
+                            <pre><code data-trim class="cpp ce">
+            /// g71:-O2 -std=c++1z
+            // setup
+              #include &lt;cstdint>
 
-int sum1000(const char *a, uint32_t offset) {
-    int res = 0;
-    auto end = offset + 1000;
-    while (offset < end)
-        res += a[offset++];
-    return res;
-}
-                </code></pre>
-                <aside class="notes">
-                    show it uint32_t and int32_t
-                    TODO still weak
-                </aside>
-            </section>
+            int sum1000(const char *a, uint32_t offset) {
+              int res = 0;
+              auto end = offset + 1000;
+              while (offset < end)
+                res += a[offset++];
+              return res;
+            }
+                            </code></pre>
+                            <aside class="notes">
+                                show it uint32_t and int32_t
+                                TODO still weak
+                            </aside>
+                        </section>-->
             <section><h3>Heap elision</h3>
                 <pre><code data-trim class="cpp ce">
 /// g71:-O2 -std=c++1z
@@ -934,9 +993,9 @@ int sum1000(const char *a, uint32_t offset) {
   using namespace std;
 
 int func() {
-    auto a = make_unique&lt;int>(42);
-    auto b = make_unique&lt;int>(24);
-    return *a + *b;
+  auto a = make_unique&lt;int>(42);
+  auto b = make_unique&lt;int>(24);
+  return *a + *b;
 }
                 </code></pre>
             </section>
@@ -1012,7 +1071,8 @@ int main(int argc, const char *argv[]) {
             </section>
             <section>
                 <h3>Classes</h3>
-                <pre><code class="cpp ce">
+                <div class="left-pane">
+                    <pre><code class="cpp ce" data-trim>
 /// g71:-O2 -std=c++1z
 class Holder {
   int value_{};
@@ -1021,7 +1081,13 @@ public:
     return value_;
   }
 };
-                </code></pre>
+                    </code></pre>
+                </div>
+                <div class="right-pane">
+                    <pre><code class="x86asm" data-trim>
+; no output
+                    </code></pre>
+                </div>
                 <aside class="notes">
                     <ul>
                         <li>
@@ -1046,7 +1112,16 @@ public:
 };
                 </code></pre>
             </section>
-            <section><h3>Power use demo</h3></section>
+            <section><h3>Power features</h3>
+                <ul>
+                    <li>
+                        <a href="http://localhost:10240/#%7B%22version%22%3A4%2C%22content%22%3A%5B%7B%22type%22%3A%22row%22%2C%22content%22%3A%5B%7B%22type%22%3A%22component%22%2C%22componentName%22%3A%22codeEditor%22%2C%22componentState%22%3A%7B%22id%22%3A1%2C%22source%22%3A%22%2F%2F%20setup%5Cn%20%20%23include%20%3Cfunctional%3E%5Cn%20%20%23include%20%3Ccstddef%3E%5Cnvoid%20sum(int%20*first%2C%20int%20num%2C%5Cn%20%20%20%20%20%20%20%20%20int%20*out_sum)%20%7B%5Cn%20%20*out_sum%20%3D%200%3B%5Cn%20%20for%20(int%20i%20%3D%200%3B%20i%20%3C%20num%3B%20%2B%2Bi)%5Cn%20%20%20%20*out_sum%20%2B%3D%20first%5Bi%5D%3B%5Cn%7D%5Cn%22%2C%22options%22%3A%7B%22compileOnChange%22%3Atrue%2C%22colouriseAsm%22%3Atrue%7D%2C%22fontScale%22%3A1.6%7D%7D%2C%7B%22type%22%3A%22component%22%2C%22componentName%22%3A%22compiler%22%2C%22componentState%22%3A%7B%22source%22%3A1%2C%22filters%22%3A%7B%22commentOnly%22%3Atrue%2C%22directives%22%3Atrue%2C%22intel%22%3Atrue%2C%22labels%22%3Atrue%2C%22trim%22%3Atrue%7D%2C%22options%22%3A%22-O2%20-std%3Dc%2B%2B1z%22%2C%22compiler%22%3A%22g71%22%2C%22fontScale%22%3A1.8%7D%7D%5D%7D%5D%7D">
+                            Difference view</a></li>
+                    <li>Conformance view TODO</li>
+                    <li>AST view TODO</li>
+                    <li>Optimization view TODO</li>
+                </ul>
+            </section>
         </section>
 
 
