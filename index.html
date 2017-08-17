@@ -934,6 +934,7 @@ double average(const ImageHolder &ih) {
 }
                 </code></pre>
             </section>
+            <!-- https://github.com/apple/swift/commit/21ab99bf80b91a025405d9d59277839074a840d7 -->
         </section>
 
 
@@ -1434,10 +1435,11 @@ void Format::decimalAppendNonNeg(unsigned value) {
             <section>
                 <h3>log10(x)</h3>
                 <pre><code class="ce cpp" data-trim>
+/// g71:-O2 -march=haswell
 constexpr unsigned PowersOf10[] = {
-    1, 10, 100, 1000, 10000, 100000,
-    1000000, 10000000, 100000000,
-    1000000000 }; // etc
+  1, 10, 100, 1000, 10000, 100000, 1000000,
+  10000000, 100000000, 1000000000
+};
 
 unsigned numDigits(unsigned v) {
   auto log2 = 31 - __builtin_clz(v);
@@ -1447,7 +1449,6 @@ unsigned numDigits(unsigned v) {
 }
 </code></pre>
             </section>
-
         </section>
 
 
