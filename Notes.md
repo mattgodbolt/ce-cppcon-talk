@@ -1,4 +1,29 @@
-# Latest Outline
+## Notes from first runthrough
+* Made it to about halfway in 75 minutes - needs shortening...
+* Jeff Sacks
+  * Consider an outline at beginning so we know where we're going
+  * ASM section should be a little shorter, was dropping off towards end
+  * Explain "Haswell"
+* Constantin:
+  * Never said which of the two was better
+  * Didn't present any measurements; practice what you preach
+* Foemmel:
+  * Maybe make a story and tell it through optimisations?
+  * Hash table? Div->Mod->Hash
+  * Benchmarks of accumulate
+  * Long multiplication was clear enough without long walkthrough
+* General:
+  * ASM section was great
+  * Add a UI tour
+  * Put # of assembly lines in UI, show diffs
+  * "Regression in compiler" (can't recall what this meant)
+  * Hard to retain mental state between slides
+  * Better highlighting of code
+  * Limit to 2-3 examples
+
+---------------
+
+# v1 Outline
 
 * Why
   * Goals
