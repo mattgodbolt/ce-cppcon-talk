@@ -21,6 +21,41 @@
   * Better highlighting of code
   * Limit to 2-3 examples
 
+maybe segue into hash example at "compilers are super smart"?
+could build own hash map? shows most of the opts. but has to be super leading?
+* shows "class" no code generated
+* Could use dynamic sized?
+* Then array<Order *, ...> with fixed size?
+* boost multi? clang?
+
+```
+// setup
+  #include <array>
+  #include <vector>
+  #include <unordered_map>
+  #include <cstdint>
+  using namespace std;
+  struct Order {
+    Order *next;
+    uint64_t id;
+  };
+using OrderId = uint64_t;
+struct  OrderMap {
+  static constexpr auto NumBuckets = 1023;
+  array<Order*, NumBuckets> bucket;
+  Order *find(OrderId key);
+};
+
+Order *OrderMap::find(OrderId key) {
+  auto hash = std::hash<OrderId>()(key);
+  auto bucketIndex = hash % bucket.size();
+  for (auto ptr = bucket[bucketIndex]; ptr; ptr = ptr->next)
+    if (ptr->id == key) return ptr;
+  return nullptr;
+}
+
+```
+
 ---------------
 
 # v1 Outline
