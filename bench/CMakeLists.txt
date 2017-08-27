@@ -32,12 +32,13 @@ set(CMAKE_CXX_COMPILER "${GCC_HOME}/bin/g++")
 project(bench)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_COMPILER_FLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_COMPILER_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${EXTRA_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold")
 
 add_subdirectory(benchmark)
 
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES main.cpp External.cpp)
 add_executable(bench ${SOURCE_FILES})
 target_link_libraries(bench benchmark)
