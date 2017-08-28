@@ -38,6 +38,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_COMPILER_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${EXTRA_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold")
 
 add_subdirectory(benchmark)
+add_subdirectory(map)
 
 set(SOURCE_FILES main.cpp External.cpp)
 add_executable(bench ${SOURCE_FILES})

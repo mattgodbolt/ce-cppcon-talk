@@ -1,3 +1,20 @@
+# v2 Outline
+1. Intro
+2. Backstory
+3. Asm 101 (5m version)
+4. Comparison (shows before/after/diff)
+5. Muls
+6. Div/Mod
+7.
+8.
+9.
+10. How it works 1
+11. How it works 2
+12. Outro
+
+
+
+
 ## Notes from first runthrough
 * Made it to about halfway in 75 minutes - needs shortening...
 * Jeff Sacks
