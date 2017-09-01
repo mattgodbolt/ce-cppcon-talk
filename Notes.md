@@ -1,18 +1,17 @@
 # v2 Outline
-1. Intro
-2. Backstory
-3. Asm 101 (5m version)
-4. Comparison (shows before/after/diff)
-5. Muls
-6. Div/Mod
-7.
-8.
-9.
-10. How it works 1
+1.  Intro: Who am I? Backstory
+2.  Asm 101 (5m version)
+3.  Microwalkthrough 
+4.  Comparison (shows before/after/diff) ... leading in to "once I built this tool..."
+5.  Muls
+6.  Div/Mod
+7.  Hash maps?
+8.  sigma / popcount?
+9.  How it works 1
+10. opt view/ast view
 11. How it works 2
-12. Outro
-
-
+12. Local demo
+13. Outro
 
 
 ## Notes from first runthrough
