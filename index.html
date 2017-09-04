@@ -15,7 +15,7 @@
         }
 
         div.footnote {
-            margin-top: 4em;
+            margin-top: 2em;
             font-size: smaller;
             font-style: italic;
         }
@@ -110,21 +110,18 @@
 <body>
 <div class="reveal">
     <!-- TODO compile all with -Wall -Wextra -->
+    <!-- TODO check font size (26) -->
     <!-- TODO unify indentation -->
     <section class="slides">
         <section id="title">
-            <em>September 2017</em>
-            <!-- TODO, better title format -->
-            <h3>Unbolting the Compiler's Lid:</h3>
-            <h5>What Has My Compiler Done for Me Lately</h5>
-            <em>Matt Godbolt, DRW Trading</em>
+            <h2>What Has My Compiler Done for Me Lately?</h2>
+            <h5>Unbolting the Compiler's Lid</h5>
+            <em>Matt Godbolt, <a href="https://drw.com/careers">DRW Trading</a></em>
             <br>
             <em>
                 <a href="https://twitter.com/mattgodbolt">@mattgodbolt</a>
                 <a href="mailto:matt@godbolt.org">matt@godbolt.org</a>
             </em>
-            <br>
-            <em><a href="https://drw.com/careers">drw.com</a></em>
         </section>
 
 
@@ -141,7 +138,7 @@
                 <h3>My background</h3>
                 <div class="fragment">
                     <img src="images/6502_z80.jpg" width="200">
-                    <!-- TODO photo of ARM here -->
+                    <img src="images/ARM_610.jpg" width="200">
                     <img src="images/red_dog.png" width="200">
                 </div>
                 <div class="fragment">
@@ -173,6 +170,13 @@
                     <li>Un-scary-fy assembler</li>
                     <li>Compilers are amazing</li>
                     <li class="fragment">...but always worth checking</li>
+                </ul>
+            </section>
+            <!-- TODO outline? -->
+            <section>
+                <h3>Outline</h3>
+                <ul>
+                    <li>TODO</li>
                 </ul>
             </section>
         </section>
@@ -225,12 +229,14 @@
                 <h3>x86 Assembly 101</h3>
             </section>
             <section>
+                <!-- TODO Mighty Boosh? -->
                 <h3>Registers</h3>
                 <ul>
-                    <li>rax, rbx, rcx, rdx, rsp, rbp, rsi, rdi, r8-r15</li>
-                    <li>xmm0-15, ymm0-15, zmm0-15</li>
-                    <li>cs, ds, ss, es, fs, gs</li>
-                    <li>flags</li>
+                    <li><code>rax</code>, <code>rbx</code>, <code>rcx</code>, <code>rdx</code>, <code>rsp</code>,
+                        <code>rbp</code>, <code>rsi</code>, <code>rdi</code>, <code>r8</code>-<code>r15</code></li>
+                    <li><code>xmm0</code>-<code>xmm15</code></li>
+                    <li><code>rdi</code>, <code>rsi</code>, <code>rdx</code>... arguments</li>
+                    <li><code>rax</code> is return value</li>
                 </ul>
             </section>
             <section>
@@ -272,19 +278,7 @@
                     </tbody>
                 </table>
             </section>
-            <section>
-                <h3>Calling convention</h3>
-                <pre><code class="cpp">long func(int a, short b, char c);</code></pre>
-                <ul class="fragment">
-                    <li>Params: rdi, rsi, rdx, rcx, r8, r9; xmm0-7</li>
-                    <li>Return: rax / xmm0</li>
-                    <li>Callee-save: rbp, rbx, r12–r15</li>
-                </ul>
-                <div class="fragment">
-                    <pre><code class="cpp">rax func(edi a, si b, dl c);</code></pre>
-                </div>
-                <div class="footnote">(System V AMD64 ABI)</div>
-            </section>
+
             <section>
                 <h3>Instructions</h3>
                 <pre><code data-trim class="x86asm">
@@ -293,50 +287,33 @@
                     op dest, src
                 </code></pre>
                 <ul>
-                    <li><code>op</code> is e.g. <code>add</code>, <code>sub</code>, <code>sub</code></li>
-                    <li><code>src</code>, <code>dest</code> is a register or a memory reference</li>
+                    <li><code>op</code> is e.g.
+                        <ul><code>call</code>, <code>ret</code>...</ul>
+                        <ul><code>push</code>, <code>pop</code>...</ul>
+                        <ul><code>add</code>, <code>sub</code>, <code>cmp</code>, <code>xor</code>...</ul>
+                    </li>
+                    <li><code>dest</code>, <code>src</code> is register or memory reference</li>
                 </ul>
                 <div class="footnote">(Intel asm syntax)</div>
             </section>
             <section>
                 <h3>Instructions</h3>
                 <pre><code data-trim class="x86asm">
-                  mov eax, 1234             ; eax = 1234
-                  mov ecx, DWORD PTR g[rip] ; ecx = contents of global variable g
-                  add eax, ecx              ; eax += ecx
-                  cmp eax, 6912             ; eax == 6912 ?
-                  je all_ok                 ;  then goto all_ok
-                  call report_error         ; else report error
-                all_ok:
-                  ret                       ; and return
-            </code></pre>
-            </section>
-            <section>
-                <h3>Instructions</h3>
-                <pre><code data-trim class="x86asm">
                 mov eax, DWORD PTR [r14]     ; eax = *(uint32_t *)r14
+                add rax, rdi                 ; rax += rdi
                 add eax, DWORD PTR [r14 + 4] ; eax += *(uint32_t *)(r14 + 4)
                 sub eax, DWORD PTR [r14 + 4 * rbx]
                                              ; eax -= *(uint32_t *)(r14 + 4 * rbx)
-                lea rax, [r14 + 4 * rbx]     ; eax = r14 + 4 * rbx
+                lea rax, [r14 + 4 * rbx]     ; rax = r14 + 4 * rbx
+                xor edx, edx                 ; edx = (edx^edx)
                 </code></pre>
                 <pre class="fragment"><code data-trim class="cpp">
                 int eax = *r14;              // int *r14;
                 eax += r14[1];
+                rax += rdi;
                 eax -= r14[rbx];
                 int *rax = &r14[rbx];
-                </code></pre>
-            </section>
-            <section>
-                <h3>Instructions</h3>
-                <pre><code data-trim class="x86asm">
-                    movsx rax, di
-                    push rax
-                    vpaddd ymm0, ymm0, ymmword ptr [rax]
-                    popcnt rax
-                    lzcnt eax, edi
-                    bsf rax
-                    int 3
+                edx = 0;
                 </code></pre>
             </section>
             <section>
@@ -370,42 +347,8 @@
                   for (int x : v) result += x;
                   return result;
                 }</code></pre>
-            </section>
-            <section>
-                <h3>Compiler Explorer v0.1</h3>
-                <pre><code data-noescape data-trim class="bash">
-                 $ g++ /tmp/test.cc -O1 -c -S -o -masm=intel -
-            </code></pre>
-                <pre class="fragment"><code class="x86asm" data-trim>
-    .file	"test.cc"
-    .text
-    .globl	_Z3sumRKSt6vectorIiSaIiEE
-    .type	_Z3sumRKSt6vectorIiSaIiEE, @function
-_Z3sumRKSt6vectorIiSaIiEE:
-.LFB786:
-    .cfi_startproc
-    mov	rcx, QWORD PTR [rdi]
-    mov	rax, QWORD PTR 8[rdi]
-    sub	rax, rcx
-    ...</code></pre>
-            </section>
-            <section>
-                <h3>Compiler Explorer v0.1</h3>
-                <pre><code data-noescape data-trim class="bash">
-                 $ g++ /tmp/test.cc -O1 -c -S -o -masm=intel - | c++filt
-            </code></pre>
-                <pre><code class="x86asm" data-trim>
-    .file	"test.cc"
-    .text
-    .globl	sum(std::vector&lt;int, std::allocator&lt;int> > const&)
-    .type	sum(std::vector&lt;int, std::allocator&lt;int> > const&), @function
-sum(std::vector&lt;int, std::allocator&lt;int> > const&):
-.LFB786:
-    .cfi_startproc
-    mov	rcx, QWORD PTR [rdi]
-    mov	rax, QWORD PTR 8[rdi]
-    sub	rax, rcx
-    ...</code></pre>
+                <div class="fragment">Which is better?</div>
+                <div class="fragment">Look at assembly!</div>
             </section>
             <section>
                 <h3>Compiler Explorer v0.1</h3>
@@ -438,7 +381,7 @@ sum(std::vector&lt;int, std::allocator&lt;int> > const&):
             <section>
                 <h3>Demo</h3>
                 <pre class="ce">
-/// g71:-O2 -std=c++1z
+/// g71:-O2 -std=c++1z -march=haswell
 // setup
   #include &lt;numeric>
   #include &lt;vector>
@@ -453,11 +396,15 @@ int sum(const vector&lt;int> &v) {
                 <aside class="notes">
                     <ul>
                         <li>Pop out</li>
-                        <li>Walk through code (using following slides), note optimizer is on</li>
+                        <li>Show code</li>
                         <li>Show optimizer off</li>
+                        <li>Show diff</li>
                     </ul>
                 </aside>
             </section>
+            <!-- TODO show sxs and show what LHS is doing
+            http://localhost:10240/#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.6,j:1,source:'//+setup%0A++%23include+%3Cnumeric%3E%0A++%23include+%3Cvector%3E%0A++using+namespace+std%3B%0Aint+sum(const+vector%3Cint%3E+%26v)+%7B%0A++int+result+%3D+0%3B%0A++for+(size_t+i+%3D+0%3B+i+%3C+v.size()%3B+%2B%2Bi)%0A++++result+%2B%3D+v%5Bi%5D%3B%0A++return+result%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:g71,filters:(___0:(),b:'0',commentOnly:'0',directives:'0',intel:'0',jquery:'3.2.1',length:1,prevObject:(___0:(sizzle1504269573838:(undefined:(legend:!(5,0,'1')))),length:1,prevObject:(___0:(jQuery321090965591201150151:(display:''),sizzle1504269573838:(undefined:(legend:!(5,0,'1')))),length:1)),trim:'0'),fontScale:1.8,options:'-O2+-std%3Dc%2B%2B1z',source:1),l:'5',n:'0',o:'x86-64+gcc+7.1+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4
+            -->
             <section>
                 <h3>Walkthrough</h3>
                 <pre><code data-trim class="x86asm">
@@ -474,58 +421,36 @@ template&lt;typename T> struct _Vector_impl {
                     </code></pre>
             </section>
             <section>
-                <h3>Walkthrough</h3>
-                <pre><code data-trim class="x86asm faded">
-  ; rdi = const vector&lt;int> *
-  mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
-  mov rcx, QWORD PTR [rdi+8]  ; rcx = *(rdi + 8)  &equiv; rdi->end
-                </code></pre>
-                <pre><code data-trim class="x86asm">
-  sub rcx, rdx                ; rcx -= rdx        &equiv; end - begin
-  mov rax, rcx                ; rax = rcx &equiv; end - begin
-  sar rax, 2                  ; rax = rax / 4
-                              ;     &equiv; (end - begin) / sizeof(int)
-                </code></pre>
-                <pre class="fragment"><code data-trim class="cpp">
+                <div class="left-pane">
+                    <h5>Traditional</h5>
+                    <pre><code data-trim class="x86asm">
+sub rcx, rdx ; rcx = end-begin
+mov rax, rcx
+shr rax, 2   ; (end-begin)/4
+je .L4
+add rcx, rdx
+xor eax, eax
+                    </code></pre>
+                    <pre class="fragment"><code data-trim class="cpp">
 size_t size() const noexcept {
   return _M_finish - _M_start;
-}                    </code></pre>
-            </section>
-            <section>
-                <h3>Walkthrough</h3>
-                <pre><code data-trim class="x86asm faded">
-  ; rdi = const vector&lt;int> *
-  mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
-  mov rcx, QWORD PTR [rdi+8]  ; rcx = *(rdi + 8)  &equiv; rdi->end
-  sub rcx, rdx                ; rcx -= rdx        &equiv; end - begin
-  mov rax, rcx                ; rax = rcx &equiv; end - begin
-  sar rax, 2                  ; rax = rax / 4
-                              ;     &equiv; (end - begin) / sizeof(int)
+}</code></pre>
+                </div>
+                <div class="right-pane">
+                    <h5>Range</h5>
+                    <pre><code data-trim class="x86asm">
+xor eax, eax
+cmp rdx, rcx ; begin==end?
+je .L4
                 </code></pre>
-                <pre><code data-trim class="x86asm">
-  test rax, rax               ; is rax == 0?
-  je .L4                      ;   if so, goto L4
-                </code></pre>
-            </section>
-            <section>
-                <h3>Walkthrough</h3>
-                <pre><code data-trim class="x86asm faded">
-  ; rdi = const vector&lt;int> *
-  mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
-  mov rcx, QWORD PTR [rdi+8]  ; rcx = *(rdi + 8)  &equiv; rdi->end
-  sub rcx, rdx                ; rcx -= rdx        &equiv; end - begin
-  mov rax, rcx                ; rax = rcx &equiv; end - begin
-  sar rax, 2                  ; rax = rax / 4
-                              ;     &equiv; (end - begin) / sizeof(int)
-  test rax, rax               ; is rax == 0?
-  je .L4                      ;   if so, goto L4
-                </code></pre>
-                <pre><code data-trim class="x86asm">
-  add rcx, rdx                ; rcx += rdx
-                              ;      &equiv; (end - begin) + begin
-                              ;      &equiv; end
-  xor eax, eax                ; eax = 0
-            </code></pre>
+                    <pre class="fragment"><code data-trim class="cpp">
+                        auto __begin = begin(v);
+                        auto __end = end(v);
+                        for (auto __it = __begin;
+                             __it != __end;
+                             ++it)
+</code></pre>
+                </div>
             </section>
             <section>
                 <h3>Walkthrough</h3>
@@ -539,17 +464,10 @@ size_t size() const noexcept {
   ret                         ; we're done
             </code></pre>
             </section>
-            <section>
-                <h3>Walkthrough</h3>
-                <pre><code data-trim class="x86asm">
-.L4:
-  xor eax, eax                ; return 0
-  ret
-            </code></pre>
-            </section>
             <section><h3>Backstory</h3>
                 <h5>So, which approach is best?</h5></section>
             <section>
+                <!-- weak, maybe make std::accum a link?-->
                 <h3>Also</h3>
                 <ul>
                     <li>Optimizer settings are important</li>
@@ -561,7 +479,7 @@ size_t size() const noexcept {
 
         <!------------------------------------------------------->
         <section id="compilersAreSuperSmart">
-            <section><h3>Compilers are super-smart!</h3></section>
+            <section><h3>What has my compiler done for me lately?</h3></section>
             <section>
                 <h3>Multiplication</h3>
                 <div class="left-pane">
@@ -584,25 +502,21 @@ mulByY(int, int):
             <section>
                 <h3>Multiplication</h3>
                 <pre>
-                            <span
-                                    data-fragment-index="4"
-                                    class="fragment highlight-current-red">1</span><span
-                        data-fragment-index="3" class="fragment highlight-current-red">1</span><span
-                        data-fragment-index="2" class="fragment highlight-current-red">0</span><span
-                        data-fragment-index="1" class="fragment highlight-current-red">1</span>    (13)
+                            1101    (13)
                           x 0101     (5)
                         --------
-                            <span data-fragment-index="1" class="fragment">1101</span>
-                           <span data-fragment-index="2" class="fragment">0000</span>
-                          <span data-fragment-index="3" class="fragment">1101</span>
-                       <span data-fragment-index="4" class="fragment">+ 0000</span>
-                        <span data-fragment-index="5" class="fragment">--------
-                        01000001    (65)</span></pre>
+                            1101
+                           0000
+                          1101
+                       + 0000
+                        --------
+                        01000001    (65)</pre>
                 <div class="fragment">That's a lot of additions!</div>
                 <div class="fragment">Haswell 32-bit multiply - 4 cycles</div>
             </section>
             <section>
                 <h3>Multiplication</h3>
+                <!-- todo sxs -->
                 <pre><code class="cpp ce">
 /// g71:-O2 -std=c++1z
 int mulBy3(int x) { return x * 3; }
@@ -656,13 +570,6 @@ modByY(int, int):
                     </code></pre>
                 </div>
                 <div class="fragment">Haswell 32-bit divide - 22-29 cycles!</div>
-            </section>
-            <section>
-                <h3>Division</h3>
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-int divBy3(int x) { return x / 3; }
-                </code></pre>
                 <aside class="notes">
                     <code>cdq</code> does sign expansion into registers. <code>div</code> divides eax:edx with the
                     operand, results in
@@ -671,7 +578,17 @@ int divBy3(int x) { return x / 3; }
                 </aside>
             </section>
             <section>
+                <!-- TODO sxs ? -->
                 <h3>Division</h3>
+                <pre><code class="cpp ce">
+/// g71:-O2 -std=c++1z
+int divBy3(int x) { return x / 3; }
+                </code></pre>
+            </section>
+            <section>
+                <h3>Division</h3>
+                <!-- TODO C implementaiton? -->
+                int64_t a =
                 <pre><code class="x86asm" data-trim>
 divBy3(int):
   mov eax, edi          ; eax = x
@@ -684,7 +601,6 @@ divBy3(int):
   sub eax, edi          ; ... - (x < 0 ? -1 : 0)
   ret
                 </code></pre>
-                <!--TODO explain more, improve, and make reveal-y-->
             </section>
             <section>
                 <h3>Modulus</h3>
@@ -712,27 +628,6 @@ int modBy3(int x) {
                     </code></pre>
                 </div>
             </section>
-            <!-- TODO perf measurements -->
-            <section><h3>Ternary operator</h3>
-                <div class="left-pane">
-                    <!---/// g71:-O2 -std=c++1z -->
-                    <pre><code class="cpp ce" data-trim>
-int func(int i) {
-  return (i < 0) ? 1234 : 5678;
-}
-                    </code></pre>
-                </div>
-                <div class="right-pane">
-                    <pre><code class="x86asm" data-noescape data-trim>
-func(int):
-  mov eax, edi
-  sar eax, 31
-  and eax, -4444
-  add eax, 5678
-  ret
-                    </code></pre>
-                </div>
-            </section>
             <section><h3>Counting bits</h3>
                 <pre><code class="ce">
 /// g71:-O2 -std=c++1z -march=haswell
@@ -750,268 +645,7 @@ int countSetBits(int a) {
                 </aside>
             </section>
             <section>
-                <h3>Summary</h3>
-                Compilers are pretty smart at cute arithmetic tricks.
-            </section>
-        </section>
-
-
-        <!------------------------------------------------------->
-        <section id="butNotClairvoyant">
-            <section>
-                <h3>Compilers are super-smart!</h3>
-                <h5 class="fragment">...but aren't clairvoyant</h5>
-            </section>
-            <section>
-                <h3>Functions</h3>
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  #include &lt;vector>
-  using namespace std;
-int someFunc(int);
-int sum(const vector&lt;int> &v) {
-  int result = 0;
-  for (size_t i = 0; i < v.size(); ++i)
-    result += someFunc(v[i]);
-  return result;
-}</code></pre>
-                <aside class="notes">
-                    Compiler can't make any assumptions about someFunc. So has to reload size.
-                    Even though vector is const, compiler can't assume it's not going to change.
-                    Using range-for fixes issue as range-for is defined to copy the extents of the iterand outside of
-                    loop.
-                </aside>
-            </section>
-            <section><h3>Virtual methods</h3>
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  #include &lt;vector>
-  using namespace std;
-struct Coster { virtual int costFor(int x) = 0; };
-
-int totalCost(Coster &coster,
-              const vector&lt;int> &v) {
-  int result = 0;
-  for (auto i : v)
-    result += coster.costFor(i);
-  return result;
-}
-                </code></pre>
-            </section>
-            <!-- TODO WORK HERE
-
-            needs to have a better "theme". fit in with story?
-            vector is good but complicates code?
-            nextCost?
-            even this generates tons of code
-
-    // setup
-    #include &lt;vector>
-    using namespace std;
-    struct Coster { virtual int nextCost()  = 0; };
-
-    int costForX(Coster &c, int x) {
-    int totalCost = 0;
-    for (int i = 0; i < x; ++i)
-      totalCost += c.nextCost();
-    return totalCost;
-    } ?
-    void costForX(Coster &c, int x, int *totalCost) {
-    for (int i = 0; i < x; ++i)
-      *totalCost += c.nextCost();
-    }
-            -->
-            <section><h3>Virtual methods</h3>
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  #include &lt;vector>
-  using namespace std;
-  struct Coster { virtual int costFor(int x) = 0; };
-
-struct StaticCost : Coster {
-  virtual int costFor(int x) { return 1; }
-};
-
-int totalCost(Coster &coster,
-              const vector&lt;int> &v) {
-  int result = 0;
-  for (auto i : v)
-    result += coster.costFor(i);
-  return result;
-}
-                </code></pre>
-            </section>
-            <section><h3>Virtual methods</h3>
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  #include &lt;vector>
-  using namespace std;
-  struct Coster { virtual int costFor(int x) = 0; };
-struct StaticCost : Coster {
-  virtual int costFor(int x) { return x; }
-};
-/// TODO!
-                </code></pre>
-            </section>
-            <section>
-                <h3>Aliasing</h3>
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  #include &lt;functional>
-  #include &lt;cstddef>
-
-void sum(int *first, int num,
-         int *out_sum) {
-  *out_sum = 0;
-  for (int i = 0; i < num; ++i)
-    *out_sum += first[i];
-}
-            </code></pre>
-            </section>
-            <section>
-                <h3>Likelihood analysis</h3>
-                <!-- TODO -->
-                <!--clang vs gcc difference here -->
-                <!-- likely doesn't work here in clang :'( -->
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  extern void allZero();
-  extern void notAllZero();
-void testZeroFirst(int a, int b, int c) {
-  if (a == 0 && b == 0 && c == 0) allZero();
-  else notAllZero();
-}
-
-void testNotZeroFirst(int a, int b, int c) {
-  if (!(a == 0 && b == 0 && c == 0)) notAllZero();
-  else allZero();
-}
-            </code></pre>
-            </section>
-            <section>
-                <h3>Helping the compiler out</h3>
-                <pre><code class="cpp ce">
-/// g71:-O3 -std=c++1z -march=haswell
-// setup
-  #include &lt;cstddef>
-int sum(const int *input, size_t length) {
-  input = static_cast&lt;decltype(input)>(
-    __builtin_assume_aligned(input, 64));
-  if (length & 63) __builtin_unreachable();
-  if (length == 0) __builtin_unreachable();
-
-  int sum = 0;
-  for (int i = 0; i < length; ++i) {
-    sum += input[i];
-  }
-  return sum;
-}
-                </code></pre>
-            </section>
-            <section>
-                <h3>Helping the compiler out?</h3>
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  #include &lt;vector>
-  using namespace std;
-
-struct ImageHolder {
-  const vector&lt;int> &intensities() const;
-};
-
-double average(const ImageHolder &ih) {
-  auto data = ih.intensities();
-  if (data.empty()) return 0;
-  long sum = 0;
-  for (auto &&v : data) sum += v;
-  return sum / static_cast&lt;double>(data.size());
-}
-                </code></pre>
-            </section>
-            <!-- https://github.com/apple/swift/commit/21ab99bf80b91a025405d9d59277839074a840d7 -->
-        </section>
-
-
-        <!------------------------------------------------------->
-        <section id="ubIsYourFriend">
-            <section>
-                <h3>Undefined behaviour</h3>
-                <h5 class="fragment">Can be your friend</h5>
-            </section>
-            <section>
-                <h3>Infinite loops</h3>
-                <!-- TODO get C++ standards quote -->
-                <pre><code data-trim class="cpp ce">
-/// g71:-O2 -DNDEBUG -std=c++1z
-// setup
-  #include &lt;cassert>
-  struct Foo {
-    Foo *next{nullptr};
-    bool isOk() const;
-  };
-static void debugCheck(Foo *first) {
-  for (auto p = first; p; p = p->next) {
-    assert(p->isOk());
-  }
-}
-
-bool test(Foo *f) {
-  debugCheck(f);
-  return f != nullptr;
-}
-            </code></pre>
-            </section>
-            <!--            <section><h3>index signed vs unsigned</h3>
-                            <pre><code data-trim class="cpp ce">
-            /// g71:-O2 -std=c++1z
-            // setup
-              #include &lt;cstdint>
-
-            int sum1000(const char *a, uint32_t offset) {
-              int res = 0;
-              auto end = offset + 1000;
-              while (offset < end)
-                res += a[offset++];
-              return res;
-            }
-                            </code></pre>
-                            <aside class="notes">
-                                show it uint32_t and int32_t
-                                TODO still weak
-                            </aside>
-                        </section>-->
-            <section><h3>Heap elision</h3>
-                <pre><code data-trim class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  #include &lt;memory>
-  using namespace std;
-
-int func() {
-  auto a = make_unique&lt;int>(42);
-  auto b = make_unique&lt;int>(24);
-  return *a + *b;
-}
-                </code></pre>
-            </section>
-        </section>
-
-
-        <!------------------------------------------------------->
-        <section id="usingCE">
-            <!-- TODO -->
-            <section>
-                <h3>Using Compiler Explorer</h3>
-            </section>
-            <section>
-                <h3>Optimizer too clever</h3>
+                <h3>Summation</h3>
                 <pre><code data-trim class="cpp ce">
 /// g71:-O2 -std=c++1z
 constexpr int sumTo(int x) {
@@ -1072,383 +706,8 @@ int main(int argc, const char *argv[]) {
                 <div class="fragment">((x - 1) * x) / 2 + x</div>
             </section>
             <section>
-                <h3>Classes</h3>
-                <div class="left-pane">
-                    <pre><code class="cpp ce" data-trim>
-/// g71:-O2 -std=c++1z
-class Holder {
-  int value_{};
-public:
-  int value() const {
-    return value_;
-  }
-};
-                    </code></pre>
-                </div>
-                <div class="right-pane">
-                    <pre><code class="x86asm" data-trim>
-; no output
-                    </code></pre>
-                </div>
-                <aside class="notes">
-                    <ul>
-                        <li>
-                            <pre>auto f = &amp;Holder::value;</pre>
-                        </li>
-                        <li>define out of line</li>
-                        <li>call from a test function</li>
-                    </ul>
-                </aside>
-            </section>
-            <section>
-                <h3>Templates</h3>
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-template&lt;typename T>
-class Holder {
-  T value_{};
-public:
-  T value() const {
-    return value_;
-  }
-};
-                </code></pre>
-            </section>
-            <section><h3>Power features</h3>
-                <ul>
-                    <li>
-                        <a href="http://localhost:10240/#%7B%22version%22%3A4%2C%22content%22%3A%5B%7B%22type%22%3A%22row%22%2C%22content%22%3A%5B%7B%22type%22%3A%22component%22%2C%22componentName%22%3A%22codeEditor%22%2C%22componentState%22%3A%7B%22id%22%3A1%2C%22source%22%3A%22%2F%2F%20setup%5Cn%20%20%23include%20%3Cfunctional%3E%5Cn%20%20%23include%20%3Ccstddef%3E%5Cnvoid%20sum(int%20*first%2C%20int%20num%2C%5Cn%20%20%20%20%20%20%20%20%20int%20*out_sum)%20%7B%5Cn%20%20*out_sum%20%3D%200%3B%5Cn%20%20for%20(int%20i%20%3D%200%3B%20i%20%3C%20num%3B%20%2B%2Bi)%5Cn%20%20%20%20*out_sum%20%2B%3D%20first%5Bi%5D%3B%5Cn%7D%5Cn%22%2C%22options%22%3A%7B%22compileOnChange%22%3Atrue%2C%22colouriseAsm%22%3Atrue%7D%2C%22fontScale%22%3A1.6%7D%7D%2C%7B%22type%22%3A%22component%22%2C%22componentName%22%3A%22compiler%22%2C%22componentState%22%3A%7B%22source%22%3A1%2C%22filters%22%3A%7B%22commentOnly%22%3Atrue%2C%22directives%22%3Atrue%2C%22intel%22%3Atrue%2C%22labels%22%3Atrue%2C%22trim%22%3Atrue%7D%2C%22options%22%3A%22-O2%20-std%3Dc%2B%2B1z%22%2C%22compiler%22%3A%22g71%22%2C%22fontScale%22%3A1.8%7D%7D%5D%7D%5D%7D">
-                            Difference view</a></li>
-                    <li>Conformance view TODO</li>
-                    <li>AST view TODO</li>
-                    <li>Optimization view TODO</li>
-                </ul>
-            </section>
-        </section>
-
-
-        <!------------------------------------------------------->
-        <section id="ceAtDRW_hash">
-            <section><h3>Case Study: hash maps</h3></section>
-            <section>
-                <h3>An order book</h3>
-                <img src="images/TwtrLadder.png">
-            </section>
-            <section>
-                <h3>Updating the order book</h3>
-                <ul>
-                    <li>New order</li>
-                    <li>Modify order</li>
-                    <li>Remove order</li>
-                </ul>
-                <div class="fragment">150 million per day</div>
-                <div class="fragment">2 million in first 30 seconds</div>
-                <div class="fragment">...for just one exchange</div>
-            </section>
-            <section>
-                <!-- clang vs gcc - ispow2!  https://github.com/llvm-mirror/libcxx/blob/master/include/__hash_table#L130  -->
-                <!-- TODO - make sure understand exactly what's going on here -->
-                <!-- TODO maybe recap hash map? -->
-                <h3>Finding an order</h3>
-                <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  #include &lt;unordered_map>
-  #include &lt;cstdint>
-  using namespace std;
-  struct Order;
-using OrderId = uint64_t;
-Order *findOrder(
-    const unordered_map&lt;OrderId, Order *> &m,
-    OrderId key) {
-  if (auto it = m.find(key); it != m.end())
-    return it->second;
-  return nullptr;
-}
-                </code></pre>
-            </section>
-        </section>
-
-        <!------------------------------------------------------->
-        <section id="ceAtDRW_order">
-            <section><h3>Case Study: order formatting</h3></section>
-            <section>
-                <h3>An order</h3>
-                <pre><span class="fix-key">8</span>=<span class="fix-value">FIX.4.2</span><span
-                        class="soh">␁</span><span
-                        class="fix-key">9</span>=<span class="fix-value">224</span><span class="soh">␁</span><span
-                        class="fix-key">35</span>=<span class="fix-value">D</span><span class="soh">␁</span><span
-                        class="fix-key">34</span>=<span class="fix-value">698</span><span
-                        class="soh">␁</span><span
-                        class="fix-key">49</span>=<span class="fix-value">ABCDEFG</span><span class="soh">␁</span><span
-                        class="fix-key">52</span>=<span class="fix-value">20150910-18:38:30</span><span
-                        class="soh">␁</span><br><span
-                        class="fix-key">56</span>=<span class="fix-value">CME</span><span class="soh">␁</span><span
-                        class="fix-key">57</span>=<span class="fix-value">G</span><span class="soh">␁</span><span
-                        class="fix-key">60</span>=<span class="fix-value">20150910-18:38:30</span><span
-                        class="soh">␁</span><span
-                        class="fix-key">167</span>=<span class="fix-value">FUT</span><span class="soh">␁</span><span
-                        class="fix-key">21</span>=<span class="fix-value">1</span><span class="soh">␁</span><span
-                        class="fix-key">204</span>=<span class="fix-value">0</span><span class="soh">␁</span><span
-                        class="fix-key">9702</span>=<span class="fix-value">2</span><span class="soh">␁</span><span
-                        class="fix-key">40</span>=<span class="fix-value">2</span><span class="soh">␁</span><br><span
-                        class="fix-key">59</span>=<span class="fix-value">0</span><span class="soh">␁</span><span
-                        class="fix-key">11</span>=<span class="fix-value">RS</span><span class="soh">␁</span><span
-                        class="fix-key">54</span>=<span class="fix-value">1</span><span class="soh">␁</span><span
-                        class="fix-key">38</span>=<span class="fix-value">4</span><span class="soh">␁</span><span
-                        class="fix-key">44</span>=<span class="fix-value">-65</span><span class="soh">␁</span><span
-                        class="fix-key">55</span>=<span class="fix-value">CL</span><span class="soh">␁</span><span
-                        class="fix-key">107</span>=<span class="fix-value">CLF6-CLG6</span><span
-                        class="soh">␁</span><span
-                        class="fix-key">1028</span>=<span class="fix-value">N</span><span class="soh">␁</span><span
-                        class="fix-key">50</span>=<span class="fix-value">DRWTRDR</span><span
-                        class="soh">␁</span><br><span
-                        class="fix-key">142</span>=<span class="fix-value">US,IL</span><span class="soh">␁</span><span
-                        class="fix-key">1</span>=<span class="fix-value">2375404</span><span class="soh">␁</span><span
-                        class="fix-key">10</span>=<span class="fix-value">027</span><span class="soh">␁</span></pre>
-            </section>
-            <section>
-                <h3>Simplified Order</h3>
-                <pre>NEW <i>stock</i> <i>price</i> <i>quantity</i></pre>
-                <pre class="fragment"><code data-trim class="cpp ce">
-/// g71:-O2 -std=c++1z
-// setup
-  #include &lt;string>
-  #include &lt;sstream>
-  using namespace std;
-string newOrder(string stock, int price, int quantity) {
-  stringstream s;
-  s << "NEW " << stock << " " << price << " " << quantity;
-  return s.str();
-}</code></pre>
-            </section>
-            <section>
-                <h3>How Fast Is It?</h3>
-                <ul>
-                    <li>Time 100 million orders, get average time</li>
-                    <li class="fragment">550ns per order (on 3.5GHz Haswell)</li>
-                    <li class="fragment">We can do better!</li>
-                </ul>
-            </section>
-            <section>
-                <h3>Profile</h3>
-                <pre><code class="bash">$ perf record ./app
-$ perf report</code></pre>
-                <pre class="fragment">26.46%  __dynamic_cast
- 6.00%  ostream::_M_insert
- 5.12%  __strcmp_sse2_unaligned
- 4.10%  _int_free
- 3.99%  basic_streambuf::xsputn
- 3.96%  __int_to_char
- 3.72%  newOrder
- 3.68%  basic_ostream& __ostream_insert
- 3.67%  num_put::_M_insert_int
- 2.36%  malloc</pre>
-            </section>
-            <section><h3>Dynamic cast?</h3>
-                <pre>__dynamic_cast()
-bool std::has_facet(std::locale const&)
-std::basic_ios::_M_cache_locale(std::locale const&)
-std::basic_ios::init(...)
-std::basic_istream::basic_istream(...)
-std::basic_iostream::basic_iostream(...)
-std::basic_stringstream::basic_stringstream(...)
-newOrder</pre>
-            </section>
-            <section>
-                <h3>Dynamic cast?</h3>
-                <pre><code class="cpp" data-trim>
-template&lt;typename _Facet> bool
-has_facet(const locale& __loc) {
-  const size_t __i = _Facet::id._M_id();
-  const locale::facet** __facets = __loc._M_impl->_M_facets;
-  return (__i < __loc._M_impl->_M_facets_size
-    &amp;&amp; dynamic_cast&lt;const _Facet*>(__facets[__i]));
-}
-                </code></pre>
-            </section>
-            <section>
-                <h3>Take Two</h3>
-                <pre><code class="cpp ce" data-trim>
-/// g71:-O2
-// setup
-  #include &lt;cstdio>
-void newOrder(char *buf, const char *stock,
-              int price, int quantity) {
-  sprintf(buf, "NEW %s %d %d", stock, price, quantity);
-}</code></pre>
-            </section>
-
-            <section>
-                <h3>Take Two - Results</h3>
-                <ul>
-                    <li>130ns per order</li>
-                    <li>4x faster!</li>
-                    <li class="fragment">We can still do better!</li>
-                </ul>
-                <pre class="fragment">47.38%  <a
-                        href="http://osxr.org/glibc/source/stdio-common/vfprintf.c?v=glibc-2.19.0#0221">vfprintf</a>
-21.51%  <a href="http://osxr.org/glibc/source/libio/genops.c?v=2.19.0#0442">_IO_default_xsputn</a>
-9.81%  <a href="http://osxr.org/glibc/source/string/strchrnul.c?v=glibc-2.16.0#0032">__strchrnul</a>
-6.80%  <a href="http://osxr.org/glibc/source/stdio-common/_itoa.c?v=glibc-2.19.0#0163">_itoa_word</a>
- </pre>
-            </section>
-
-            <section>
-                <h3>Take Three - Rethink</h3>
-                <ul class="fragment">
-                    <li>Don't need full generality of printf</li>
-                    <li>Create a custom formatter</li>
-                    <li>Maybe end up with a faster <code>_itoa_word</code></li>
-                </ul>
-            </section>
-
-            <section>
-                <h3>itoa</h3>
-                <ul class="fragment">
-                    <li>Rightmost digit is <code>value % 10</code></li>
-                    <li>Next digit is <code>(value / 10) % 10</code></li>
-                    <li>And so on...</li>
-                    <li>Digits come out in reverse order</li>
-                </ul>
-            </section>
-
-            <section>
-                <h3>Take Three</h3>
-                <pre><code class="cpp">class Format {
-  char _buffer[2048];
-  int _ptr;
-public:
-  Format() : _ptr(0) {}
-  void append(char c) { _buffer[_ptr++] = c; }
-  void append(const char *data) {
-    while (*data) append(*data++);
-  }
-  void finish() { append('\x00'); }
-  void decimalAppend(int value);
-  void decimalAppendNonNeg(unsigned value);
-};</code></pre>
-            </section>
-
-            <section>
-                <h3>Take Three</h3>
-                <pre><code class="cpp">void Format::decimalAppend(int value) {
-  if (value < 0) {
-    append('-');
-    value = -value;
-  }
-  decimalAppendNonNeg(value);
-}</code></pre>
-            </section>
-            <section>
-                <h3>Take Three</h3>
-                <pre><code class="cpp ce">
-/// g71:-O3 -std=c++1z -march=haswell
-// setup
-  #include &lt;utility>
-  using namespace std;
-
-  class Format {
-    char _buffer[2048];
-    int _ptr;
-  public:
-    Format() : _ptr(0) {}
-    void append(char c) { _buffer[_ptr++] = c; }
-
-    void decimalAppendNonNeg(unsigned value);
-
-    void decimalAppend(int value) {
-      if (value < 0) {
-        append('-');
-        value = -value;
-      }
-      decimalAppendNonNeg(value);
-    }
-  };
-
-void Format::decimalAppendNonNeg(unsigned value) {
-  int startPos = _ptr;
-  do {
-    append((char)(value % 10) + '0');
-    value /= 10;
-  } while (value);
-  // Reverse the digits.
-  auto end = &_buffer[_ptr - 1];
-  auto start = &_buffer[startPos];
-  while (end > start) swap(*start++, *end--);
-}
-                </code></pre>
-            </section>
-
-            <section>
-                <h3>Take Three</h3>
-                <pre><code class="cpp">void newOrder(Format &format, const char *stock,
-              int price, int quantity) {
-  format.append("NEW ");
-  format.append(stock);
-  format.append(' ');
-  format.decimalAppend(price);
-  format.append(' ');
-  format.decimalAppendNonNeg(quantity);
-  format.finish();
-}</code></pre>
-            </section>
-
-            <section>
-                <h3>Take Three - Results</h3>
-                <ul>
-                    <li>20ns / order</li>
-                    <li>~100 CPU clock cycles</li>
-                    <li>27x faster than Take One</li>
-                    <li>6.5x faster than Take Two</li>
-                </ul>
-            </section>
-            <section>
-                <h3>Take Three - Profile</h3>
-                <pre>94.93% newOrder(Format&, char const*, int, int)
- 4.86% main</pre>
-            </section>
-            <section>
-                <h3>Take Three</h3>
-                <ul>
-                    <li>Can we do better?</li>
-                    <li class="fragment">Yes!</li>
-                </ul>
-            </section>
-            <section>
-                <h3>Best so far</h3>
-                <ul>
-                    <li>Work out number of digits</li>
-                    <li>Generate bespoke routine for N digits</li>
-                    <li>Do two digits at a time <code>table[x % 100];</code></li>
-                    <li class="fragment">13ns / order</li>
-                </ul>
-            </section>
-            <section>
-                <h3>log10(x)</h3>
-                <ul>
-                    <li>Number of digits in result is <code>1 + log10(x)</code></li>
-                    <li><code>log10(x) = log2(x) * (ln(2)/ln(10))</code></li>
-                    <li><code>log2(x)</code> is <code class="asm">31 - clz</code></li>
-                    <li><code>log(2) / log(10) ~ 0.30103 ~ 1233/4096</code></li>
-                </ul>
-            </section>
-            <section>
-                <h3>log10(x)</h3>
-                <pre><code class="ce cpp" data-trim>
-/// g71:-O2 -march=haswell
-constexpr unsigned PowersOf10[] = {
-  1, 10, 100, 1000, 10000, 100000, 1000000,
-  10000000, 100000000, 1000000000
-};
-
-unsigned numDigits(unsigned v) {
-  auto log2 = 31 - __builtin_clz(v);
-  auto log10Approx = (log2 + 1) * 1233 >> 12;
-  auto log10 = log10Approx - (v < PowersOf10[log10Approx]);
-  return log10 + 1;
-}
-</code></pre>
+                <h3>Summary</h3>
+                Compilers are pretty smart at cute arithmetic tricks.
             </section>
         </section>
 
@@ -1591,116 +850,6 @@ webServer.listen(10240);
                 , <a href="https://go.godbolt.org/">go</a>
                 , <a href="https://ispc.godbolt.org/">ispc</a> }.godbolt.org
             </section>
-        </section>
-
-
-        <!------------------------------------------------------->
-        <!------------------------------------------------------->
-        <!------------------------------------------------------->
-        <!------------------------------------------------------->
-        <section>
-            <h3>Non-virtual thunks</h3>
-            <pre><code class="cpp ce">
-/// clang400:-O1 -std=c++1z
-struct Foo { virtual void foo() = 0; };
-struct Bar { virtual void bar() = 0; };
-extern void logFoo(const Foo &);
-struct FooBar : Foo, Bar {
-  void bar() override;
-  void log();
-};
-
-void FooBar::bar() {
-  log();
-}           </code></pre>
-            <aside class="notes">
-                line 35 of output with label and directive filter off
-            </aside>
-        </section>
-
-        <section>
-            <h3>Variant</h3>
-            <pre><code class="ce">
-/// clang_trunk:-O3 -march=haswell -std=c++1z -stdlib=libc++
-// setup
-  #include &lt;variant>
-  using namespace std;
-
-using IntOrFloat = variant&lt;int, float>;
-int test(IntOrFloat iof) {
-  return visit([](auto i) -> int{ return i; }, iof);
-}
-// TODO:
-int test2() {
-  IntOrFloat iof { 1.f };
-  return visit([](auto i) -> int{ return i; }, iof);
-}
-            </code></pre>
-        </section>
-
-        <section>
-            pass by value / pass by reference https://godbolt.org/g/XWFR7s
-            <pre><code class="cpp ce">
-using T = int;
-
-struct p1d { T x; };
-struct p2d { T x; T y; };
-struct p3d { T x; T y; T z; };
-struct p4d { T x; T y; T z; T a; };
-struct p5d { T x; T y; T z; T a; T b; };
-
-T sum(p1d p) {
-  return p.x;
-}
-
-T sum(const p2d p) {
-  return p.x + p.y;
-}
-
-T sum(p3d p) {
-  return p.x + p.y + p.z;
-}
-
-T sum(p4d p) {
-  return p.x + p.y + p.z + p.a;
-}
-
-T sum(p5d p) {
-  return p.x + p.y + p.z + p.a + p.b;
-}
-
-extern T e_sum(p3d p);
-extern T e_sum(p4d p);
-extern T e_sum(const p5d &p);
-
-T f3() {
-  p3d p {1, 2, 3};
-  return e_sum(p);
-}
-
-T f4() {
-  p4d p {1, 2, 3, 4};
-  return e_sum(p);
-}
-
-T f5() {
-  p5d p {1, 2, 3, 4, 5};
-  return e_sum(p);
-}
-            </code></pre>
-            <!-- TODO flesh this ^^ one out -->
-        </section>
-
-        <section>
-            <h3>The address sanitizer</h3>
-            <pre><code class="ce">
-/// g71:-O2
-// setup
-  #include &lt;cstdlib>
-int read(int *array, size_t index) {
-  return array[index];
-}
-            </code></pre>
         </section>
 
         <div class="footer">

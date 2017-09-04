@@ -1,6 +1,7 @@
 # v2 Outline
 1.  Intro: Who am I? Backstory
 2.  Asm 101 (5m version)
+......
 3.  Microwalkthrough 
 4.  Comparison (shows before/after/diff) ... leading in to "once I built this tool..."
 5.  Muls
@@ -8,6 +9,7 @@
 7.  Hash maps?
 8.  sigma / popcount?
 9.  How it works 1
+.... how others use it?
 10. opt view/ast view
 11. How it works 2
 12. Local demo
