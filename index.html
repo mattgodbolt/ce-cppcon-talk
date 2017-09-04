@@ -11,7 +11,7 @@
 
     <style>
         .faded {
-            opacity: 0.7;
+            opacity: 0.5;
         }
 
         div.footnote {
@@ -168,8 +168,7 @@
                 <h3>My goals</h3>
                 <ul>
                     <li>Un-scary-fy assembler</li>
-                    <li>Compilers are amazing</li>
-                    <li class="fragment">...but always worth checking</li>
+                    <li>Compilers work hard for us</li>
                 </ul>
             </section>
             <!-- TODO outline? -->
@@ -199,8 +198,7 @@
                   for (int x : v) result += x;
                   return result;
                 }</code></pre>
-                <div class="fragment">Which is better?</div>
-                <div class="fragment">Why care?</div>
+                <div class="fragment">Is one better than the other?</div>
                 <aside class="notes">
                     <ul>
                         <li>2012, C++11isms, range-for</li>
@@ -624,9 +622,21 @@ int modBy3(int x) {
 </span>  lea eax, [rdx+rdx*2]
   sub edi, eax
   mov eax, edi
-  ret
+<span class="faded">  ret</span>
                     </code></pre>
                 </div>
+            </section>
+            <section>
+                <h3>Why modulus?</h3>
+                <ul>
+                    <li>
+                        <a href="http://localhost:10240/#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.6,j:1,source:'//+setup%0A++%23include+%3Cunordered_map%3E%0A++using+namespace+std%3B%0A%0Aint+lookupOr0(int+i,%0A+++++++++++const+unordered_map%3Cint,+int%3E+%26m)+%7B%0A++if+(auto+it+%3D+m.find(i)%3B+it+!!%3D+m.end())%0A++++return+it-%3Esecond%3B%0A++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:gsnapshot,filters:(___0:(),b:'0',commentOnly:'0',directives:'0',intel:'0',jquery:'3.2.1',length:1,prevObject:(___0:(sizzle1504548572380:(undefined:(legend:!(5,0,'1')))),length:1,prevObject:(___0:(jQuery3210165493275017513991:(display:''),sizzle1504548572380:(undefined:(legend:!(5,0,'1')))),length:1)),trim:'0'),fontScale:1.8,options:'-O2+-std%3Dc%2B%2B1z+-march%3Dhaswell',source:1),l:'5',n:'0',o:'x86-64+gcc+(snapshot)+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4">
+                            Bucket selection in hash maps</a></li>
+                    <li>
+                        <a href="http://localhost:10240/#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.6,j:1,source:'//+setup%0A++%23include+%3Cunordered_map%3E%0A++using+namespace+std%3B%0A%0Aint+lookupOr0(int+i,%0A+++++++++++const+unordered_map%3Cint,+int%3E+%26m)+%7B%0A++if+(auto+it+%3D+m.find(i)%3B+it+!!%3D+m.end())%0A++++return+it-%3Esecond%3B%0A++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:clang_trunk,filters:(___0:(),b:'0',commentOnly:'0',directives:'0',intel:'0',jquery:'3.2.1',length:1,prevObject:(___0:(sizzle1504548572380:(undefined:(legend:!(5,0,'1')))),length:1,prevObject:(___0:(jQuery3210165493275017513991:(display:''),sizzle1504548572380:(undefined:(legend:!(5,0,'1')))),length:1)),trim:'0'),fontScale:1.8,options:'-O2+-std%3Dc%2B%2B1z+-march%3Dhaswell+-stdlib%3Dlibc%2B%2B',source:1),l:'5',n:'0',o:'x86-64+clang+(trunk)+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4">
+                            libc++</a> special-cases power-of-two</li>
+                    <li>boost multi_index</li>
+                </ul>
             </section>
             <section><h3>Counting bits</h3>
                 <pre><code class="ce">
@@ -647,7 +657,7 @@ int countSetBits(int a) {
             <section>
                 <h3>Summation</h3>
                 <pre><code data-trim class="cpp ce">
-/// g71:-O2 -std=c++1z
+/// g71:-O2 -std=c++1z -march=haswell
 constexpr int sumTo(int x) {
   int sum = 0;
   for (int i = 0; i &lt;= x; ++i)
@@ -670,68 +680,22 @@ int main(int argc, const char *argv[]) {
             </section>
             <section>
                 <h3>Sum(x)</h3>
-                <table id="sum">
-                    <tbody>
-                    <tr class="fragment">
-                        <td class="filled"></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="fragment">
-                        <td class="filled"></td>
-                        <td class="filled"></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="fragment">
-                        <td class="filled"></td>
-                        <td class="filled"></td>
-                        <td class="filled"></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="fragment">
-                        <td class="filled"></td>
-                        <td class="filled"></td>
-                        <td class="filled"></td>
-                        <td class="filled"></td>
-                        <td></td>
-                    </tr>
-                    </tbody>
-                </table>
-                <div class="fragment">(x * (x + 1)) / 2</div>
-                <div class="fragment">((x - 1) * x) / 2 + x</div>
+                <div>\[
+                    \begin{aligned}
+                    \sum{x} &amp;&equiv; \frac{x(x + 1)}{2} \\
+                    &amp;&equiv; x + \frac{x(x - 1)}{2}
+                    \end{aligned}
+                    \]
+                </div>
             </section>
             <section>
-                <h3>Summary</h3>
-                Compilers are pretty smart at cute arithmetic tricks.
-            </section>
-        </section>
-
-
-        <!------------------------------------------------------->
-        <section id="otherPeople">
-            <!-- TODO -->
-            <section><h3>Uses</h3></section>
-            <section>
-                <h3>C++ REPL</h3>
-                <ul>
-                    <li>Quick turnaround for ideas</li>
-                    <li>"Does this even compile?"</li>
-                    <li>Minimal bug reports for compilers</li>
-                </ul>
+                <h3>Devirtualisation</h3>
+                <!-- TODO -->
             </section>
             <section>
-                <h3>Other uses</h3>
-                <ul>
-                    <li>Compiler teams</li>
-                    <li>"Works on my machine"</li>
-                </ul>
+                <h3>What has my compiler done for me lately?</h3>
+                <div class="fragment">A lot!</div>
             </section>
-
         </section>
 
 
@@ -867,9 +831,11 @@ webServer.listen(10240);
         transition: 'none',
         history: true,
         slideNumber: true,
+        math: {config: 'TeX-AMS_HTML-full'},
         dependencies: [
             {src: 'reveal.js/plugin/markdown/marked.js'},
             {src: 'reveal.js/plugin/markdown/markdown.js'},
+            {src: 'reveal.js/plugin/math/math.js'},
             {src: 'reveal.js/plugin/notes/notes.js', async: true},
             {
                 src: 'reveal.js/plugin/highlight/highlight.js', async: true,

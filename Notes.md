@@ -1,3 +1,9 @@
+# v3 timings
+20m to the end of ASM 101
+37min to end of walkthrough
+1hr to end of made-up devirtualise
+1hr 15 to end ot alk
+
 # v2 Outline
 1.  Intro: Who am I? Backstory
 2.  Asm 101 (5m version)
@@ -7,7 +13,9 @@
 5.  Muls
 6.  Div/Mod
 7.  Hash maps?
-8.  sigma / popcount?
+8.  sigma 
+8.  popcount?
+8.  
 9.  How it works 1
 .... how others use it?
 10. opt view/ast view
@@ -432,7 +440,7 @@ Fold operator repl style thing
 
 Move construction vs copy
 
-Shout to Chamdler and Michael Spencer talks on UB
+Shout to Chandler and Michael Spencer talks on UB
 
 Shout to John Regehr 
 
