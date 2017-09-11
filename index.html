@@ -14,6 +14,10 @@
             opacity: 0.5;
         }
 
+        img.logo {
+            padding: 5px;
+        }
+
         div.footnote {
             margin-top: 2em;
             font-size: smaller;
@@ -111,7 +115,6 @@
 <div class="reveal">
     <!-- TODO compile all with -Wall -Wextra -->
     <!-- TODO check font size (26) -->
-    <!-- TODO unify indentation -->
     <section class="slides">
         <section id="title">
             <h2>What Has My Compiler Done for Me Lately?</h2>
@@ -128,23 +131,16 @@
         <!------------------------------------------------------>
         <section id="why">
             <section>
-                <h3>Why am I here?</h3>
-                <aside class="notes">
-                    <p>I'm wondering that too. If I explain a bit about myself perhaps it'll help.</p>
-                    <p>Passion for performance, mechanical sympathy</p>
-                </aside>
-            </section>
-            <section>
-                <h3>My background</h3>
+                <h3>About me</h3>
                 <div class="fragment">
-                    <img src="images/6502_z80.jpg" width="200">
-                    <img src="images/ARM_610.jpg" width="200">
-                    <img src="images/red_dog.png" width="200">
+                    <img src="images/6502_z80.jpg" height="160">
+                    <img src="images/ARM_610.jpg" height="160">
+                    <img src="images/red_dog.png" height="160">
                 </div>
                 <div class="fragment">
-                    <img src="images/profactor.jpg" width="100">
-                    <img src="images/google.png" width="100">
-                    <img src="images/DRWSmallLogo.png" width="100">
+                    <img class="logo" src="images/profactor.jpg" height="30">
+                    <img class="logo" src="images/google.png" height="30">
+                    <img class="logo" src="images/DRWSmallLogo.png" height="30">
                 </div>
                 <aside class="notes">
                     <h4>Potted history:</h4>
@@ -168,14 +164,16 @@
                 <h3>My goals</h3>
                 <ul>
                     <li>Un-scary-fy assembler</li>
-                    <li>Compilers work hard for us</li>
+                    <li>Appreciate your compiler!</li>
                 </ul>
             </section>
-            <!-- TODO outline? -->
             <section>
                 <h3>Outline</h3>
                 <ul>
-                    <li>TODO</li>
+                    <li>Compiler Explorer story</li>
+                    <li>Assembly 101</li>
+                    <li>What has my compiler done for me lately?</li>
+                    <li>Behind the scenes of Compiler Explorer</li>
                 </ul>
             </section>
         </section>
@@ -185,7 +183,7 @@
         <section id="backstory">
             <section>
                 <h3>Backstory</h3>
-                <pre class="fragment"><code data-trim class="cpp">
+                <pre><code data-trim class="cpp">
                 int sum(const vector&lt;int> &v) {
                   int result = 0;
                   for (size_t i = 0; i < v.size(); ++i)
@@ -208,7 +206,7 @@
             <section>
                 <h3>WARNING</h3>
                 <ul>
-                    <li>Reading assembly alone is bad</li>
+                    <li>Reading assembly alone can be misleading</li>
                     <li><em>Always</em> measure too</li>
                 </ul>
                 <aside class="notes">
@@ -351,7 +349,7 @@
             <section>
                 <h3>Compiler Explorer v0.1</h3>
                 <pre><code data-noescape data-trim class="bash">
-                 $ g++ /tmp/test.cc -O1 -c -S -o -masm=intel - | c++filt \
+                 $ g++ /tmp/test.cc -O2 -c -S -o -masm=intel - | c++filt \
                     | grep -vE '\s+\.'
             </code></pre>
                 <pre><code class="x86asm" data-trim>
@@ -360,11 +358,9 @@ sum(std::vector&lt;int, std::allocator&lt;int> > const&):
     mov	rcx, QWORD PTR [rdi]
     mov	rax, QWORD PTR 8[rdi]
     sub	rax, rcx
-    sar	rax, 2
+    shr	rax, 2
     mov	rsi, rax
-    test rax, rax
-    mov	edx, 0
-    mov eax, 0
+    xor eax, eax
     ...</code></pre>
             </section>
             <section><h3>Compiler Explorer v0.1</h3>
@@ -400,9 +396,6 @@ int sum(const vector&lt;int> &v) {
                     </ul>
                 </aside>
             </section>
-            <!-- TODO show sxs and show what LHS is doing
-            http://localhost:10240/#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.6,j:1,source:'//+setup%0A++%23include+%3Cnumeric%3E%0A++%23include+%3Cvector%3E%0A++using+namespace+std%3B%0Aint+sum(const+vector%3Cint%3E+%26v)+%7B%0A++int+result+%3D+0%3B%0A++for+(size_t+i+%3D+0%3B+i+%3C+v.size()%3B+%2B%2Bi)%0A++++result+%2B%3D+v%5Bi%5D%3B%0A++return+result%3B%0A%7D%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:g71,filters:(___0:(),b:'0',commentOnly:'0',directives:'0',intel:'0',jquery:'3.2.1',length:1,prevObject:(___0:(sizzle1504269573838:(undefined:(legend:!(5,0,'1')))),length:1,prevObject:(___0:(jQuery321090965591201150151:(display:''),sizzle1504269573838:(undefined:(legend:!(5,0,'1')))),length:1)),trim:'0'),fontScale:1.8,options:'-O2+-std%3Dc%2B%2B1z',source:1),l:'5',n:'0',o:'x86-64+gcc+7.1+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4
-            -->
             <section>
                 <h3>Walkthrough</h3>
                 <pre><code data-trim class="x86asm">
@@ -465,7 +458,6 @@ je .L4
             <section><h3>Backstory</h3>
                 <h5>So, which approach is best?</h5></section>
             <section>
-                <!-- weak, maybe make std::accum a link?-->
                 <h3>Also</h3>
                 <ul>
                     <li>Optimizer settings are important</li>
@@ -482,7 +474,7 @@ je .L4
                 <h3>Multiplication</h3>
                 <div class="left-pane">
                     <pre><code class="cpp ce" data-trim>
-/// g71:-O2 -std=c++1z
+/// g71:-O2 -std=c++1z -march=haswell
 int mulByY(int x, int y) {
   return x * y;
 }
@@ -514,19 +506,15 @@ mulByY(int, int):
             </section>
             <section>
                 <h3>Multiplication</h3>
-                <!-- todo sxs -->
                 <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-int mulBy3(int x) { return x * 3; }
-int mulBy5(int x) { return x * 5; }
-int mulBy7(int x) { return x * 7; }
-int mulBy9(int x) { return x * 9; }
+/// g71:-O2 -std=c++1z -march=haswell
+int mulByConstant(int x) { return x * 2; }
                 </code></pre>
             </section>
             <section>
                 <h3>Multiplication</h3>
                 <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
+/// g71:-O2 -std=c++1z -march=haswell
 int mulBy65599(int a) {
   return (a << 16) + (a << 6) - a;
   //         ^          ^
@@ -579,24 +567,22 @@ modByY(int, int):
                 <!-- TODO sxs ? -->
                 <h3>Division</h3>
                 <pre><code class="cpp ce">
-/// g71:-O2 -std=c++1z
-int divBy3(int x) { return x / 3; }
+/// g71:-O2 -std=c++1z -march=haswell
+unsigned divByConstant(unsigned x) { return x / 2; }
                 </code></pre>
             </section>
             <section>
                 <h3>Division</h3>
                 <!-- TODO C implementaiton? -->
-                int64_t a =
                 <pre><code class="x86asm" data-trim>
-divBy3(int):
+divBy3(unsigned):
   mov eax, edi          ; eax = x
-  mov edx, 1431655766
-  sar edi, 31           ; edi = x>>31
-                        ;     &equiv; x < 0 ? -1 : 0
-  imul edx              ; eax:edx = x * 1431655766
-  mov eax, edx          ;   (x * 1431655766) >> 32
-                        ; 1431655766 / 4294967296 = 0.3333333335
-  sub eax, edi          ; ... - (x < 0 ? -1 : 0)
+  mov edx, 0xaaaaaaab
+  mul edx               ; eax:edx = x * 0xaaaaaaab
+  mov eax, edx          ;   (x * 0xaaaaaaab) >> 32
+                        ; &equiv; (x * 0xaaaaaaab) / 0x10000000
+                        ; &equiv; x * 0.6666666667
+  shr eax               ; x * 0.333333333
   ret
                 </code></pre>
             </section>
@@ -605,20 +591,19 @@ divBy3(int):
                 <div class="left-pane">
                     <!---/// g71:-O2 -std=c++1z -->
                     <pre><code class="cpp ce" data-trim>
-int modBy3(int x) {
+unsigned modBy3(unsigned x) {
   return x % 3;
 }
                     </code></pre>
                 </div>
                 <div class="right-pane">
                     <pre><code class="x86asm" data-noescape data-trim>
-<span class="faded">modBy3(int):
+<span class="faded">modBy3(unsigned):
   mov eax, edi
-  mov edx, 1431655766
-  imul edx
-  mov eax, edi
-  sar eax, 31
-  sub edx, eax
+  mov edx, 0xaaaaaaab
+  mul edx
+  mov eax, edx
+  shr eax
 </span>  lea eax, [rdx+rdx*2]
   sub edi, eax
   mov eax, edi
@@ -634,7 +619,8 @@ int modBy3(int x) {
                             Bucket selection in hash maps</a></li>
                     <li>
                         <a href="http://localhost:10240/#g:!((g:!((g:!((h:codeEditor,i:(fontScale:1.6,j:1,source:'//+setup%0A++%23include+%3Cunordered_map%3E%0A++using+namespace+std%3B%0A%0Aint+lookupOr0(int+i,%0A+++++++++++const+unordered_map%3Cint,+int%3E+%26m)+%7B%0A++if+(auto+it+%3D+m.find(i)%3B+it+!!%3D+m.end())%0A++++return+it-%3Esecond%3B%0A++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:clang_trunk,filters:(___0:(),b:'0',commentOnly:'0',directives:'0',intel:'0',jquery:'3.2.1',length:1,prevObject:(___0:(sizzle1504548572380:(undefined:(legend:!(5,0,'1')))),length:1,prevObject:(___0:(jQuery3210165493275017513991:(display:''),sizzle1504548572380:(undefined:(legend:!(5,0,'1')))),length:1)),trim:'0'),fontScale:1.8,options:'-O2+-std%3Dc%2B%2B1z+-march%3Dhaswell+-stdlib%3Dlibc%2B%2B',source:1),l:'5',n:'0',o:'x86-64+clang+(trunk)+(Editor+%231,+Compiler+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4">
-                            libc++</a> special-cases power-of-two</li>
+                            libc++</a> special-cases power-of-two
+                    </li>
                     <li>boost multi_index</li>
                 </ul>
             </section>
@@ -690,7 +676,80 @@ int main(int argc, const char *argv[]) {
             </section>
             <section>
                 <h3>Devirtualisation</h3>
-                <!-- TODO -->
+                <div class="left-pane">
+                <pre><code class="cpp ce" data-trim>
+/// g71:-O2 -std=c++1z -march=haswell
+struct Transform {
+  virtual int transform(
+    int i) const = 0;
+};
+
+int sum(const Transform &t,
+        int n) {
+  int result = 0;
+  for (int i = 0; i <= n; ++i)
+    result += t.transform(i);
+  return result;
+}
+                    </code></pre>
+                </div>
+                <div class="right-pane">
+                <pre><code class="asm" data-trim>
+.L3:
+  mov rax, QWORD PTR [rbp+0]
+  mov esi, ebx
+  mov rdi, rbp
+  add ebx, 1
+  call [QWORD PTR [rax]]
+  add r12d, eax
+  cmp ebx, r13d
+  jne .L3
+                    </code></pre>
+                </div>
+            </section>
+            <section>
+                <h3>Devirtualisation</h3>
+                <div class="left-pane">
+                <pre><code class="cpp ce" data-trim>
+/// g71:-O2 -std=c++1z -march=haswell
+// setup
+  struct Transform {
+    virtual int transform(int i) const = 0;
+  };
+  int sum(const Transform &t,
+          int n) {
+    int result = 0;
+    for (int i = 0; i <= n; ++i)
+      result += t.transform(i);
+    return result;
+  }
+
+struct Noop : Transform {
+  int transform (int i)
+      const override {
+    return i;
+  }
+};
+                    </code></pre>
+                </div>
+                <div class="right-pane">
+                <pre><code class="asm" data-trim>
+.L5:
+  add ebx, 1
+  add ebp, eax
+  cmp ebx, r12d
+  je .L11
+.L6:
+  mov rax, QWORD PTR [r13+0]
+  mov rdx, QWORD PTR [rax]
+  mov eax, ebx
+  cmp rdx, Noop::transform(int)
+  je .L5
+                    </code></pre>
+                </div>
+                <aside class="nodes">
+                    `-fstrict-vtable-pointers` in clang
+                </aside>
             </section>
             <section>
                 <h3>What has my compiler done for me lately?</h3>
@@ -746,7 +805,6 @@ webServer.listen(10240);
                     <li>Compilers stored on S3</li>
                     <li>OSS ones publically available</li>
                     <li>MS compilers via WINE</li>
-                    <!-- TODO: link! -->
                 </ul>
                 <aside class="notes">
                     30+ GB of compilers currently
@@ -770,7 +828,7 @@ webServer.listen(10240);
             <section>
                 <h3>How it works - Frontend</h3>
                 <ul>
-                    <li>Monaco</li>
+                    <li>Microsoft's Monaco</li>
                     <li>GoldenLayout</li>
                 </ul>
                 <h5 class="fragment">Thank you!</h5>
@@ -783,10 +841,8 @@ webServer.listen(10240);
                     </li>
                     <li><a href="https://github.com/mattgodbolt/compiler-explorer-image">github.com/mattgodbolt/compiler-explorer-image</a>
                     </li>
+                    <li class="fragment">Running locally is easy!<br><pre>$ make</pre></li>
                 </ul>
-            </section>
-            <section>
-                <h3>Running it locally</h3>
             </section>
         </section>
 
@@ -794,14 +850,20 @@ webServer.listen(10240);
         <!------------------------------------------------------->
         <section id="conclusions">
             <section>
-                <h3>Conclusions</h3>
+                <h3>Thanks</h3>
                 <ul>
-                    <li>Thanks to contributors</li>
+                    <li>Thanks to contributors:
+                        <ul>
+                            <li>Rubén Rincón</li>
+                            <li>Gabriel Devillers</li>
+                            <li>Simon Brand, Johan Engelen, Jared Wyles</li>
+                            <li>...and the rest!</li>
+                        </ul>
+                    </li>
                     <li>Thanks to Patreon folks</li>
                     <li>Thanks to awesome C++ community</li>
                     <li class="fragment">Thanks to you!</li>
                 </ul>
-                <!-- TODO -->
             </section>
             <section>
                 <h3>Go read some assembly!</h3>

@@ -1,3 +1,37 @@
+# v3.3 notes (7 sep)
+* 1hr 17
+* didn't do devirt as much
+* running locally = kill
+* wanted to talk more about other poeple usage
+
+# v3.2 notes (6th Spet)
+* 1h15
+* still rambling about me
+* flow of examples?
+
+# v3.1 notes (5th Sept)
+* total time: 1h10
+* rambling during "about me" terrible. Needs to be much tighter
+* still need to do devirtualisation
+* take a look at ec2 bit at end, ordering?
+* conclusions aren't conclusions
+* List of people to thank!
+* pics? humour?
+
+devirt?
+```
+struct Sequence {
+  virtual int next() = 0;
+};
+
+int sum(Sequence &s, int n) {
+  int result = 0;
+  for (int i = 0; i < n; ++i)
+    result += s.next();
+  return result;
+}
+```
+
 # v3 timings
 20m to the end of ASM 101
 37min to end of walkthrough

@@ -1,19 +1,19 @@
 (function () {
-    var ce_nodes = document.querySelectorAll('.ce');
+    const ce_nodes = document.querySelectorAll('.ce');
 
-    for (var i = 0, len = ce_nodes.length; i < len; i++) {
-        var element = ce_nodes[i];
-        var compiler = "g71";
-        var options = "-O1"
-        var source = unescape(element.textContent);
-        var lines = source.split('\n');
+    for (let i = 0, len = ce_nodes.length; i < len; i++) {
+        let element = ce_nodes[i];
+        let compiler = "g71";
+        let options = "-O1"
+        let source = unescape(element.textContent);
+        let lines = source.split('\n');
         source = "";
-        var displaySource = "";
-        var matcher = /^\/\/\/\s*([^:]+):(.*)$/;
-        var skipDisplay = false;
-        for (var idx = 0; idx < lines.length; ++idx) {
-            var line = lines[idx];
-            var match = line.match(matcher);
+        let displaySource = "";
+        let matcher = /^\/\/\/\s*([^:]+):(.*)$/;
+        let skipDisplay = false;
+        for (let idx = 0; idx < lines.length; ++idx) {
+            let line = lines[idx];
+            let match = line.match(matcher);
             if (match) {
                 compiler = match[1];
                 options = match[2];
@@ -29,7 +29,7 @@
                     displaySource += line + "\n"
             }
         }
-        var content = [];
+        let content = [];
         content.push({
             type: 'component',
             componentName: 'codeEditor',
@@ -51,43 +51,36 @@
                 fontScale: 1.8
             }
         });
-        var obj = {
+        let obj = {
             version: 4,
             content: [{type: 'row', content: content}]
         };
-        var ceFragment = encodeURIComponent(JSON.stringify(obj));
+        let ceFragment = encodeURIComponent(JSON.stringify(obj));
 
-        var parent = element.parentElement;
-
-        function replaceWithIFrame() {
-            element.remove();
-            var ceElement = document.createElement('iframe');
-            ceElement.setAttribute('width', '1200px');
-            ceElement.setAttribute('height', '300px');
-
-            var embedUrl = "http://localhost:10240/e#" + ceFragment;
-            ceElement.setAttribute('src', embedUrl);
-            parent.appendChild(ceElement);
-        }
+        let parent = element.parentElement;
 
         if (parent.tagName === "PRE") {
-            var a = document.createElement('a');
+            let a = document.createElement('a');
             a.setAttribute('href', 'http://localhost:10240/#' + ceFragment);
             a.setAttribute('target', '_blank');
             a.setAttribute('class', 'view-button');
             a.textContent = 'View';
             parent.parentElement.appendChild(a);
-            // TODO can't do this it seems, hljs may have tinkered?
-            // a.onclick = function () {
-            //     console.log("badgers");
-            //     console.log(element);
-            //     element.remove();
-            //     // replaceWithIFrame(parent.parentElement, parent);
-            // };
             element.textContent = displaySource;
         } else {
-            replaceWithIFrame(parent, element);
+            element.remove();
+            let ceElement = document.createElement('iframe');
+            ceElement.setAttribute('width', '1200px');
+            ceElement.setAttribute('height', '300px');
+            parent.appendChild(ceElement);
+
+            let embedUrl = "http://localhost:10240/e#" + ceFragment;
+            Reveal.addEventListener('slidechanged', (e) => {
+                if (e.currentSlide.contains(ceElement)) {
+                    ceElement.setAttribute('src', embedUrl);
+                    Reveal.sync();
+                }
+            });
         }
     }
-
 })();
