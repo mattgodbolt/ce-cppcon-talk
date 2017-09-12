@@ -14,6 +14,10 @@
             opacity: 0.5;
         }
 
+        span.opt {
+            font-size: 70%;
+            vertical-align: sub;
+        }
         img.logo {
             padding: 5px;
         }
@@ -281,14 +285,12 @@
                     op
                     op dest
                     op dest, src
+                    op dest, src1, src2
                 </code></pre>
                 <ul>
-                    <li><code>op</code> is e.g.
-                        <ul><code>call</code>, <code>ret</code>...</ul>
-                        <ul><code>push</code>, <code>pop</code>...</ul>
-                        <ul><code>add</code>, <code>sub</code>, <code>cmp</code>, <code>xor</code>...</ul>
-                    </li>
-                    <li><code>dest</code>, <code>src</code> is register or memory reference</li>
+                    <li><code>op</code> is e.g. <code>call</code>, <code>ret</code>, <code>add</code>, <code>sub</code>, <code>cmp</code>...</li>
+                    <li><code>dest</code>, <code>src</code> is register or memory reference:<br>
+                    <code>[base + reg1<span class="opt">opt</span> + reg2*(1, 2, 4 or 8)<span class="opt">opt</span>]</code></li>
                 </ul>
                 <div class="footnote">(Intel asm syntax)</div>
             </section>
@@ -675,7 +677,7 @@ int main(int argc, const char *argv[]) {
                 </div>
             </section>
             <section>
-                <h3>Devirtualisation</h3>
+                <h3>Virtual methods</h3>
                 <div class="left-pane">
                 <pre><code class="cpp ce" data-trim>
 /// g71:-O2 -std=c++1z -march=haswell
@@ -708,7 +710,7 @@ int sum(const Transform &t,
                 </div>
             </section>
             <section>
-                <h3>Devirtualisation</h3>
+                <h3>Virtual methods</h3>
                 <div class="left-pane">
                 <pre><code class="cpp ce" data-trim>
 /// g71:-O2 -std=c++1z -march=haswell
@@ -747,7 +749,7 @@ struct Noop : Transform {
   je .L5
                     </code></pre>
                 </div>
-                <aside class="nodes">
+                <aside class="notes">
                     `-fstrict-vtable-pointers` in clang
                 </aside>
             </section>
@@ -768,7 +770,7 @@ struct Noop : Transform {
                 <h3>How it works - Backend</h3>
                 <ul>
                     <li>Written in <code>node.js</code></li>
-                    <li>Runs on Amazon EC2</li>
+                    <li>Runs on Amazon</li>
                 </ul>
             </section>
             <section>
@@ -793,8 +795,10 @@ webServer.listen(10240);
             <section>
                 <h3>Amazon EC2</h3>
                 <ul>
+                    <li>Edge cache</li>
                     <li>Load balancer</li>
                     <li>Virtual machines</li>
+                    <li>Docker images</li>
                     <li>Shared compiler storage</li>
                 </ul>
             </section>

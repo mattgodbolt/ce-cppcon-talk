@@ -18,20 +18,6 @@
 * List of people to thank!
 * pics? humour?
 
-devirt?
-```
-struct Sequence {
-  virtual int next() = 0;
-};
-
-int sum(Sequence &s, int n) {
-  int result = 0;
-  for (int i = 0; i < n; ++i)
-    result += s.next();
-  return result;
-}
-```
-
 # v3 timings
 20m to the end of ASM 101
 37min to end of walkthrough
