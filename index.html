@@ -18,6 +18,7 @@
             font-size: 70%;
             vertical-align: sub;
         }
+
         img.logo {
             padding: 5px;
         }
@@ -288,9 +289,12 @@
                     op dest, src1, src2
                 </code></pre>
                 <ul>
-                    <li><code>op</code> is e.g. <code>call</code>, <code>ret</code>, <code>add</code>, <code>sub</code>, <code>cmp</code>...</li>
+                    <li><code>op</code> is e.g. <code>call</code>, <code>ret</code>, <code>add</code>, <code>sub</code>,
+                        <code>cmp</code>...
+                    </li>
                     <li><code>dest</code>, <code>src</code> is register or memory reference:<br>
-                    <code>[base + reg1<span class="opt">opt</span> + reg2*(1, 2, 4 or 8)<span class="opt">opt</span>]</code></li>
+                        <code>[base + reg1<span class="opt">opt</span> + reg2*(1, 2, 4 or 8)<span class="opt">opt</span>]</code>
+                    </li>
                 </ul>
                 <div class="footnote">(Intel asm syntax)</div>
             </section>
@@ -734,7 +738,7 @@ struct Noop : Transform {
 };
                     </code></pre>
                 </div>
-                <div class="right-pane">
+                <div class="right-pane fragment">
                 <pre><code class="asm" data-trim>
 .L5:
   add ebx, 1
@@ -818,7 +822,7 @@ webServer.listen(10240);
                 <h3>How it works - security</h3>
                 <ul>
                     <li>Compilers: huge attack vector</li>
-                    <li>Principal of "what's the worst could happen"</li>
+                    <li>Principle of "what's the worst could happen"</li>
                     <li>Docker</li>
                     <li><code>LD_PRELOAD</code></li>
                 </ul>
@@ -845,7 +849,9 @@ webServer.listen(10240);
                     </li>
                     <li><a href="https://github.com/mattgodbolt/compiler-explorer-image">github.com/mattgodbolt/compiler-explorer-image</a>
                     </li>
-                    <li class="fragment">Running locally is easy!<br><pre>$ make</pre></li>
+                    <li class="fragment">Running locally is easy!<br>
+                        <pre>$ make</pre>
+                    </li>
                 </ul>
             </section>
         </section>
