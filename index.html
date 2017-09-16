@@ -300,23 +300,26 @@
             </section>
             <section>
                 <h3>Instructions</h3>
-                <pre><code data-trim class="x86asm">
-                mov eax, DWORD PTR [r14]     ; eax = *(uint32_t *)r14
-                add rax, rdi                 ; rax += rdi
-                add eax, DWORD PTR [r14 + 4] ; eax += *(uint32_t *)(r14 + 4)
-                sub eax, DWORD PTR [r14 + 4 * rbx]
-                                             ; eax -= *(uint32_t *)(r14 + 4 * rbx)
-                lea rax, [r14 + 4 * rbx]     ; rax = r14 + 4 * rbx
-                xor edx, edx                 ; edx = (edx^edx)
+                <div class="left-pane">
+                <pre class="smaller"><code data-trim class="x86asm">
+                mov eax, DWORD PTR [r14]
+                add rax, rdi
+                add eax, DWORD PTR [r14+4]
+                sub eax, DWORD PTR [r14+4*rbx]
+                lea rax, [r14+4*rbx]
+                xor edx, edx
                 </code></pre>
-                <pre class="fragment"><code data-trim class="cpp">
-                int eax = *r14;              // int *r14;
+                </div>
+                <div class="right-pane">
+                <pre class="fragment smaller"><code data-trim class="cpp">
+                int eax = *r14;   // int *r14;
                 eax += r14[1];
                 rax += rdi;
                 eax -= r14[rbx];
                 int *rax = &r14[rbx];
                 edx = 0;
                 </code></pre>
+                </div>
             </section>
             <section>
                 <h3>Summary</h3>
@@ -350,12 +353,12 @@
                   return result;
                 }</code></pre>
                 <div class="fragment">Which is better?</div>
-                <div class="fragment">Look at assembly!</div>
             </section>
             <section>
                 <h3>Compiler Explorer v0.1</h3>
                 <pre><code data-noescape data-trim class="bash">
-                 $ g++ /tmp/test.cc -O2 -c -S -o -masm=intel - | c++filt \
+                 $ g++ /tmp/test.cc -O2 -c -S -o -masm=intel - \
+                    | c++filt \
                     | grep -vE '\s+\.'
             </code></pre>
                 <pre><code class="x86asm" data-trim>
@@ -366,7 +369,6 @@ sum(std::vector&lt;int, std::allocator&lt;int> > const&):
     sub	rax, rcx
     shr	rax, 2
     mov	rsi, rax
-    xor eax, eax
     ...</code></pre>
             </section>
             <section><h3>Compiler Explorer v0.1</h3>
@@ -406,8 +408,8 @@ int sum(const vector&lt;int> &v) {
                 <h3>Walkthrough</h3>
                 <pre><code data-trim class="x86asm">
   ; rdi = const vector&lt;int> *
-  mov rdx, QWORD PTR [rdi]    ; rdx = *rdi        &equiv; rdi->begin
-  mov rcx, QWORD PTR [rdi+8]  ; rcx = *(rdi + 8)  &equiv; rdi->end
+  mov rdx, QWORD PTR [rdi]   ; rdx = *rdi     &equiv; begin()
+  mov rcx, QWORD PTR [rdi+8] ; rcx = *(rdi+8) &equiv; end()
                 </code></pre>
                 <pre class="fragment"><code data-trim class="cpp">
 template&lt;typename T> struct _Vector_impl {
@@ -420,7 +422,7 @@ template&lt;typename T> struct _Vector_impl {
             <section>
                 <div class="left-pane">
                     <h5>Traditional</h5>
-                    <pre><code data-trim class="x86asm">
+                    <pre class="smaller"><code data-trim class="x86asm">
 sub rcx, rdx ; rcx = end-begin
 mov rax, rcx
 shr rax, 2   ; (end-begin)/4
@@ -428,7 +430,7 @@ je .L4
 add rcx, rdx
 xor eax, eax
                     </code></pre>
-                    <pre class="fragment"><code data-trim class="cpp">
+                    <pre class="fragment smaller"><code data-trim class="cpp">
 size_t size() const noexcept {
   return _M_finish - _M_start;
 }</code></pre>
@@ -582,13 +584,13 @@ unsigned divByConstant(unsigned x) { return x / 2; }
                 <!-- TODO C implementaiton? -->
                 <pre><code class="x86asm" data-trim>
 divBy3(unsigned):
-  mov eax, edi          ; eax = x
+  mov eax, edi        ; eax = x
   mov edx, 0xaaaaaaab
-  mul edx               ; eax:edx = x * 0xaaaaaaab
-  mov eax, edx          ;   (x * 0xaaaaaaab) >> 32
-                        ; &equiv; (x * 0xaaaaaaab) / 0x10000000
-                        ; &equiv; x * 0.6666666667
-  shr eax               ; x * 0.333333333
+  mul edx             ; eax:edx = x * 0xaaaaaaab
+  mov eax, edx        ;   (x * 0xaaaaaaab) >> 32
+                      ; &equiv; (x * 0xaaaaaaab) / 0x10000000
+                      ; &equiv; x * 0.6666666667
+  shr eax             ; x * 0.333333333
   ret
                 </code></pre>
             </section>
@@ -597,7 +599,8 @@ divBy3(unsigned):
                 <div class="left-pane">
                     <!---/// g71:-O2 -std=c++1z -->
                     <pre><code class="cpp ce" data-trim>
-unsigned modBy3(unsigned x) {
+unsigned modBy3(unsigned x)
+{
   return x % 3;
 }
                     </code></pre>
@@ -683,7 +686,7 @@ int main(int argc, const char *argv[]) {
             <section>
                 <h3>Virtual methods</h3>
                 <div class="left-pane">
-                <pre><code class="cpp ce" data-trim>
+                <pre class="smaller"><code class="cpp ce" data-trim>
 /// g71:-O2 -std=c++1z -march=haswell
 struct Transform {
   virtual int transform(
@@ -702,14 +705,14 @@ int sum(const Transform &t,
                 <div class="right-pane">
                 <pre><code class="asm" data-trim>
 .L3:
-  mov rax, QWORD PTR [rbp+0]
-  mov esi, ebx
-  mov rdi, rbp
-  add ebx, 1
-  call [QWORD PTR [rax]]
-  add r12d, eax
-  cmp ebx, r13d
-  jne .L3
+ mov rax, QWORD PTR [rbp+0]
+ mov esi, ebx
+ mov rdi, rbp
+ add ebx, 1
+ call [QWORD PTR [rax]]
+ add r12d, eax
+ cmp ebx, r13d
+ jne .L3
                     </code></pre>
                 </div>
             </section>
@@ -739,7 +742,7 @@ struct Noop : Transform {
                     </code></pre>
                 </div>
                 <div class="right-pane fragment">
-                <pre><code class="asm" data-trim>
+                <pre class="smaller"><code class="asm" data-trim>
 .L5:
   add ebx, 1
   add ebp, eax
@@ -779,7 +782,7 @@ struct Noop : Transform {
             </section>
             <section>
                 <h3><code>node.js</code></h3>
-                <pre><code class="javascript" data-trim>
+                <pre class="smaller"><code class="javascript" data-trim>
 function compile(req, res, next) {
   // exec req.compiler, feed it req.body
   // parse output, return via res
@@ -852,6 +855,7 @@ webServer.listen(10240);
                     <li class="fragment">Running locally is easy!<br>
                         <pre>$ make</pre>
                     </li>
+                    <li class="fragment">More in next C++ Weekly</li>
                 </ul>
             </section>
         </section>

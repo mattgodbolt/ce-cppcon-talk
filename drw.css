@@ -151,14 +151,18 @@ body {
 .reveal pre {
     display: block;
     position: relative;
-    width: 90%;
+    width: 95%;
     margin: 20px auto;
     text-align: left;
-    font-size: 0.55em;
+    font-size: 0.7em;
     font-family: monospace;
     line-height: 1.2em;
     word-wrap: break-word;
     box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
+}
+
+.reveal pre.smaller {
+    font-size: 0.6em;
 }
 
 .reveal code {
@@ -167,7 +171,7 @@ body {
 
 .reveal pre code {
     display: block;
-    padding: 5px;
+    padding: 8px;
     overflow: auto;
     max-height: 400px;
     word-wrap: normal;
