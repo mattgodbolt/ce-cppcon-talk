@@ -41,8 +41,12 @@
             background: rgb(141, 211, 199);
         }
 
-        #registers th {
+        code.smaller {
             font-size: smaller;
+        }
+
+        #registers th {
+            font-size: 30px;
             text-align: center;
         }
 
@@ -293,7 +297,7 @@
                         <code>cmp</code>...
                     </li>
                     <li><code>dest</code>, <code>src</code> is register or memory reference:<br>
-                        <code>[base + reg1<span class="opt">opt</span> + reg2*(1, 2, 4 or 8)<span class="opt">opt</span>]</code>
+                        <code class="smaller">[base + reg1<span class="opt">opt</span> + reg2*(1, 2, 4 or 8)<span class="opt">opt</span>]</code>
                     </li>
                 </ul>
                 <div class="footnote">(Intel asm syntax)</div>
@@ -583,15 +587,14 @@ unsigned divByConstant(unsigned x) { return x / 2; }
                 <h3>Division</h3>
                 <!-- TODO C implementaiton? -->
                 <pre><code class="x86asm" data-trim>
-divBy3(unsigned):
-  mov eax, edi        ; eax = x
-  mov edx, 0xaaaaaaab
-  mul edx             ; eax:edx = x * 0xaaaaaaab
-  mov eax, edx        ;   (x * 0xaaaaaaab) >> 32
-                      ; &equiv; (x * 0xaaaaaaab) / 0x10000000
-                      ; &equiv; x * 0.6666666667
-  shr eax             ; x * 0.333333333
-  ret
+mov eax, edi        ; eax = x
+mov edx, 0xaaaaaaab
+mul edx             ; eax:edx = x * 0xaaaaaaab
+mov eax, edx        ;   (x * 0xaaaaaaab) >> 32
+                    ; &equiv; (x * 0xaaaaaaab) / 0x10000000
+                    ; &equiv; x * 0.6666666667
+shr eax             ; x * 0.333333333
+ret
                 </code></pre>
             </section>
             <section>
@@ -599,24 +602,22 @@ divBy3(unsigned):
                 <div class="left-pane">
                     <!---/// g71:-O2 -std=c++1z -->
                     <pre><code class="cpp ce" data-trim>
-unsigned modBy3(unsigned x)
-{
+int modBy3(unsigned x) {
   return x % 3;
 }
                     </code></pre>
                 </div>
                 <div class="right-pane">
                     <pre><code class="x86asm" data-noescape data-trim>
-<span class="faded">modBy3(unsigned):
-  mov eax, edi
-  mov edx, 0xaaaaaaab
-  mul edx
-  mov eax, edx
-  shr eax
-</span>  lea eax, [rdx+rdx*2]
-  sub edi, eax
-  mov eax, edi
-<span class="faded">  ret</span>
+<span class="faded">mov eax, edi
+mov edx, 0xaaaaaaab
+mul edx
+mov eax, edx
+shr eax
+</span>lea eax, [rdx+rdx*2]
+sub edi, eax
+mov eax, edi
+<span class="faded">ret</span>
                     </code></pre>
                 </div>
             </section>
