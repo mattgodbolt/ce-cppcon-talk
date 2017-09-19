@@ -1,3 +1,9 @@
+# 18 Sep notes/TODO
+* Photos/images on slides
+* Hellige suggests "How do people use it"
+  * e.g. John Zwinck's bug report, how many GCC/Clang bugs refer to it?
+* Consider dropping devirtualise (after Geek Lunch), just too much to go in to
+
 # v3.3 notes (7 sep)
 * 1hr 17
 * didn't do devirt as much

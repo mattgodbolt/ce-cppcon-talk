@@ -59,9 +59,13 @@
 
         let parent = element.parentElement;
 
+        const isPdf = !!window.location.search.match(/print-pdf/gi);
+        const baseUrl = isPdf ? 'https://gcc.godbolt.org/#' : 'http://localhost:10240/#';
+
         if (parent.tagName === "PRE") {
             let a = document.createElement('a');
-            a.setAttribute('href', 'http://localhost:10240/#' + ceFragment);
+
+            a.setAttribute('href', baseUrl + ceFragment);
             a.setAttribute('target', '_blank');
             a.setAttribute('class', 'view-button');
             a.textContent = 'View';
@@ -74,13 +78,17 @@
             ceElement.setAttribute('height', '300px');
             parent.appendChild(ceElement);
 
-            let embedUrl = "http://localhost:10240/e#" + ceFragment;
-            Reveal.addEventListener('slidechanged', (e) => {
-                if (e.currentSlide.contains(ceElement)) {
-                    ceElement.setAttribute('src', embedUrl);
-                    Reveal.sync();
-                }
-            });
+            let embedUrl = baseUrl + ceFragment;
+            if (isPdf) {
+                ceElement.setAttribute('src', embedUrl);
+            } else {
+                Reveal.addEventListener('slidechanged', (e) => {
+                    if (e.currentSlide.contains(ceElement)) {
+                        ceElement.setAttribute('src', embedUrl);
+                        Reveal.sync();
+                    }
+                });
+            }
         }
     }
 })();
