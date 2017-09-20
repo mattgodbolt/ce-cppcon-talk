@@ -126,7 +126,7 @@
         <section id="title">
             <h2>What Has My Compiler Done for Me Lately?</h2>
             <h5>Unbolting the Compiler's Lid</h5>
-            <em>Matt Godbolt, <a href="https://drw.com/careers">DRW Trading</a></em>
+            <em><a href="https://xania.org/">Matt Godbolt</a>, <a href="https://drw.com/careers">DRW Trading</a></em>
             <br>
             <em>
                 <a href="https://twitter.com/mattgodbolt">@mattgodbolt</a>
@@ -169,6 +169,9 @@
             </section>
             <section>
                 <h3>My goals</h3>
+                <!--<div>
+                    <img src="images/goal.jpg" height="150px">
+                </div>-->
                 <ul>
                     <li>Un-scary-fy assembler</li>
                     <li>Appreciate your compiler!</li>
@@ -297,7 +300,8 @@
                         <code>cmp</code>...
                     </li>
                     <li><code>dest</code>, <code>src</code> is register or memory reference:<br>
-                        <code class="smaller">[base + reg1<span class="opt">opt</span> + reg2*(1, 2, 4 or 8)<span class="opt">opt</span>]</code>
+                        <code class="smaller">[base + reg1<span class="opt">opt</span> + reg2*(1, 2, 4 or 8)<span
+                                class="opt">opt</span>]</code>
                     </li>
                 </ul>
                 <div class="footnote">(Intel asm syntax)</div>
@@ -317,8 +321,8 @@
                 <div class="right-pane">
                 <pre class="fragment smaller"><code data-trim class="cpp">
                 int eax = *r14;   // int *r14;
-                eax += r14[1];
                 rax += rdi;
+                eax += r14[1];
                 eax -= r14[rbx];
                 int *rax = &r14[rbx];
                 edx = 0;
@@ -361,7 +365,7 @@
             <section>
                 <h3>Compiler Explorer v0.1</h3>
                 <pre><code data-noescape data-trim class="bash">
-                 $ g++ /tmp/test.cc -O2 -c -S -o -masm=intel - \
+                 $ g++ /tmp/test.cc -O2 -c -S -o - -masm=intel \
                     | c++filt \
                     | grep -vE '\s+\.'
             </code></pre>
@@ -685,83 +689,6 @@ int main(int argc, const char *argv[]) {
                 </div>
             </section>
             <section>
-                <h3>Virtual methods</h3>
-                <div class="left-pane">
-                <pre class="smaller"><code class="cpp ce" data-trim>
-/// g71:-O2 -std=c++1z -march=haswell
-struct Transform {
-  virtual int transform(
-    int i) const = 0;
-};
-
-int sum(const Transform &t,
-        int n) {
-  int result = 0;
-  for (int i = 0; i <= n; ++i)
-    result += t.transform(i);
-  return result;
-}
-                    </code></pre>
-                </div>
-                <div class="right-pane">
-                <pre><code class="asm" data-trim>
-.L3:
- mov rax, QWORD PTR [rbp+0]
- mov esi, ebx
- mov rdi, rbp
- add ebx, 1
- call [QWORD PTR [rax]]
- add r12d, eax
- cmp ebx, r13d
- jne .L3
-                    </code></pre>
-                </div>
-            </section>
-            <section>
-                <h3>Virtual methods</h3>
-                <div class="left-pane">
-                <pre><code class="cpp ce" data-trim>
-/// g71:-O2 -std=c++1z -march=haswell
-// setup
-  struct Transform {
-    virtual int transform(int i) const = 0;
-  };
-  int sum(const Transform &t,
-          int n) {
-    int result = 0;
-    for (int i = 0; i <= n; ++i)
-      result += t.transform(i);
-    return result;
-  }
-
-struct Noop : Transform {
-  int transform (int i)
-      const override {
-    return i;
-  }
-};
-                    </code></pre>
-                </div>
-                <div class="right-pane fragment">
-                <pre class="smaller"><code class="asm" data-trim>
-.L5:
-  add ebx, 1
-  add ebp, eax
-  cmp ebx, r12d
-  je .L11
-.L6:
-  mov rax, QWORD PTR [r13+0]
-  mov rdx, QWORD PTR [rax]
-  mov eax, ebx
-  cmp rdx, Noop::transform(int)
-  je .L5
-                    </code></pre>
-                </div>
-                <aside class="notes">
-                    `-fstrict-vtable-pointers` in clang
-                </aside>
-            </section>
-            <section>
                 <h3>What has my compiler done for me lately?</h3>
                 <div class="fragment">A lot!</div>
             </section>
@@ -785,8 +712,7 @@ struct Noop : Transform {
                 <h3><code>node.js</code></h3>
                 <pre class="smaller"><code class="javascript" data-trim>
 function compile(req, res, next) {
-  // exec req.compiler, feed it req.body
-  // parse output, return via res
+  // exec compiler, feed it req.body, parse output
 }
 var webServer = express();
 var apiHandler = express.Router();
@@ -843,7 +769,6 @@ webServer.listen(10240);
                     <li>Microsoft's Monaco</li>
                     <li>GoldenLayout</li>
                 </ul>
-                <h5 class="fragment">Thank you!</h5>
             </section>
             <section>
                 <h3>The code</h3>
@@ -865,6 +790,28 @@ webServer.listen(10240);
         <!------------------------------------------------------->
         <section id="conclusions">
             <section>
+                <h3>Other uses</h3>
+                <ul>
+                    <li>Compiler development</li>
+                    <li>C++ REPL</li>
+                    <li>Training resource</li>
+                </ul>
+                <aside class="notes">
+                    <ul>
+                        <li>160 bugs in GCC tracker refer to godbolt.org</li>
+                        <li>104 in clang</li>
+                    </ul>
+                </aside>
+            </section>
+            <section>
+                <h3>Coming soon...</h3>
+                <ul>
+                    <li>CFG viewer</li>
+                    <li>Unified languages</li>
+                    <li>Execution support</li>
+                </ul>
+            </section>
+            <section>
                 <h3>Thanks</h3>
                 <ul>
                     <li>Thanks to contributors:
@@ -883,20 +830,19 @@ webServer.listen(10240);
             <section>
                 <h3>Go read some assembly!</h3>
                 <br>
-                { <a href="https://gcc.godbolt.org/">gcc</a>
-                , <a href="https://gcc.godbolt.org/">cppx</a>
-                , <a href="https://d.godbolt.org/">d</a>
-                , <a href="https://swift.godbolt.org/">swift</a>
-                , <a href="https://haskell.godbolt.org/">haskell</a>
-                , <a href="https://go.godbolt.org/">go</a>
-                , <a href="https://ispc.godbolt.org/">ispc</a> }.godbolt.org
+                <div>
+                    { <a href="https://gcc.godbolt.org/">gcc</a>
+                    , <a href="https://gcc.godbolt.org/">cppx</a>
+                    , <a href="https://d.godbolt.org/">d</a>
+                    , <a href="https://swift.godbolt.org/">swift</a>
+                    , <a href="https://haskell.godbolt.org/">haskell</a>
+                    , <a href="https://go.godbolt.org/">go</a>
+                    , <a href="https://ispc.godbolt.org/">ispc</a> }.godbolt.org
+                </div>
+                <div class="footnote fragment"><h6>(And hug a compiler developer)</h6></div>
             </section>
         </section>
 
-        <div class="footer">
-            <hr>
-            <img src="images/DRWSmallLogo.png" width="50" height="16">
-        </div>
     </section>
 </div>
 

@@ -60,7 +60,7 @@
         let parent = element.parentElement;
 
         const isPdf = !!window.location.search.match(/print-pdf/gi);
-        const baseUrl = isPdf ? 'https://gcc.godbolt.org/#' : 'http://localhost:10240/#';
+        const baseUrl = isPdf ? 'https://gcc.godbolt.org/e#' : 'http://localhost:10240/e#';
 
         if (parent.tagName === "PRE") {
             let a = document.createElement('a');
