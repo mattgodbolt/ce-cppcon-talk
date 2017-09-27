@@ -60,12 +60,12 @@
         let parent = element.parentElement;
 
         const isPdf = !!window.location.search.match(/print-pdf/gi);
-        const baseUrl = isPdf ? 'https://gcc.godbolt.org/e#' : 'http://localhost:10240/e#';
+        const baseUrl = isPdf ? 'https://gcc.godbolt.org/' : 'http://localhost:10240/';
 
         if (parent.tagName === "PRE") {
             let a = document.createElement('a');
 
-            a.setAttribute('href', baseUrl + ceFragment);
+            a.setAttribute('href', baseUrl + "#" + ceFragment);
             a.setAttribute('target', '_blank');
             a.setAttribute('class', 'view-button');
             a.textContent = 'View';
@@ -78,7 +78,7 @@
             ceElement.setAttribute('height', '300px');
             parent.appendChild(ceElement);
 
-            let embedUrl = baseUrl + ceFragment;
+            let embedUrl = baseUrl + "e#" + ceFragment;
             if (isPdf) {
                 ceElement.setAttribute('src', embedUrl);
             } else {
